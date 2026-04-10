@@ -1,5 +1,6 @@
 package com.timebank.timebank.user.dto;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public class UserProfileResponse {
@@ -9,15 +10,40 @@ public class UserProfileResponse {
     private String email;
     private String bio;
     private String phone;
+    private String location;
+    private String languages;
+    private String website;
+    private String linkedin;
+    private String twitter;
     private long timeCreditMinutes;
+    private Instant createdAt;
 
-    public UserProfileResponse(UUID id, String fullName, String email, String bio, String phone, long timeCreditMinutes) {
+    public UserProfileResponse(
+            UUID id,
+            String fullName,
+            String email,
+            String bio,
+            String phone,
+            String location,
+            String languages,
+            String website,
+            String linkedin,
+            String twitter,
+            long timeCreditMinutes,
+            Instant createdAt
+    ) {
         this.id = id;
         this.fullName = fullName;
         this.email = email;
         this.bio = bio;
         this.phone = phone;
+        this.location = location;
+        this.languages = languages;
+        this.website = website;
+        this.linkedin = linkedin;
+        this.twitter = twitter;
         this.timeCreditMinutes = timeCreditMinutes;
+        this.createdAt = createdAt;
     }
 
     public UUID getId() {
@@ -40,7 +66,31 @@ public class UserProfileResponse {
         return phone;
     }
 
+    public String getLocation() {
+        return location;
+    }
+
+    public String getLanguages() {
+        return languages;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public String getLinkedin() {
+        return linkedin;
+    }
+
+    public String getTwitter() {
+        return twitter;
+    }
+
     public long getTimeCreditMinutes() {
         return timeCreditMinutes;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 }

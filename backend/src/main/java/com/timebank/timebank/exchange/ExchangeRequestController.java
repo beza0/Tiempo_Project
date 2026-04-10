@@ -1,6 +1,8 @@
 package com.timebank.timebank.exchange;
 
+import com.timebank.timebank.exchange.dto.CreateExchangeMessageRequest;
 import com.timebank.timebank.exchange.dto.CreateExchangeRequestRequest;
+import com.timebank.timebank.exchange.dto.ExchangeMessageResponse;
 import com.timebank.timebank.exchange.dto.ExchangeRequestResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +44,27 @@ public class ExchangeRequestController {
     public ResponseEntity<List<ExchangeRequestResponse>> getMyReceivedRequests(Authentication authentication) {
         return ResponseEntity.ok(
                 exchangeRequestService.getMyReceivedRequests(authentication.getName())
+        );
+    }
+
+    @GetMapping("/{exchangeRequestId}/messages")
+    public ResponseEntity<List<ExchangeMessageResponse>> getMessages(
+            @PathVariable UUID exchangeRequestId,
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(
+                exchangeRequestService.listMessages(exchangeRequestId, authentication.getName())
+        );
+    }
+
+    @PostMapping("/{exchangeRequestId}/messages")
+    public ResponseEntity<ExchangeMessageResponse> postMessage(
+            @PathVariable UUID exchangeRequestId,
+            @Valid @RequestBody CreateExchangeMessageRequest req,
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(
+                exchangeRequestService.sendMessage(exchangeRequestId, req, authentication.getName())
         );
     }
 

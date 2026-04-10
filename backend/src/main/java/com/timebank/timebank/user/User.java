@@ -53,6 +53,21 @@ public class User {
     @Column(length = 30)
     private String phone;
 
+    @Column(length = 120)
+    private String location;
+
+    @Column(length = 200)
+    private String languages;
+
+    @Column(length = 255)
+    private String website;
+
+    @Column(length = 255)
+    private String linkedin;
+
+    @Column(length = 255)
+    private String twitter;
+
     // --- Lifecycle Hooks ---
 
     @PrePersist
@@ -98,6 +113,26 @@ public class User {
         return phone;
     }
 
+    public String getLocation() {
+        return location;
+    }
+
+    public String getLanguages() {
+        return languages;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public String getLinkedin() {
+        return linkedin;
+    }
+
+    public String getTwitter() {
+        return twitter;
+    }
+
     // --- Setters (kontrollü bırakıyoruz) ---
 
     public void setFullName(String fullName) {
@@ -126,5 +161,25 @@ public class User {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public void setLanguages(String languages) {
+        this.languages = languages;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
+    public void setLinkedin(String linkedin) {
+        this.linkedin = linkedin;
+    }
+
+    public void setTwitter(String twitter) {
+        this.twitter = twitter;
     }
 }

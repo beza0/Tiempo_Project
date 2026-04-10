@@ -13,8 +13,60 @@ export function TestimonialsSection() {
   const { t } = useLanguage();
   const tm = t.landing.testimonials;
 
+  if (tm.items.length === 0) {
+    return (
+      <section
+        id="testimonials"
+        className="bg-gradient-to-br from-muted/60 to-muted px-4 py-20 sm:px-6 lg:px-8"
+      >
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-3xl text-foreground sm:text-4xl md:text-5xl">
+              {tm.title}
+            </h2>
+            <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+              {tm.subtitle}
+            </p>
+          </div>
+
+          <p className="mb-10 text-center text-muted-foreground">{tm.empty}</p>
+
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            {[0, 1, 2].map((index) => (
+              <Card
+                key={index}
+                className="flex min-h-[220px] flex-col justify-center rounded-3xl border-2 border-dashed border-border/80 bg-card/50 p-8"
+              >
+                <div className="mb-4 flex justify-center gap-1 opacity-30">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className="h-5 w-5 fill-yellow-400 text-yellow-400"
+                    />
+                  ))}
+                </div>
+                <div className="mx-auto mb-4 h-3 w-3/4 max-w-[220px] rounded-full bg-muted" />
+                <div className="mx-auto mb-6 h-3 w-1/2 max-w-[160px] rounded-full bg-muted" />
+                <div className="flex items-center justify-center gap-4">
+                  <div className="h-14 w-14 shrink-0 rounded-full bg-muted" />
+                  <div className="space-y-2 text-left">
+                    <div className="h-3 w-24 rounded bg-muted" />
+                    <div className="h-3 w-32 rounded bg-muted" />
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section id="testimonials" className="bg-gradient-to-br from-muted/60 to-muted px-4 py-20 sm:px-6 lg:px-8">
+    <section
+      id="testimonials"
+      className="bg-gradient-to-br from-muted/60 to-muted px-4 py-20 sm:px-6 lg:px-8"
+    >
       <div className="mx-auto max-w-7xl">
         <div className="mb-16 text-center">
           <h2 className="mb-4 text-3xl text-foreground sm:text-4xl md:text-5xl">
@@ -24,33 +76,34 @@ export function TestimonialsSection() {
             {tm.subtitle}
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {tm.items.map((testimonial, index) => (
-            <Card 
+            <Card
               key={index}
               className="rounded-3xl border border-border/80 bg-card p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
             >
               <div className="mb-4 flex gap-1">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  <Star
+                    key={i}
+                    className="h-5 w-5 fill-yellow-400 text-yellow-400"
+                  />
                 ))}
               </div>
-              
+
               <p className="mb-6 italic text-foreground/90">
                 &ldquo;{testimonial.quote}&rdquo;
               </p>
-              
+
               <div className="flex items-center gap-4">
-                <ImageWithFallback 
-                  src={images[index]}
+                <ImageWithFallback
+                  src={images[Math.min(index, images.length - 1)]}
                   alt={testimonial.name}
                   className="h-14 w-14 rounded-full object-cover"
                 />
                 <div>
-                  <h4 className="text-foreground">
-                    {testimonial.name}
-                  </h4>
+                  <h4 className="text-foreground">{testimonial.name}</h4>
                   <p className="text-sm text-muted-foreground">
                     {testimonial.role}
                   </p>

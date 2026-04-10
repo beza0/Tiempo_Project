@@ -7,11 +7,13 @@ import com.timebank.timebank.user.User;
 import com.timebank.timebank.user.UserRepository;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional
 public class SkillService {
 
     private final SkillRepository skillRepository;
@@ -30,6 +32,9 @@ public class SkillService {
         skill.setTitle(req.getTitle().trim());
         skill.setDescription(req.getDescription().trim());
         skill.setDurationMinutes(req.getDurationMinutes());
+        skill.setCategory(blankToNull(req.getCategory()));
+        String level = blankToNull(req.getLevel());
+        skill.setLevel(level != null ? level : "intermediate");
         skill.setOwner(owner);
 
         Skill saved = skillRepository.save(skill);
@@ -68,6 +73,13 @@ public class SkillService {
         skill.setTitle(req.getTitle().trim());
         skill.setDescription(req.getDescription().trim());
         skill.setDurationMinutes(req.getDurationMinutes());
+        if (req.getCategory() != null) {
+            skill.setCategory(blankToNull(req.getCategory()));
+        }
+        String level = blankToNull(req.getLevel());
+        if (level != null) {
+            skill.setLevel(level);
+        }
 
         Skill updated = skillRepository.save(skill);
         return mapToResponse(updated);
@@ -86,9 +98,19 @@ public class SkillService {
                 skill.getTitle(),
                 skill.getDescription(),
                 skill.getDurationMinutes(),
+                skill.getCategory(),
+                skill.getLevel(),
                 skill.getOwner().getId(),
                 skill.getOwner().getFullName(),
                 skill.getCreatedAt()
         );
+    }
+
+    private static String blankToNull(String s) {
+        if (s == null) {
+            return null;
+        }
+        String t = s.trim();
+        return t.isEmpty() ? null : t;
     }
 }

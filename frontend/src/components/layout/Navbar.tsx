@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { PageType } from "../../App";
 import { useAuth } from "../../contexts/AuthContext";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { fetchUnreadNotificationCount } from "../../api/notifications";
 import { Sidebar } from "./Sidebar";
 
 interface NavbarProps {
@@ -11,9 +12,25 @@ interface NavbarProps {
 }
 
 export function Navbar({ onNavigate }: NavbarProps) {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, token } = useAuth();
   const { t } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [notifCount, setNotifCount] = useState(0);
+
+  useEffect(() => {
+    if (!isAuthenticated || !token) {
+      setNotifCount(0);
+      return;
+    }
+    const load = () => {
+      void fetchUnreadNotificationCount(token)
+        .then((r) => setNotifCount(r.count))
+        .catch(() => setNotifCount(0));
+    };
+    load();
+    const interval = window.setInterval(load, 60_000);
+    return () => window.clearInterval(interval);
+  }, [isAuthenticated, token]);
 
   useEffect(() => {
     const mq = window.matchMedia("(width >= 80rem)");
@@ -76,9 +93,14 @@ export function Navbar({ onNavigate }: NavbarProps) {
                   </button>
                   <button
                     onClick={() => handleNavigate("messages")}
-                    className="shrink-0 whitespace-nowrap text-neutral-700 transition-colors hover:text-neutral-950 dark:text-muted-foreground dark:hover:text-foreground"
+                    className="relative inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-neutral-700 transition-colors hover:text-neutral-950 dark:text-muted-foreground dark:hover:text-foreground"
                   >
                     {t.nav.messages}
+                    {notifCount > 0 ? (
+                      <span className="inline-flex min-w-[1.125rem] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold leading-none text-destructive-foreground">
+                        {notifCount > 99 ? "99+" : notifCount}
+                      </span>
+                    ) : null}
                   </button>
                   <button
                     onClick={() => handleNavigate("profile")}

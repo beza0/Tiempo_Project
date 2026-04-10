@@ -15,6 +15,21 @@ public class UpdateUserProfileRequest {
     @Size(max = 30, message = "Telefon en fazla 30 karakter olabilir")
     private String phone;
 
+    @Size(max = 120, message = "Konum en fazla 120 karakter olabilir")
+    private String location;
+
+    @Size(max = 200, message = "Diller en fazla 200 karakter olabilir")
+    private String languages;
+
+    @Size(max = 255, message = "Web sitesi en fazla 255 karakter olabilir")
+    private String website;
+
+    @Size(max = 255, message = "LinkedIn en fazla 255 karakter olabilir")
+    private String linkedin;
+
+    @Size(max = 255, message = "Twitter en fazla 255 karakter olabilir")
+    private String twitter;
+
     public String getFullName() {
         return fullName;
     }
@@ -27,6 +42,26 @@ public class UpdateUserProfileRequest {
         return phone;
     }
 
+    public String getLocation() {
+        return location;
+    }
+
+    public String getLanguages() {
+        return languages;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public String getLinkedin() {
+        return linkedin;
+    }
+
+    public String getTwitter() {
+        return twitter;
+    }
+
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
@@ -37,5 +72,25 @@ public class UpdateUserProfileRequest {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public void setLanguages(String languages) {
+        this.languages = languages;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
+    public void setLinkedin(String linkedin) {
+        this.linkedin = linkedin;
+    }
+
+    public void setTwitter(String twitter) {
+        this.twitter = twitter;
     }
 }

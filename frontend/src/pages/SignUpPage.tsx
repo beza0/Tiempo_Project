@@ -49,7 +49,8 @@ export function SignUpPage({ onNavigate }: SignUpPageProps) {
         },
         res.token,
       );
-      onNavigate?.("dashboard");
+      sessionStorage.setItem("timelink_profile_onboarding", "1");
+      onNavigate?.("edit-profile");
     } catch (err) {
       const msg =
         err instanceof ApiError

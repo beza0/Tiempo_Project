@@ -20,11 +20,17 @@ public class Skill {
     @Column(nullable = false, length = 100)
     private String title;
 
-    @Column(nullable = false, length = 1000)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false)
     private int durationMinutes;
+
+    @Column(length = 120)
+    private String category;
+
+    @Column(length = 20)
+    private String level;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
@@ -54,6 +60,14 @@ public class Skill {
         return durationMinutes;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public String getLevel() {
+        return level;
+    }
+
     public User getOwner() {
         return owner;
     }
@@ -72,6 +86,14 @@ public class Skill {
 
     public void setDurationMinutes(int durationMinutes) {
         this.durationMinutes = durationMinutes;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
     }
 
     public void setOwner(User owner) {

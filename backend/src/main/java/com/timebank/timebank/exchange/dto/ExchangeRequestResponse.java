@@ -15,6 +15,8 @@ public class ExchangeRequestResponse {
     private UUID ownerId;
     private String ownerName;
     private String message;
+    private int bookedMinutes;
+    private Instant scheduledStartAt;
     private ExchangeRequestStatus status;
     private Instant createdAt;
 
@@ -27,6 +29,8 @@ public class ExchangeRequestResponse {
             UUID ownerId,
             String ownerName,
             String message,
+            int bookedMinutes,
+            Instant scheduledStartAt,
             ExchangeRequestStatus status,
             Instant createdAt
     ) {
@@ -38,6 +42,8 @@ public class ExchangeRequestResponse {
         this.ownerId = ownerId;
         this.ownerName = ownerName;
         this.message = message;
+        this.bookedMinutes = bookedMinutes;
+        this.scheduledStartAt = scheduledStartAt;
         this.status = status;
         this.createdAt = createdAt;
     }
@@ -72,6 +78,14 @@ public class ExchangeRequestResponse {
 
     public String getMessage() {
         return message;
+    }
+
+    public int getBookedMinutes() {
+        return bookedMinutes;
+    }
+
+    public Instant getScheduledStartAt() {
+        return scheduledStartAt;
     }
 
     public ExchangeRequestStatus getStatus() {

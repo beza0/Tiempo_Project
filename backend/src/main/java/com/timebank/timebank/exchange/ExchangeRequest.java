@@ -30,6 +30,18 @@ public class ExchangeRequest {
     @Column(nullable = false, length = 1000)
     private String message;
 
+    /** Talep oluşturulurken seçilen süre (dakika). Tamamlanınca bu süre kadar bakiyeden düşülür (1 saat = 60 dk). */
+    @Column(name = "booked_minutes", nullable = false)
+    private int bookedMinutes;
+
+    /** Kullanıcının seçtiği oturum başlangıç zamanı (UTC). */
+    @Column(name = "scheduled_start_at")
+    private Instant scheduledStartAt;
+
+    /** Oturumdan ~1 saat önce hatırlatıcı bildirimi gönderildi mi */
+    @Column(name = "reminder_sent", nullable = false)
+    private boolean reminderSent;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -85,6 +97,30 @@ public class ExchangeRequest {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public int getBookedMinutes() {
+        return bookedMinutes;
+    }
+
+    public void setBookedMinutes(int bookedMinutes) {
+        this.bookedMinutes = bookedMinutes;
+    }
+
+    public Instant getScheduledStartAt() {
+        return scheduledStartAt;
+    }
+
+    public void setScheduledStartAt(Instant scheduledStartAt) {
+        this.scheduledStartAt = scheduledStartAt;
+    }
+
+    public boolean isReminderSent() {
+        return reminderSent;
+    }
+
+    public void setReminderSent(boolean reminderSent) {
+        this.reminderSent = reminderSent;
     }
 
     public void setCreatedAt(Instant createdAt) {

@@ -4,40 +4,122 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 import { Checkbox } from "../components/ui/checkbox";
 import { Badge } from "../components/ui/badge";
 import { X } from "lucide-react";
 import { useState } from "react";
 import type { PageType } from "../App";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useAuth } from "../contexts/AuthContext";
+import type { Messages } from "../language";
+import { createSkill } from "../api/skills";
+import { ApiError } from "../api/client";
 
 interface AddSkillPageProps {
   onNavigate?: (page: PageType) => void;
 }
 
 const CATEGORY_KEYS = [
-  "Sports", "Arts", "Languages", "Programming", "Music",
-  "Cooking", "Photography", "Writing", "Design",
+  "Sports",
+  "Arts",
+  "Languages",
+  "Programming",
+  "Music",
+  "Cooking",
+  "Photography",
+  "Writing",
+  "Design",
 ] as const;
 
+/** Dropdown’da “Diğer”; API’ye gönderilmez, custom metin kullanılır */
+const CATEGORY_OTHER = "Other";
+
 const DAY_KEYS = [
-  "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
 ] as const;
+
+function buildDescription(
+  base: string,
+  a: Messages["addSkill"],
+  opts: {
+    locationType: string[];
+    locationText: string;
+    selectedDays: string[];
+    dayLabels: string[];
+    startTime: string;
+    endTime: string;
+    tags: string[];
+  },
+): string {
+  const lines: string[] = [];
+  if (opts.locationType.length > 0) {
+    lines.push(
+      `${a.sessionType}: ${opts.locationType.join(", ")}`,
+    );
+  }
+  if (opts.locationText.trim()) {
+    lines.push(`${a.location}: ${opts.locationText.trim()}`);
+  }
+  if (opts.selectedDays.length > 0) {
+    const labelByDay = new Map<string, string>(
+      DAY_KEYS.map((k, i) => [k, opts.dayLabels[i] ?? k]),
+    );
+    const dayPart = opts.selectedDays
+      .map((d) => labelByDay.get(d) ?? d)
+      .join(", ");
+    lines.push(`${a.availableDays}: ${dayPart}`);
+  }
+  if (opts.startTime || opts.endTime) {
+    lines.push(
+      `${a.availableFrom}–${a.availableUntil}: ${opts.startTime || "—"} – ${opts.endTime || "—"}`,
+    );
+  }
+  if (opts.tags.length > 0) {
+    lines.push(`${a.tags}: ${opts.tags.join(", ")}`);
+  }
+  const trimmed = base.trim();
+  if (lines.length === 0) return trimmed;
+  return `${trimmed}\n\n———\n${lines.join("\n")}`;
+}
 
 export function AddSkillPage({ onNavigate }: AddSkillPageProps) {
   const { t } = useLanguage();
   const a = t.addSkill;
   const catLabels = t.browse.categoryLabels;
+  const { token } = useAuth();
 
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("");
+  const [customCategory, setCustomCategory] = useState("");
+  const [description, setDescription] = useState("");
+  const [level, setLevel] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState("");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [currentTag, setCurrentTag] = useState("");
   const [locationType, setLocationType] = useState<string[]>([]);
+  const [locationText, setLocationText] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const toggleDay = (day: string) => {
-    setSelectedDays(prev =>
-      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
+    setSelectedDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
     );
   };
 
@@ -53,14 +135,88 @@ export function AddSkillPage({ onNavigate }: AddSkillPageProps) {
   };
 
   const toggleLocationType = (type: string) => {
-    setLocationType(prev =>
-      prev.includes(type) ? prev.filter(ty => ty !== type) : [...prev, type]
+    setLocationType((prev) =>
+      prev.includes(type) ? prev.filter((ty) => ty !== type) : [...prev, type],
     );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!token) {
+      setError(a.errorNoAuth);
+      return;
+    }
+    if (!title.trim() || !description.trim()) {
+      setError(a.validationCore);
+      return;
+    }
+    if (!category) {
+      setError(a.validationCategory);
+      return;
+    }
+    const resolvedCategory =
+      category === CATEGORY_OTHER ? customCategory.trim() : category;
+    if (category === CATEGORY_OTHER) {
+      if (!resolvedCategory) {
+        setError(a.validationCategoryCustom);
+        return;
+      }
+      if (resolvedCategory.length > 120) {
+        setError(a.validationCategoryCustomLen);
+        return;
+      }
+    }
+    if (!level) {
+      setError(a.validationLevel);
+      return;
+    }
+    const dm = parseInt(durationMinutes, 10);
+    if (!durationMinutes || Number.isNaN(dm) || dm < 30) {
+      setError(a.validationDuration);
+      return;
+    }
+
+    const fullDescription = buildDescription(description, a, {
+      locationType,
+      locationText,
+      selectedDays,
+      dayLabels: [...a.days],
+      startTime,
+      endTime,
+      tags,
+    });
+
+    if (fullDescription.length > 8000) {
+      setError(a.validationDescriptionMax);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await createSkill(token, {
+        title: title.trim(),
+        description: fullDescription,
+        durationMinutes: dm,
+        category: resolvedCategory,
+        level,
+      });
+      onNavigate?.("profile");
+    } catch (err) {
+      const msg =
+        err instanceof ApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : a.errorPublish;
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <PageLayout onNavigate={onNavigate}>
-      
       <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
           <div className="mb-8">
@@ -69,36 +225,72 @@ export function AddSkillPage({ onNavigate }: AddSkillPageProps) {
           </div>
 
           <Card className="rounded-2xl border-0 p-8 shadow-lg">
-            <form className="space-y-6">
+            {error ? (
+              <p
+                className="mb-4 rounded-xl border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+                role="alert"
+              >
+                {error}
+              </p>
+            ) : null}
+            <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <Label htmlFor="title">{a.skillTitle}</Label>
-                <Input 
+                <Input
                   id="title"
+                  value={title}
+                  onChange={(ev) => setTitle(ev.target.value)}
                   placeholder={a.skillTitlePh}
                   className="mt-2"
+                  autoComplete="off"
                 />
               </div>
 
               <div>
                 <Label htmlFor="category">{a.category}</Label>
-                <Select>
-                  <SelectTrigger className="mt-2">
+                <Select
+                  value={category || undefined}
+                  onValueChange={(v) => {
+                    setCategory(v);
+                    if (v !== CATEGORY_OTHER) setCustomCategory("");
+                  }}
+                >
+                  <SelectTrigger id="category" className="mt-2">
                     <SelectValue placeholder={a.selectCategory} />
                   </SelectTrigger>
                   <SelectContent>
-                    {CATEGORY_KEYS.map(cat => (
+                    {CATEGORY_KEYS.map((cat) => (
                       <SelectItem key={cat} value={cat}>
                         {catLabels[cat] ?? cat}
                       </SelectItem>
                     ))}
+                    <SelectItem value={CATEGORY_OTHER}>
+                      {a.categoryOther}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
+                {category === CATEGORY_OTHER ? (
+                  <div className="mt-3">
+                    <Label htmlFor="custom-category">{a.categoryCustom}</Label>
+                    <Input
+                      id="custom-category"
+                      value={customCategory}
+                      onChange={(ev) => setCustomCategory(ev.target.value)}
+                      placeholder={a.categoryCustomPh}
+                      className="mt-2"
+                      maxLength={120}
+                      autoComplete="off"
+                    />
+                  </div>
+                ) : null}
               </div>
 
               <div>
                 <Label htmlFor="description">{a.description}</Label>
-                <Textarea 
+                <Textarea
                   id="description"
+                  value={description}
+                  onChange={(ev) => setDescription(ev.target.value)}
                   placeholder={a.descriptionPh}
                   className="mt-2 min-h-32"
                 />
@@ -106,13 +298,15 @@ export function AddSkillPage({ onNavigate }: AddSkillPageProps) {
 
               <div>
                 <Label htmlFor="level">{a.level}</Label>
-                <Select>
-                  <SelectTrigger className="mt-2">
+                <Select value={level || undefined} onValueChange={setLevel}>
+                  <SelectTrigger id="level" className="mt-2">
                     <SelectValue placeholder={a.selectLevel} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="beginner">{a.levelBeginner}</SelectItem>
-                    <SelectItem value="intermediate">{a.levelIntermediate}</SelectItem>
+                    <SelectItem value="intermediate">
+                      {a.levelIntermediate}
+                    </SelectItem>
                     <SelectItem value="advanced">{a.levelAdvanced}</SelectItem>
                     <SelectItem value="expert">{a.levelExpert}</SelectItem>
                   </SelectContent>
@@ -123,20 +317,27 @@ export function AddSkillPage({ onNavigate }: AddSkillPageProps) {
                 <Label>{a.sessionType}</Label>
                 <div className="flex gap-4 mt-2">
                   <div className="flex items-center gap-2">
-                    <Checkbox 
+                    <Checkbox
                       id="online"
                       checked={locationType.includes("online")}
                       onCheckedChange={() => toggleLocationType("online")}
                     />
-                    <label htmlFor="online" className="text-sm cursor-pointer">{a.online}</label>
+                    <label htmlFor="online" className="text-sm cursor-pointer">
+                      {a.online}
+                    </label>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Checkbox 
+                    <Checkbox
                       id="in-person"
                       checked={locationType.includes("in-person")}
                       onCheckedChange={() => toggleLocationType("in-person")}
                     />
-                    <label htmlFor="in-person" className="text-sm cursor-pointer">{a.inPerson}</label>
+                    <label
+                      htmlFor="in-person"
+                      className="text-sm cursor-pointer"
+                    >
+                      {a.inPerson}
+                    </label>
                   </div>
                 </div>
               </div>
@@ -144,8 +345,10 @@ export function AddSkillPage({ onNavigate }: AddSkillPageProps) {
               {locationType.includes("in-person") && (
                 <div>
                   <Label htmlFor="location">{a.location}</Label>
-                  <Input 
+                  <Input
                     id="location"
+                    value={locationText}
+                    onChange={(ev) => setLocationText(ev.target.value)}
                     placeholder={a.locationPh}
                     className="mt-2"
                   />
@@ -153,22 +356,12 @@ export function AddSkillPage({ onNavigate }: AddSkillPageProps) {
               )}
 
               <div>
-                <Label htmlFor="credits">{a.creditsPerHour}</Label>
-                <Input 
-                  id="credits"
-                  type="number"
-                  min="1"
-                  max="10"
-                  placeholder={a.creditsPh}
-                  className="mt-2"
-                />
-                <p className="mt-1 text-xs text-muted-foreground">{a.creditsHint}</p>
-              </div>
-
-              <div>
                 <Label htmlFor="duration">{a.durationMin}</Label>
-                <Select>
-                  <SelectTrigger className="mt-2">
+                <Select
+                  value={durationMinutes || undefined}
+                  onValueChange={setDurationMinutes}
+                >
+                  <SelectTrigger id="duration" className="mt-2">
                     <SelectValue placeholder={a.selectDuration} />
                   </SelectTrigger>
                   <SelectContent>
@@ -186,7 +379,7 @@ export function AddSkillPage({ onNavigate }: AddSkillPageProps) {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
                   {DAY_KEYS.map((dayKey, i) => (
                     <div key={dayKey} className="flex items-center gap-2">
-                      <Checkbox 
+                      <Checkbox
                         id={dayKey}
                         checked={selectedDays.includes(dayKey)}
                         onCheckedChange={() => toggleDay(dayKey)}
@@ -202,17 +395,21 @@ export function AddSkillPage({ onNavigate }: AddSkillPageProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="start-time">{a.availableFrom}</Label>
-                  <Input 
+                  <Input
                     id="start-time"
                     type="time"
+                    value={startTime}
+                    onChange={(ev) => setStartTime(ev.target.value)}
                     className="mt-2"
                   />
                 </div>
                 <div>
                   <Label htmlFor="end-time">{a.availableUntil}</Label>
-                  <Input 
+                  <Input
                     id="end-time"
                     type="time"
+                    value={endTime}
+                    onChange={(ev) => setEndTime(ev.target.value)}
                     className="mt-2"
                   />
                 </div>
@@ -221,18 +418,25 @@ export function AddSkillPage({ onNavigate }: AddSkillPageProps) {
               <div>
                 <Label htmlFor="tags">{a.tags}</Label>
                 <div className="flex gap-2 mt-2">
-                  <Input 
+                  <Input
                     id="tags"
                     value={currentTag}
                     onChange={(e) => setCurrentTag(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addTag();
+                      }
+                    }}
                     placeholder={a.tagsPh}
                   />
-                  <Button type="button" onClick={addTag}>{a.add}</Button>
+                  <Button type="button" onClick={addTag}>
+                    {a.add}
+                  </Button>
                 </div>
                 {tags.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-3">
-                    {tags.map(tag => (
+                    {tags.map((tag) => (
                       <Badge key={tag} variant="secondary" className="gap-1">
                         {tag}
                         <button type="button" onClick={() => removeTag(tag)}>
@@ -245,26 +449,27 @@ export function AddSkillPage({ onNavigate }: AddSkillPageProps) {
               </div>
 
               <div className="flex gap-4 pt-6">
-                <Button 
+                <Button
                   type="button"
                   variant="outline"
                   className="flex-1"
                   onClick={() => onNavigate?.("dashboard")}
+                  disabled={loading}
                 >
                   {t.common.cancel}
                 </Button>
-                <Button 
+                <Button
                   type="submit"
                   className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white"
+                  disabled={loading}
                 >
-                  {a.publish}
+                  {loading ? t.common.loading : a.publish}
                 </Button>
               </div>
             </form>
           </Card>
         </div>
       </div>
-      
     </PageLayout>
   );
 }

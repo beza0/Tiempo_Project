@@ -25,6 +25,8 @@ type AuthContextValue = {
   isAuthenticated: boolean;
   login: (user: AuthUser, token: string) => void;
   logout: () => void;
+  /** Oturumdaki kullanıcıyı günceller (ör. profil kaydından sonra ad). */
+  patchUser: (patch: Partial<AuthUser>) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -81,6 +83,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(LEGACY_USER_KEY);
   }, []);
 
+  const patchUser = useCallback((patch: Partial<AuthUser>) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, ...patch };
+      try {
+        const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw) as {
+            token?: string;
+            user?: AuthUser;
+          };
+          if (parsed?.token) {
+            localStorage.setItem(
+              AUTH_STORAGE_KEY,
+              JSON.stringify({ user: next, token: parsed.token }),
+            );
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }, []);
+
   const value = useMemo(
     () => ({
       user,
@@ -88,8 +115,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: user !== null && token !== null,
       login,
       logout,
+      patchUser,
     }),
-    [user, token, login, logout],
+    [user, token, login, logout, patchUser],
   );
 
   return (

@@ -46,7 +46,7 @@ public class UserService {
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(req.getPassword()));
         user.setRole("USER");
-        user.setTimeCreditMinutes(120); // başlangıç kredisi
+        user.setTimeCreditMinutes(60); // başlangıç: 1 saat kredi
 
         return userRepository.save(user);
     }
@@ -79,14 +79,7 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadCredentialsException("Kullanıcı bulunamadı"));
 
-        return new UserProfileResponse(
-                user.getId(),
-                user.getFullName(),
-                user.getEmail(),
-                user.getBio(),
-                user.getPhone(),
-                user.getTimeCreditMinutes()
-        );
+        return toProfileResponse(user);
     }
 
     public UserProfileResponse updateMyProfile(String email, UpdateUserProfileRequest req) {
@@ -94,19 +87,42 @@ public class UserService {
                 .orElseThrow(() -> new BadCredentialsException("Kullanıcı bulunamadı"));
 
         user.setFullName(req.getFullName().trim());
-        user.setBio(req.getBio() != null ? req.getBio().trim() : null);
-        user.setPhone(req.getPhone() != null ? req.getPhone().trim() : null);
+        user.setBio(blankToNull(req.getBio()));
+        user.setPhone(blankToNull(req.getPhone()));
+        user.setLocation(blankToNull(req.getLocation()));
+        user.setLanguages(blankToNull(req.getLanguages()));
+        user.setWebsite(blankToNull(req.getWebsite()));
+        user.setLinkedin(blankToNull(req.getLinkedin()));
+        user.setTwitter(blankToNull(req.getTwitter()));
 
         User saved = userRepository.save(user);
 
+        return toProfileResponse(saved);
+    }
+
+    private static UserProfileResponse toProfileResponse(User user) {
         return new UserProfileResponse(
-                saved.getId(),
-                saved.getFullName(),
-                saved.getEmail(),
-                saved.getBio(),
-                saved.getPhone(),
-                saved.getTimeCreditMinutes()
+                user.getId(),
+                user.getFullName(),
+                user.getEmail(),
+                user.getBio(),
+                user.getPhone(),
+                user.getLocation(),
+                user.getLanguages(),
+                user.getWebsite(),
+                user.getLinkedin(),
+                user.getTwitter(),
+                user.getTimeCreditMinutes(),
+                user.getCreatedAt()
         );
+    }
+
+    private static String blankToNull(String s) {
+        if (s == null) {
+            return null;
+        }
+        String t = s.trim();
+        return t.isEmpty() ? null : t;
     }
 
     public UserDashboardResponse getMyDashboard(String email) {

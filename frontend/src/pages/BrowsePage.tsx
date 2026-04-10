@@ -16,181 +16,26 @@ import { Search, SlidersHorizontal } from "lucide-react";
 import { useState, useMemo, useEffect, useLayoutEffect, useRef } from "react";
 import type { PageType } from "../App";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useAuth } from "../contexts/AuthContext";
 import { formatTemplate } from "../language";
+import { fetchPublicSkills } from "../api/skills";
+import {
+  mapSkillDtoToBrowseCard,
+  type BrowseSkillCardModel,
+} from "../lib/skillBrowseMap";
 
 interface BrowsePageProps {
   onNavigate?: (page: PageType) => void;
+  onOpenSkillDetail?: (skillId: string) => void;
 }
 
 const PAGE_SIZE = 6;
 
-type SortOption = "relevant" | "rated" | "credits" | "newest";
+type SortOption = "relevant" | "rated" | "sessionLength" | "newest";
 
-const mockSkills = [
-  {
-    id: "1",
-    title: "Beginner Yoga Classes",
-    instructor: {
-      name: "Sarah Martinez",
-      image: "https://images.unsplash.com/photo-1655249481446-25d575f1c054?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHdvbWFufGVufDF8fHx8MTc2MDE2NzQxMnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      rating: 4.9,
-      reviews: 127
-    },
-    category: "Sports",
-    duration: "1 hour/session",
-    location: "Online & In-Person",
-    timeCredits: 2,
-    image: "https://images.unsplash.com/photo-1758274535024-be3faa30f507?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b2dhJTIwaW5zdHJ1Y3RvciUyMHRlYWNoaW5nfGVufDF8fHx8MTc2MDEyMDA0N3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    tags: ["Beginner", "Wellness", "Flexibility"]
-  },
-  {
-    id: "2",
-    title: "Guitar Lessons for All Levels",
-    instructor: {
-      name: "Marcus Johnson",
-      image: "https://images.unsplash.com/photo-1719257751404-1dea075324bd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMG1hbnxlbnwxfHx8fDE3NjAwOTMwNzd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      rating: 4.8,
-      reviews: 93
-    },
-    category: "Music",
-    duration: "1.5 hours/session",
-    location: "In-Person",
-    timeCredits: 3,
-    image: "https://images.unsplash.com/photo-1724161644178-95e09f524020?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxndWl0YXIlMjB0ZWFjaGVyJTIwbXVzaWNpYW58ZW58MXx8fHwxNzYwMTkyODI1fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    tags: ["Music", "Acoustic", "Electric"]
-  },
-  {
-    id: "3",
-    title: "Web Development Fundamentals",
-    instructor: {
-      name: "Emily Chen",
-      image: "https://images.unsplash.com/photo-1655249481446-25d575f1c054?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHdvbWFufGVufDF8fHx8MTc2MDE2NzQxMnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      rating: 5.0,
-      reviews: 156
-    },
-    category: "Programming",
-    duration: "2 hours/session",
-    location: "Online",
-    timeCredits: 4,
-    image: "https://images.unsplash.com/photo-1565229284535-2cbbe3049123?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9ncmFtbWluZyUyMGNvZGluZyUyMGxlc3NvbnxlbnwxfHx8fDE3NjAxOTI4MjV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    tags: ["HTML", "CSS", "JavaScript"]
-  },
-  {
-    id: "4",
-    title: "Spanish Conversation Practice",
-    instructor: {
-      name: "Carlos Rodriguez",
-      image: "https://images.unsplash.com/photo-1719257751404-1dea075324bd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMG1hbnxlbnwxfHx8fDE3NjAwOTMwNzd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      rating: 4.7,
-      reviews: 84
-    },
-    category: "Languages",
-    duration: "1 hour/session",
-    location: "Online",
-    timeCredits: 2,
-    image: "https://images.unsplash.com/photo-1605711285791-0219e80e43a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjB0ZWFjaGluZyUyMGNsYXNzfGVufDF8fHx8MTc2MDE5MjgyM3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    tags: ["Intermediate", "Conversation", "Culture"]
-  },
-  {
-    id: "5",
-    title: "Digital Painting Basics",
-    instructor: {
-      name: "Alex Kim",
-      image: "https://images.unsplash.com/photo-1655249481446-25d575f1c054?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHdvbWFufGVufDF8fHx8MTc2MDE2NzQxMnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      rating: 4.9,
-      reviews: 112
-    },
-    category: "Arts",
-    duration: "2 hours/session",
-    location: "Online",
-    timeCredits: 3,
-    image: "https://images.unsplash.com/photo-1605711285791-0219e80e43a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjB0ZWFjaGluZyUyMGNsYXNzfGVufDF8fHx8MTc2MDE5MjgyM3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    tags: ["Digital Art", "Procreate", "Photoshop"]
-  },
-  {
-    id: "6",
-    title: "Photography Composition",
-    instructor: {
-      name: "David Park",
-      image: "https://images.unsplash.com/photo-1719257751404-1dea075324bd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMG1hbnxlbnwxfHx8fDE3NjAwOTMwNzd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      rating: 4.8,
-      reviews: 98
-    },
-    category: "Arts",
-    duration: "1.5 hours/session",
-    location: "In-Person",
-    timeCredits: 3,
-    image: "https://images.unsplash.com/photo-1605711285791-0219e80e43a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjB0ZWFjaGluZyUyMGNsYXNzfGVufDF8fHx8MTc2MDE5MjgyM3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    tags: ["Photography", "Composition", "Lighting"]
-  },
-  {
-    id: "7",
-    title: "Italian Cooking from Scratch",
-    instructor: {
-      name: "Maria Rossi",
-      image: "https://images.unsplash.com/photo-1655249481446-25d575f1c054?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHdvbWFufGVufDF8fHx8MTc2MDE2NzQxMnww&ixlib=rb-4.1.0&q=80&w=1080",
-      rating: 4.9,
-      reviews: 64
-    },
-    category: "Cooking",
-    duration: "2 hours/session",
-    location: "In-Person",
-    timeCredits: 3,
-    image: "https://images.unsplash.com/photo-1605711285791-0219e80e43a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjB0ZWFjaGluZyUyMGNsYXNzfGVufDF8fHx8MTc2MDE5MjgyM3ww&ixlib=rb-4.1.0&q=80&w=1080",
-    tags: ["Italian", "Pasta", "Home cooking"]
-  },
-  {
-    id: "8",
-    title: "Creative Writing Workshop",
-    instructor: {
-      name: "James Wilson",
-      image: "https://images.unsplash.com/photo-1719257751404-1dea075324bd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMG1hbnxlbnwxfHx8fDE3NjAwOTMwNzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      rating: 4.6,
-      reviews: 41
-    },
-    category: "Writing",
-    duration: "1 hour/session",
-    location: "Online",
-    timeCredits: 2,
-    image: "https://images.unsplash.com/photo-1565229284535-2cbbe3049123?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9ncmFtbWluZyUyMGNvZGluZyUyMGxlc3NvbnxlbnwxfHx8fDE3NjAxOTI4MjV8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    tags: ["Fiction", "Stories", "Editing"]
-  },
-  {
-    id: "9",
-    title: "UI/UX Design Fundamentals",
-    instructor: {
-      name: "Priya Sharma",
-      image: "https://images.unsplash.com/photo-1655249481446-25d575f1c054?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHdvbWFufGVufDF8fHx8MTc2MDE2NzQxMnww&ixlib=rb-4.1.0&q=80&w=1080",
-      rating: 5.0,
-      reviews: 203
-    },
-    category: "Design",
-    duration: "1.5 hours/session",
-    location: "Online & In-Person",
-    timeCredits: 4,
-    image: "https://images.unsplash.com/photo-1724161644178-95e09f524020?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxndWl0YXIlMjB0ZWFjaGVyJTIwbXVzaWNpYW58ZW58MXx8fHwxNzYwMTkyODI1fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    tags: ["Figma", "Wireframes", "Prototyping"]
-  },
-  {
-    id: "10",
-    title: "Beginner Piano Lessons",
-    instructor: {
-      name: "Lisa Anderson",
-      image: "https://images.unsplash.com/photo-1655249481446-25d575f1c054?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHdvbWFufGVufDF8fHx8MTc2MDE2NzQxMnww&ixlib=rb-4.1.0&q=80&w=1080",
-      rating: 4.8,
-      reviews: 76
-    },
-    category: "Music",
-    duration: "1 hour/session",
-    location: "In-Person",
-    timeCredits: 2,
-    image: "https://images.unsplash.com/photo-1605711285791-0219e80e43a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjB0ZWFjaGluZyUyMGNsYXNzfGVufDF8fHx8MTc2MDE5MjgyM3ww&ixlib=rb-4.1.0&q=80&w=1080",
-    tags: ["Piano", "Reading music", "Classical"]
-  }
-];
-
-export function BrowsePage({ onNavigate }: BrowsePageProps) {
-  const { t } = useLanguage();
+export function BrowsePage({ onNavigate, onOpenSkillDetail }: BrowsePageProps) {
+  const { t, locale } = useLanguage();
+  const { user } = useAuth();
   const b = t.browse;
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -200,63 +45,86 @@ export function BrowsePage({ onNavigate }: BrowsePageProps) {
     categories: [],
     locations: [],
     minRating: 0,
-    timeCreditsRange: [1, 20]
+    sessionHoursRange: [0.5, 12],
   });
+  const [catalog, setCatalog] = useState<BrowseSkillCardModel[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
 
-  // Filter skills based on search and filters
+  useEffect(() => {
+    let cancelled = false;
+    setCatalogLoading(true);
+    fetchPublicSkills()
+      .then((rows) => {
+        if (!cancelled) {
+          setCatalog(rows.map((s) => mapSkillDtoToBrowseCard(s, t)));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setCatalog([]);
+      })
+      .finally(() => {
+        if (!cancelled) setCatalogLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [locale, t]);
+
   const filteredSkills = useMemo(() => {
-    return mockSkills.filter(skill => {
-      // Search filter
+    return catalog.filter((skill) => {
       if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        const matchesSearch = 
-          skill.title.toLowerCase().includes(query) ||
-          skill.instructor.name.toLowerCase().includes(query) ||
-          skill.category.toLowerCase().includes(query) ||
-          skill.tags.some(tag => tag.toLowerCase().includes(query));
-        
-        if (!matchesSearch) return false;
+        const q = searchQuery.toLowerCase().trim();
+        if (q && !skill.searchBlob.includes(q)) return false;
       }
 
-      // Category filter
-      if (filters.categories.length > 0 && !filters.categories.includes(skill.category)) {
+      if (
+        filters.categories.length > 0 &&
+        !filters.categories.includes(skill.category)
+      ) {
         return false;
       }
 
-      // Location filter
       if (filters.locations.length > 0) {
         const skillLocation = skill.location.toLowerCase();
-        const hasMatch = filters.locations.some(loc => {
+        const hasMatch = filters.locations.some((loc) => {
           if (loc === "Online" && skillLocation.includes("online")) return true;
-          if (loc === "In-Person" && !skillLocation.includes("online")) return true;
+          if (loc === "In-Person" && !skillLocation.includes("online"))
+            return true;
           return false;
         });
         if (!hasMatch) return false;
       }
 
-      // Rating filter
-      if (skill.instructor.rating < filters.minRating) {
+      if (
+        filters.minRating > 0 &&
+        skill.instructor.rating < filters.minRating
+      ) {
         return false;
       }
 
-      // Time credits filter
-      if (skill.timeCredits < filters.timeCreditsRange[0] || skill.timeCredits > filters.timeCreditsRange[1]) {
+      if (
+        skill.sessionHours < filters.sessionHoursRange[0] ||
+        skill.sessionHours > filters.sessionHoursRange[1]
+      ) {
         return false;
       }
 
       return true;
     });
-  }, [searchQuery, filters]);
+  }, [searchQuery, filters, catalog]);
 
   const sortedSkills = useMemo(() => {
     const list = [...filteredSkills];
     switch (sortBy) {
       case "rated":
         return list.sort((a, b) => b.instructor.rating - a.instructor.rating);
-      case "credits":
-        return list.sort((a, b) => a.timeCredits - b.timeCredits);
+      case "sessionLength":
+        return list.sort((a, b) => a.sessionHours - b.sessionHours);
       case "newest":
-        return list.sort((a, b) => Number(b.id) - Number(a.id));
+        return list.sort(
+          (a, b) =>
+            Date.parse(b.createdAt || "0") - Date.parse(a.createdAt || "0"),
+        );
       default:
         return list;
     }
@@ -354,13 +222,20 @@ export function BrowsePage({ onNavigate }: BrowsePageProps) {
           <div className="lg:col-span-3">
             <div className="mb-6 flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <p className="min-w-0 flex-1 text-left text-sm text-muted-foreground sm:text-base">
-                {filteredSkills.length === 0
-                  ? formatTemplate(b.noMatches, { total: mockSkills.length })
-                  : formatTemplate(b.showing, {
-                      from: (activePage - 1) * PAGE_SIZE + 1,
-                      to: Math.min(activePage * PAGE_SIZE, sortedSkills.length),
-                      count: sortedSkills.length,
-                    })}
+                {catalogLoading
+                  ? t.common.loading
+                  : filteredSkills.length === 0
+                    ? catalog.length === 0
+                      ? b.emptyCatalog
+                      : formatTemplate(b.noMatches, { total: catalog.length })
+                    : formatTemplate(b.showing, {
+                        from: (activePage - 1) * PAGE_SIZE + 1,
+                        to: Math.min(
+                          activePage * PAGE_SIZE,
+                          sortedSkills.length,
+                        ),
+                        count: sortedSkills.length,
+                      })}
               </p>
               <div className="ml-auto flex w-fit max-w-full shrink-0 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2.5">
                 <Label
@@ -382,23 +257,48 @@ export function BrowsePage({ onNavigate }: BrowsePageProps) {
                   <SelectContent position="popper" align="end" className="rounded-lg border-border bg-popover text-popover-foreground shadow-lg">
                     <SelectItem value="relevant">{b.sortRelevant}</SelectItem>
                     <SelectItem value="rated">{b.sortRated}</SelectItem>
-                    <SelectItem value="credits">{b.sortCredits}</SelectItem>
+                    <SelectItem value="sessionLength">{b.sortSessionLength}</SelectItem>
                     <SelectItem value="newest">{b.sortNewest}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             
-            {sortedSkills.length > 0 ? (
+            {catalogLoading ? (
+              <div className="py-24 text-center text-muted-foreground">
+                {t.common.loading}
+              </div>
+            ) : sortedSkills.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {paginatedSkills.map((skill) => (
-                  <SkillCard key={skill.id} {...skill} />
-                ))}
+                {paginatedSkills.map((skill) => {
+                  const isOwnListing =
+                    Boolean(user?.id) && skill.ownerId === user?.id;
+                  return (
+                    <SkillCard
+                      key={skill.id}
+                      id={skill.id}
+                      title={skill.title}
+                      instructor={skill.instructor}
+                      category={skill.category}
+                      duration={skill.duration}
+                      location={skill.location}
+                      sessionHours={skill.sessionHours}
+                      image={skill.image}
+                      tags={skill.tags}
+                      showBookCta={!isOwnListing}
+                      onBookNow={() => onOpenSkillDetail?.(skill.id)}
+                    />
+                  );
+                })}
               </div>
             ) : (
               <div className="py-12 text-center">
-                <p className="mb-2 text-xl text-muted-foreground">{b.noSkillsTitle}</p>
-                <p className="text-muted-foreground">{b.noSkillsHint}</p>
+                <p className="mb-2 text-xl text-muted-foreground">
+                  {catalog.length === 0 ? b.emptyCatalog : b.noSkillsTitle}
+                </p>
+                {catalog.length > 0 ? (
+                  <p className="text-muted-foreground">{b.noSkillsHint}</p>
+                ) : null}
               </div>
             )}
             

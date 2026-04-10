@@ -15,6 +15,10 @@ import java.util.UUID;
 @RequestMapping("/api/skills")
 public class SkillController {
 
+    /** Sadece gerçek UUID ile eşleşsin; "mine" gibi kelimeler {skillId} sanılmasın. */
+    private static final String UUID_SEGMENT =
+            "{skillId:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}";
+
     private final SkillService skillService;
 
     public SkillController(SkillService skillService) {
@@ -35,17 +39,21 @@ public class SkillController {
         return ResponseEntity.ok(skillService.getAllSkills());
     }
 
-    @GetMapping("/{skillId}")
-    public ResponseEntity<SkillResponse> getSkillById(@PathVariable UUID skillId) {
-        return ResponseEntity.ok(skillService.getSkillById(skillId));
-    }
-
+    /**
+     * {@code /mine} mutlaka {@code /{skillId}} üzerinden önce tanımlanmalı; aksi halde
+     * bazı Spring sürümlerinde "mine" path değişkeni sanılıp UUID dönüşümü patlayabilir.
+     */
     @GetMapping("/mine")
     public ResponseEntity<List<SkillResponse>> getMySkills(Authentication authentication) {
         return ResponseEntity.ok(skillService.getMySkills(authentication.getName()));
     }
 
-    @PutMapping("/{skillId}")
+    @GetMapping("/" + UUID_SEGMENT)
+    public ResponseEntity<SkillResponse> getSkillById(@PathVariable UUID skillId) {
+        return ResponseEntity.ok(skillService.getSkillById(skillId));
+    }
+
+    @PutMapping("/" + UUID_SEGMENT)
     public ResponseEntity<SkillResponse> updateSkill(
             @PathVariable UUID skillId,
             @Valid @RequestBody UpdateSkillRequest req,
@@ -56,7 +64,7 @@ public class SkillController {
         );
     }
 
-    @DeleteMapping("/{skillId}")
+    @DeleteMapping("/" + UUID_SEGMENT)
     public ResponseEntity<Void> deleteSkill(
             @PathVariable UUID skillId,
             Authentication authentication

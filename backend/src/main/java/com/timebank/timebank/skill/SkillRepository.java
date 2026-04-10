@@ -9,8 +9,10 @@ import java.util.UUID;
 
 public interface SkillRepository extends JpaRepository<Skill, UUID> {
 
+    @EntityGraph(attributePaths = "owner")
     List<Skill> findByOwnerId(UUID ownerId);
 
+    @EntityGraph(attributePaths = "owner")
     Optional<Skill> findByIdAndOwnerEmail(UUID id, String ownerEmail);
 
     @Override

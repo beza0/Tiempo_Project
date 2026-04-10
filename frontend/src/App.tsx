@@ -36,7 +36,13 @@ export type PageType =
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageType>("landing");
+  const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
+
+  const openSkillDetail = (skillId: string) => {
+    setSelectedSkillId(skillId);
+    setCurrentPage("skill-detail");
+  };
 
   const renderPage = () => {
     if (pageRequiresAuth(currentPage) && !isAuthenticated) {
@@ -49,11 +55,21 @@ export default function App() {
       case "landing":
         return <LandingPage onNavigate={setCurrentPage} />;
       case "browse":
-        return <BrowsePage onNavigate={setCurrentPage} />;
+        return (
+          <BrowsePage
+            onNavigate={setCurrentPage}
+            onOpenSkillDetail={openSkillDetail}
+          />
+        );
       case "dashboard":
         return <DashboardPage onNavigate={setCurrentPage} />;
       case "profile":
-        return <ProfilePage onNavigate={setCurrentPage} />;
+        return (
+          <ProfilePage
+            onNavigate={setCurrentPage}
+            onOpenSkillDetail={openSkillDetail}
+          />
+        );
       case "how-it-works":
         return <HowItWorksPage onNavigate={setCurrentPage} />;
       case "add-skill":
@@ -81,7 +97,12 @@ export default function App() {
       case "reset-password":
         return <ResetPasswordPage onNavigate={setCurrentPage} />;
       case "skill-detail":
-        return <SkillDetailPage onNavigate={setCurrentPage} />;
+        return (
+          <SkillDetailPage
+            onNavigate={setCurrentPage}
+            skillId={selectedSkillId}
+          />
+        );
       default:
         return <LandingPage onNavigate={setCurrentPage} />;
     }

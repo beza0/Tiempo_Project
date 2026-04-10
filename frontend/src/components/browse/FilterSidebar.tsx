@@ -24,7 +24,8 @@ export interface Filters {
   categories: string[];
   locations: string[];
   minRating: number;
-  timeCreditsRange: [number, number];
+  /** Tek oturum süresi (saat), ondalık olabilir (örn. 0.5 = 30 dk) */
+  sessionHoursRange: [number, number];
 }
 
 interface FilterSidebarProps {
@@ -61,7 +62,7 @@ export function FilterSidebar({ filters, onFiltersChange }: FilterSidebarProps) 
       categories: [],
       locations: [],
       minRating: 0,
-      timeCreditsRange: [1, 20],
+      sessionHoursRange: [0.5, 12],
     });
   };
 
@@ -118,26 +119,27 @@ export function FilterSidebar({ filters, onFiltersChange }: FilterSidebarProps) 
       
       <div className="mb-6">
         <Label className="mb-3 block text-sm text-foreground">
-          {formatTemplate(fi.timeCreditsRange, {
-            min: filters.timeCreditsRange[0],
-            max: filters.timeCreditsRange[1],
+          {formatTemplate(fi.sessionHoursRange, {
+            min: filters.sessionHoursRange[0],
+            max: filters.sessionHoursRange[1],
           })}
         </Label>
-        <Slider 
-          value={filters.timeCreditsRange} 
+        <Slider
+          value={filters.sessionHoursRange}
           onValueChange={(value) =>
             onFiltersChange({
               ...filters,
-              timeCreditsRange: value as [number, number],
+              sessionHoursRange: value as [number, number],
             })
           }
-          max={20} 
-          step={1} 
-          className="mb-2" 
+          min={0.5}
+          max={12}
+          step={0.5}
+          className="mb-2"
         />
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>{fi.h1}</span>
-          <span>{fi.h20}</span>
+          <span>{fi.sessionShort}</span>
+          <span>{fi.sessionLong}</span>
         </div>
       </div>
       
