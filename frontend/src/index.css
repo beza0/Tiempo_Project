@@ -3566,6 +3566,41 @@ html.dark {
   }
 }
 
+/* Navbar notifications: plain CSS — Tailwind arbitrary min(a,b) often fails to emit (commas) */
+.nav-notification-popover {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: min(32rem, calc(100dvh - 5rem));
+  width: min(430px, calc(100vw - 1.5rem));
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+.nav-notification-popover .nav-notification-scroll {
+  min-height: 0;
+  flex: 1 1 0%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+  pointer-events: auto;
+}
+
+/* Bell trigger: explicit padding — px-3.5 etc. may not emit in Tailwind build; base * { padding:0 } wins */
+.nav-notification-bell-btn {
+  box-sizing: border-box;
+  padding-inline: 1rem;
+  gap: 0.5rem;
+}
+
+@media (min-width: 40rem) {
+  .nav-notification-bell-btn {
+    padding-inline: 1.125rem;
+  }
+}
+
 /* Searchable combobox (Radix Popover + native list; scrollable list region) */
 .searchable-combobox-panel {
   display: flex;

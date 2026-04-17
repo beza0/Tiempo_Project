@@ -11,6 +11,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useAuth } from "../contexts/AuthContext";
 
 const stepIcons = [UserPlus, Search, BookOpen, Award] as const;
 
@@ -20,6 +21,7 @@ interface HowItWorksPageProps {
 
 export function HowItWorksPage({ onNavigate }: HowItWorksPageProps) {
   const { t } = useLanguage();
+  const { isAuthenticated } = useAuth();
   const h = t.howItWorks;
 
   return (
@@ -33,13 +35,15 @@ export function HowItWorksPage({ onNavigate }: HowItWorksPageProps) {
           <p className="text-xl text-white/90 mb-8">
             {h.heroSubtitle}
           </p>
-          <Button
-            size="lg"
-            className="rounded-full bg-card px-8 py-6 text-primary shadow-xl hover:bg-accent"
-            onClick={() => onNavigate?.("signup")}
-          >
-            {h.getStartedFree}
-          </Button>
+          {!isAuthenticated ? (
+            <Button
+              size="lg"
+              className="rounded-full bg-card px-8 py-6 text-primary shadow-xl hover:bg-accent"
+              onClick={() => onNavigate?.("signup")}
+            >
+              {h.getStartedFree}
+            </Button>
+          ) : null}
         </div>
       </div>
       
@@ -131,12 +135,14 @@ export function HowItWorksPage({ onNavigate }: HowItWorksPageProps) {
               <p className="text-white/80 mb-6">
                 {h.bonusDesc}
               </p>
-              <Button
-                className="w-full bg-card text-primary hover:bg-accent"
-                onClick={() => onNavigate?.("signup")}
-              >
-                {h.claimBonus}
-              </Button>
+              {!isAuthenticated ? (
+                <Button
+                  className="w-full bg-card text-primary hover:bg-accent"
+                  onClick={() => onNavigate?.("signup")}
+                >
+                  {h.claimBonus}
+                </Button>
+              ) : null}
             </Card>
           </div>
         </div>
@@ -192,13 +198,15 @@ export function HowItWorksPage({ onNavigate }: HowItWorksPageProps) {
           <p className="text-xl text-white/90 mb-8">
             {h.ctaSubtitle}
           </p>
-          <Button
-            size="lg"
-            className="rounded-full bg-card px-8 py-6 text-primary shadow-xl hover:bg-accent"
-            onClick={() => onNavigate?.("signup")}
-          >
-            {h.ctaButton}
-          </Button>
+          {!isAuthenticated ? (
+            <Button
+              size="lg"
+              className="rounded-full bg-card px-8 py-6 text-primary shadow-xl hover:bg-accent"
+              onClick={() => onNavigate?.("signup")}
+            >
+              {h.ctaButton}
+            </Button>
+          ) : null}
         </div>
       </div>
       

@@ -10,10 +10,10 @@ import java.util.UUID;
 public interface UserNotificationRepository extends JpaRepository<UserNotification, UUID> {
 
     @Query(
-            "SELECT n FROM UserNotification n JOIN n.user u WHERE u.email = :email ORDER BY n.createdAt DESC")
+            "SELECT n FROM UserNotification n JOIN n.user u WHERE LOWER(u.email) = LOWER(:email) ORDER BY n.createdAt DESC")
     List<UserNotification> findByUserEmailOrderByCreatedAtDesc(@Param("email") String email);
 
     @Query(
-            "SELECT COUNT(n) FROM UserNotification n JOIN n.user u WHERE u.email = :email AND n.readAt IS NULL")
+            "SELECT COUNT(n) FROM UserNotification n JOIN n.user u WHERE LOWER(u.email) = LOWER(:email) AND n.readAt IS NULL")
     long countUnreadByUserEmail(@Param("email") String email);
 }

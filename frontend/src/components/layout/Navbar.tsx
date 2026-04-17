@@ -7,7 +7,10 @@ import { useLanguage } from "../../contexts/LanguageContext";
 import {
   fetchNotifications,
   fetchUnreadNotificationCount,
+  isNotificationUnread,
+  markAllNotificationsRead,
   markNotificationRead,
+  markNotificationUnread,
   type NotificationDto,
 } from "../../api/notifications";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -103,6 +106,28 @@ export function Navbar({ onNavigate }: NavbarProps) {
     handleNavigate("messages");
   };
 
+  const syncNotificationsFromServer = async () => {
+    if (!token) return;
+    try {
+      const list = await fetchNotifications(token);
+      setNotifications(list);
+      setNotifCount(list.filter((n) => isNotificationUnread(n)).length);
+    } catch {
+      void loadUnread();
+    }
+  };
+
+  const handleMarkAllNotificationsRead = async () => {
+    if (!token) return;
+    setNotifCount(0);
+    try {
+      await markAllNotificationsRead(token);
+      await syncNotificationsFromServer();
+    } catch {
+      void loadUnread();
+    }
+  };
+
   const navLinkClass =
     "cursor-pointer rounded-md px-2 py-1.5 shrink-0 whitespace-nowrap text-white/90 transition-all duration-150 hover:bg-white/30 hover:text-white hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)]";
 
@@ -114,7 +139,7 @@ export function Navbar({ onNavigate }: NavbarProps) {
             {/* Logo */}
             <button
               onClick={() => handleNavigate("landing")}
-              className="flex shrink-0 cursor-pointer items-center gap-2 transition-opacity hover:opacity-80"
+              className="flex shrink-0 cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 transition-all hover:bg-white/10 hover:opacity-100"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
                 <Clock className="h-6 w-6 text-white" />
@@ -169,148 +194,242 @@ export function Navbar({ onNavigate }: NavbarProps) {
               </button>
             </div>
 
-            {/* Desktop Auth */}
-            <div className="nav-xl-row shrink-0 gap-3">
+            {/* Auth cluster: bell outside nav-xl-row so it stays next to hamburger on narrow screens */}
+            <div className="flex shrink-0 items-center gap-3 sm:gap-2 md:gap-3 pl-2 pr-[max(0.75rem,env(safe-area-inset-right))] sm:pl-1 sm:pr-[max(0rem,env(safe-area-inset-right))]">
               {isAuthenticated ? (
-                <>
-                  <Popover open={notifOpen} onOpenChange={setNotifOpen}>
-                    <PopoverTrigger asChild>
+                <Popover modal={false} open={notifOpen} onOpenChange={setNotifOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="nav-notification-bell-btn inline-flex h-9 shrink-0 cursor-pointer items-center gap-2 rounded-full bg-white/20 px-3 py-1.5 text-white ring-1 ring-white/30 transition hover:bg-white/30 sm:mx-1"
+                      aria-label={t.nav.notifications}
+                    >
+                      <Bell className="h-4 w-4 shrink-0 text-white" />
+                      <span className="text-sm font-semibold tabular-nums">
+                        {notifCount > 99 ? "99+" : notifCount}
+                      </span>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="end"
+                    side="bottom"
+                    sideOffset={8}
+                    collisionPadding={20}
+                    className="nav-notification-popover overflow-hidden rounded-2xl border-0 bg-white p-0 shadow-2xl dark:border dark:border-border dark:bg-card"
+                  >
+                    <div className="flex shrink-0 items-center justify-between border-b border-gray-200 p-4 dark:border-border">
+                      <h2 className="text-lg font-semibold text-gray-900 dark:text-foreground">
+                        {t.nav.notifications}
+                      </h2>
                       <button
                         type="button"
-                        className="mx-1 inline-flex h-9 items-center gap-2 rounded-lg border border-primary/30 bg-gradient-to-r from-blue-500 to-purple-600 px-3 text-white shadow-[0_6px_18px_rgba(99,102,241,0.35)] transition-all hover:brightness-105 dark:border-primary/40 dark:shadow-[0_8px_22px_rgba(88,28,135,0.45)]"
-                        aria-label={t.nav.notifications}
+                        className="text-sm font-medium text-purple-600 hover:text-purple-700 disabled:cursor-not-allowed disabled:opacity-40 dark:text-purple-400 dark:hover:text-purple-300"
+                        disabled={
+                          notifications.length === 0 ||
+                          !notifications.some((n) => isNotificationUnread(n))
+                        }
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          void handleMarkAllNotificationsRead();
+                        }}
                       >
-                        <Bell className="h-4 w-4 text-white" />
-                        {notifCount > 0 ? (
-                          <span className="inline-flex min-w-[1.2rem] items-center justify-center rounded-full bg-white/20 px-1.5 text-[11px] font-semibold leading-none text-white ring-1 ring-white/40">
-                            {notifCount > 99 ? "99+" : notifCount}
-                          </span>
-                        ) : null}
+                        {t.nav.markAllRead}
                       </button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      align="end"
-                      className="w-[430px] rounded-xl border border-border bg-card p-0 shadow-2xl"
-                    >
-                      <div className="border-b border-border px-4 py-3">
-                        <p className="text-sm font-semibold text-foreground">
-                          {t.nav.notifications}
+                    </div>
+                    <div className="nav-notification-scroll max-h-[min(500px,calc(100dvh-8rem))]">
+                      {notifications.length === 0 ? (
+                        <p className="p-4 text-sm text-gray-500 dark:text-muted-foreground">
+                          {t.nav.noNotifications}
                         </p>
-                      </div>
-                      <div className="max-h-[460px] space-y-2 overflow-y-auto p-3">
-                        {notifications.length === 0 ? (
-                          <p className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
-                            {t.nav.noNotifications}
-                          </p>
-                        ) : (
-                          notifications.map((n) => {
-                            return (
+                      ) : (
+                        notifications.map((n) => {
+                          const unread = isNotificationUnread(n);
+                          return (
+                            <div
+                              key={n.id}
+                              className={`border-b border-gray-100 p-4 transition-colors last:border-b-0 dark:border-border ${
+                                unread
+                                  ? "border-l-[5px] border-l-purple-600 bg-white dark:border-l-purple-500 dark:bg-card"
+                                  : "border-l-[5px] border-l-transparent bg-gray-50/90 dark:bg-muted/25"
+                              }`}
+                            >
                               <div
-                                key={n.id}
-                                className="rounded-lg border border-border bg-background p-3"
+                                role={n.exchangeRequestId ? "button" : undefined}
+                                tabIndex={n.exchangeRequestId ? 0 : undefined}
+                                className={
+                                  n.exchangeRequestId
+                                    ? "w-full cursor-pointer text-left outline-none"
+                                    : "w-full text-left"
+                                }
+                                onClick={() =>
+                                  n.exchangeRequestId
+                                    ? void goToExchangeMessages(n.exchangeRequestId)
+                                    : undefined
+                                }
+                                onKeyDown={
+                                  n.exchangeRequestId
+                                    ? (ev) => {
+                                        if (ev.key === "Enter" || ev.key === " ") {
+                                          ev.preventDefault();
+                                          void goToExchangeMessages(n.exchangeRequestId);
+                                        }
+                                      }
+                                    : undefined
+                                }
                               >
-                                <button
-                                  type="button"
-                                  className="w-full text-left"
-                                  onClick={() =>
-                                    n.exchangeRequestId
-                                      ? void goToExchangeMessages(n.exchangeRequestId)
-                                      : undefined
-                                  }
-                                >
-                                  <div className="mb-1 flex items-center justify-between gap-2">
-                                  <p className="text-sm font-medium text-foreground">
+                                <div className="mb-2 flex items-start justify-between gap-2">
+                                  <h3
+                                    className={
+                                      unread
+                                        ? "font-bold text-gray-900 dark:text-foreground"
+                                        : "font-medium text-gray-400 dark:text-muted-foreground"
+                                    }
+                                  >
                                     {n.title}
-                                  </p>
-                                  <span className="text-[11px] text-muted-foreground">
+                                  </h3>
+                                  <span
+                                    className={`shrink-0 whitespace-nowrap text-xs ${
+                                      unread
+                                        ? "text-gray-500 dark:text-muted-foreground"
+                                        : "text-gray-400 dark:text-muted-foreground/90"
+                                    }`}
+                                  >
                                     {new Date(n.createdAt).toLocaleString(
                                       locale === "tr" ? "tr-TR" : "en-US",
                                       { dateStyle: "short", timeStyle: "short" },
                                     )}
                                   </span>
-                                  </div>
-                                  {n.skillTitle ? (
-                                    <p className="mb-1 text-xs font-medium text-primary">
-                                      {n.skillTitle}
-                                    </p>
-                                  ) : null}
-                                  <p className="text-sm text-muted-foreground">
-                                    {n.body}
-                                  </p>
-                                </button>
-                                <div className="mt-3 flex flex-wrap items-center gap-2">
-                                  {n.exchangeRequestId ? (
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() =>
-                                        void goToExchangeMessages(
-                                          n.exchangeRequestId,
-                                        )
-                                      }
-                                    >
-                                      <MessageCircle className="mr-1 h-4 w-4" />
-                                      {t.nav.goToMessages}
-                                    </Button>
-                                  ) : null}
-                                  {!n.readAt && token ? (
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() =>
-                                        void markNotificationRead(token, n.id).then(
-                                          () => void loadUnread(),
-                                        )
-                                      }
-                                    >
-                                      {t.nav.markRead}
-                                    </Button>
-                                  ) : null}
                                 </div>
+                                {n.skillTitle ? (
+                                  <p
+                                    className={`mb-2 text-sm ${
+                                      unread
+                                        ? "font-medium text-purple-600 dark:text-purple-400"
+                                        : "font-medium text-purple-400/45 dark:text-purple-400/35"
+                                    }`}
+                                  >
+                                    {n.skillTitle}
+                                  </p>
+                                ) : null}
+                                <p
+                                  className={`mb-3 text-sm leading-relaxed ${
+                                    unread
+                                      ? "text-gray-700 dark:text-foreground/90"
+                                      : "text-gray-400 dark:text-muted-foreground/85"
+                                  }`}
+                                >
+                                  {n.body}
+                                </p>
                               </div>
-                            );
-                          })
-                        )}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+                              <div className="flex flex-wrap gap-3">
+                                {n.exchangeRequestId ? (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      void goToExchangeMessages(n.exchangeRequestId);
+                                    }}
+                                    className={`inline-flex items-center gap-2 text-sm font-medium ${
+                                      unread
+                                        ? "text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300"
+                                        : "text-purple-500/55 hover:text-purple-500/75 dark:text-purple-400/45 dark:hover:text-purple-400/65"
+                                    }`}
+                                  >
+                                    <MessageCircle className="h-4 w-4 shrink-0" />
+                                    {t.nav.goToMessages}
+                                  </button>
+                                ) : null}
+                                {token && n.id && unread ? (
+                                  <button
+                                    type="button"
+                                    className="relative z-10 text-sm text-gray-600 hover:text-gray-800 dark:text-muted-foreground dark:hover:text-foreground"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      void (async () => {
+                                        try {
+                                          await markNotificationRead(token, n.id);
+                                          await syncNotificationsFromServer();
+                                        } catch {
+                                          void loadUnread();
+                                        }
+                                      })();
+                                    }}
+                                  >
+                                    {t.nav.markRead}
+                                  </button>
+                                ) : null}
+                                {token && n.id && !unread ? (
+                                  <button
+                                    type="button"
+                                    className="relative z-10 text-sm text-gray-400 hover:text-gray-500 dark:text-muted-foreground/80 dark:hover:text-muted-foreground"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      void (async () => {
+                                        try {
+                                          await markNotificationUnread(token, n.id);
+                                          await syncNotificationsFromServer();
+                                        } catch {
+                                          void loadUnread();
+                                        }
+                                      })();
+                                    }}
+                                  >
+                                    {t.nav.markUnread}
+                                  </button>
+                                ) : null}
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              ) : null}
+
+              <div className="nav-xl-row shrink-0 gap-3">
+                {isAuthenticated ? (
                   <Button
                     variant="ghost"
-                    className="text-white/90 hover:text-white"
+                    className="cursor-pointer text-white/90 hover:bg-white/15 hover:text-white"
                     onClick={handleLogout}
                   >
                     {t.nav.logout}
                   </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    variant="ghost"
-                    className="text-white/90 hover:text-white"
-                    onClick={() => handleNavigate("login")}
-                  >
-                    {t.nav.signIn}
-                  </Button>
-                  <Button
-                    onClick={() => handleNavigate("signup")}
-                    className="whitespace-nowrap bg-gradient-to-r from-blue-500 to-purple-600 text-white"
-                  >
-                    {t.nav.getStarted}
-                  </Button>
-                </>
-              )}
-            </div>
+                ) : (
+                  <>
+                    <Button
+                      variant="ghost"
+                      className="cursor-pointer text-white/90 hover:bg-white/15 hover:text-white"
+                      onClick={() => handleNavigate("login")}
+                    >
+                      {t.nav.signIn}
+                    </Button>
+                    <Button
+                      onClick={() => handleNavigate("signup")}
+                      className="cursor-pointer whitespace-nowrap bg-gradient-to-r from-blue-500 to-purple-600 text-white"
+                    >
+                      {t.nav.getStarted}
+                    </Button>
+                  </>
+                )}
+              </div>
 
-            {/* Narrow screens: hamburger → sidebar */}
-            <button
-              type="button"
-              className="nav-xl-menu-btn shrink-0 rounded-lg p-2 text-white hover:bg-white/15 hover:text-white"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Toggle menu"
-              aria-expanded={isMenuOpen}
-            >
-              <Menu className="h-6 w-6" />
-            </button>
+              {/* Narrow screens: hamburger → sidebar */}
+              <button
+                type="button"
+                className="nav-xl-menu-btn shrink-0 rounded-lg p-2 text-white hover:bg-white/15 hover:text-white"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label="Toggle menu"
+                aria-expanded={isMenuOpen}
+              >
+                <Menu className="h-6 w-6" />
+              </button>
+            </div>
           </div>
         </div>
       </nav>

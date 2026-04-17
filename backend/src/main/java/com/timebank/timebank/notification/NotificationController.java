@@ -29,12 +29,75 @@ public class NotificationController {
         return Map.of("count", notificationService.countUnread(authentication.getName()));
     }
 
+    /** POST avoids some proxies/CDNs mishandling PUT; PUT kept for compatibility. */
+    @PostMapping({"/mark-all-read", "/read-all"})
+    public ResponseEntity<Void> markAllReadPost(Authentication authentication) {
+        notificationService.markAllRead(authentication.getName());
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Same fixed-path style as {@code /mark-all-read} — some deployments break
+     * {@code /{uuid}/read}; query param avoids embedding the id in the path.
+     */
+    @PostMapping("/mark-one-read")
+    public ResponseEntity<Void> markOneRead(
+            @RequestParam("id") UUID id,
+            Authentication authentication
+    ) {
+        notificationService.markRead(authentication.getName(), id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/mark-one-unread")
+    public ResponseEntity<Void> markOneUnread(
+            @RequestParam("id") UUID id,
+            Authentication authentication
+    ) {
+        notificationService.markUnread(authentication.getName(), id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/read-all")
+    public ResponseEntity<Void> markAllReadPut(Authentication authentication) {
+        notificationService.markAllRead(authentication.getName());
+        return ResponseEntity.noContent().build();
+    }
+
+    /** POST avoids some proxies/CDNs mishandling PUT; PUT kept for compatibility. */
+    @PostMapping("/{id}/read")
+    public ResponseEntity<Void> markReadPost(
+            @PathVariable UUID id,
+            Authentication authentication
+    ) {
+        notificationService.markRead(authentication.getName(), id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PutMapping("/{id}/read")
     public ResponseEntity<Void> markRead(
             @PathVariable UUID id,
             Authentication authentication
     ) {
         notificationService.markRead(authentication.getName(), id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/unread")
+    public ResponseEntity<Void> markUnreadPost(
+            @PathVariable UUID id,
+            Authentication authentication
+    ) {
+        notificationService.markUnread(authentication.getName(), id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/unread")
+    public ResponseEntity<Void> markUnread(
+            @PathVariable UUID id,
+            Authentication authentication
+    ) {
+        notificationService.markUnread(authentication.getName(), id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -2,6 +2,7 @@ import { Button } from "../ui/button";
 import { Clock, Users, Sparkles } from "lucide-react";
 import type { PageType } from "../../App";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface HeroSectionProps {
   onNavigate?: (page: PageType) => void;
@@ -9,6 +10,7 @@ interface HeroSectionProps {
 
 export function HeroSection({ onNavigate }: HeroSectionProps) {
   const { t } = useLanguage();
+  const { isAuthenticated } = useAuth();
   const h = t.landing.hero;
 
   return (
@@ -51,13 +53,15 @@ export function HeroSection({ onNavigate }: HeroSectionProps) {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button 
-            size="lg" 
-            className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:opacity-90 shadow-xl px-8 py-6 rounded-full"
-            onClick={() => onNavigate?.("signup")}
-          >
-            {h.joinNow}
-          </Button>
+          {!isAuthenticated ? (
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:opacity-90 shadow-xl px-8 py-6 rounded-full"
+              onClick={() => onNavigate?.("signup")}
+            >
+              {h.joinNow}
+            </Button>
+          ) : null}
           <Button 
             size="lg" 
             className="rounded-full border-2 border-primary/80 bg-card px-8 py-6 text-primary hover:bg-accent"

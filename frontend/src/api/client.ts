@@ -55,7 +55,11 @@ export async function apiFetch<T>(
     h.set("Authorization", `Bearer ${token}`);
   }
 
-  const res = await fetch(url, { ...rest, headers: h });
+  const res = await fetch(url, {
+    ...rest,
+    headers: h,
+    cache: "no-store",
+  });
   const text = await res.text();
   let data: unknown = null;
   if (text) {

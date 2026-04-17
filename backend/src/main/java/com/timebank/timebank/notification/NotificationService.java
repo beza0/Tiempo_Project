@@ -3,9 +3,11 @@ package com.timebank.timebank.notification;
 import com.timebank.timebank.exchange.ExchangeRequest;
 import com.timebank.timebank.notification.dto.NotificationResponse;
 import com.timebank.timebank.user.User;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -20,9 +22,12 @@ public class NotificationService {
             DateTimeFormatter.ofPattern("d MMM yyyy HH:mm").withZone(DISPLAY_ZONE);
 
     private final UserNotificationRepository userNotificationRepository;
+    private final JdbcTemplate jdbcTemplate;
 
-    public NotificationService(UserNotificationRepository userNotificationRepository) {
+    public NotificationService(
+            UserNotificationRepository userNotificationRepository, JdbcTemplate jdbcTemplate) {
         this.userNotificationRepository = userNotificationRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Transactional
@@ -91,26 +96,80 @@ public class NotificationService {
 
     @Transactional(readOnly = true)
     public List<NotificationResponse> listForUser(String email) {
-        return userNotificationRepository.findByUserEmailOrderByCreatedAtDesc(email).stream()
+        String e = normalizeEmail(email);
+        if (e.isEmpty()) {
+            return List.of();
+        }
+        return userNotificationRepository.findByUserEmailOrderByCreatedAtDesc(e).stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public long countUnread(String email) {
-        return userNotificationRepository.countUnreadByUserEmail(email);
+        String e = normalizeEmail(email);
+        if (e.isEmpty()) {
+            return 0;
+        }
+        return userNotificationRepository.countUnreadByUserEmail(e);
     }
 
     @Transactional
     public void markRead(String email, UUID notificationId) {
+        String e = normalizeEmail(email);
         UserNotification n = userNotificationRepository.findById(notificationId)
                 .orElseThrow(() -> new IllegalArgumentException("Bildirim bulunamadı"));
-        if (!n.getUser().getEmail().equalsIgnoreCase(email)) {
+        if (!n.getUser().getEmail().equalsIgnoreCase(e)) {
             throw new IllegalArgumentException("Bu bildirime erişim yok");
         }
         if (n.getReadAt() == null) {
             n.setReadAt(Instant.now());
+            userNotificationRepository.save(n);
         }
+    }
+
+    @Transactional
+    public void markUnread(String email, UUID notificationId) {
+        String e = normalizeEmail(email);
+        UserNotification n = userNotificationRepository.findById(notificationId)
+                .orElseThrow(() -> new IllegalArgumentException("Bildirim bulunamadı"));
+        if (!n.getUser().getEmail().equalsIgnoreCase(e)) {
+            throw new IllegalArgumentException("Bu bildirime erişim yok");
+        }
+        n.setReadAt(null);
+        userNotificationRepository.save(n);
+    }
+
+    /**
+     * Direct SQL so the DB always updates; JPA dirty-checking alone was unreliable here.
+     * Falls back to per-entity save if zero rows matched (e.g. schema drift).
+     */
+    @Transactional
+    public void markAllRead(String email) {
+        String e = normalizeEmail(email);
+        if (e.isEmpty()) {
+            return;
+        }
+        Timestamp ts = Timestamp.from(Instant.now());
+        int updated =
+                jdbcTemplate.update(
+                        "UPDATE user_notifications AS un SET read_at = ? FROM users AS u "
+                                + "WHERE un.user_id = u.id AND lower(trim(u.email)) = lower(trim(?)) AND un.read_at IS NULL",
+                        ts,
+                        e);
+        if (updated == 0) {
+            Instant now = Instant.now();
+            for (UserNotification n : userNotificationRepository.findByUserEmailOrderByCreatedAtDesc(e)) {
+                if (n.getReadAt() == null) {
+                    n.setReadAt(now);
+                    userNotificationRepository.save(n);
+                }
+            }
+        }
+    }
+
+    private static String normalizeEmail(String email) {
+        return email == null ? "" : email.trim();
     }
 
     private NotificationResponse toResponse(UserNotification n) {
