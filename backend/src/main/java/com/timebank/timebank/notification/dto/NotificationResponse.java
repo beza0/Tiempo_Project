@@ -11,6 +11,7 @@ public class NotificationResponse {
     private Instant createdAt;
     private Instant readAt;
     private UUID exchangeRequestId;
+    private String skillTitle;
 
     public NotificationResponse(
             UUID id,
@@ -18,7 +19,8 @@ public class NotificationResponse {
             String body,
             Instant createdAt,
             Instant readAt,
-            UUID exchangeRequestId
+            UUID exchangeRequestId,
+            String skillTitle
     ) {
         this.id = id;
         this.title = title;
@@ -26,6 +28,7 @@ public class NotificationResponse {
         this.createdAt = createdAt;
         this.readAt = readAt;
         this.exchangeRequestId = exchangeRequestId;
+        this.skillTitle = skillTitle;
     }
 
     public UUID getId() {
@@ -50,5 +53,9 @@ public class NotificationResponse {
 
     public UUID getExchangeRequestId() {
         return exchangeRequestId;
+    }
+
+    public String getSkillTitle() {
+        return skillTitle;
     }
 }

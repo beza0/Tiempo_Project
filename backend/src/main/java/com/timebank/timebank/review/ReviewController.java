@@ -44,4 +44,19 @@ public class ReviewController {
                 reviewService.getRatingSummary(authentication.getName())
         );
     }
+
+    /** Benim yazdığım yorumlar (aldığım derslerde eğitmeni değerlendirme) */
+    @GetMapping("/me/given")
+    public ResponseEntity<List<ReviewResponse>> getMyWrittenReviews(Authentication authentication) {
+        return ResponseEntity.ok(
+                reviewService.getReviewsWrittenByUser(authentication.getName())
+        );
+    }
+
+    @GetMapping("/me/given/summary")
+    public ResponseEntity<UserRatingSummaryResponse> getMyGivenReviewsSummary(Authentication authentication) {
+        return ResponseEntity.ok(
+                reviewService.getRatingSummaryForReviewsGiven(authentication.getName())
+        );
+    }
 }

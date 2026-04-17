@@ -31,7 +31,7 @@ interface BrowsePageProps {
 
 const PAGE_SIZE = 6;
 
-type SortOption = "relevant" | "rated" | "sessionLength" | "newest";
+type SortOption = "relevant" | "rated" | "newest";
 
 export function BrowsePage({ onNavigate, onOpenSkillDetail }: BrowsePageProps) {
   const { t, locale } = useLanguage();
@@ -45,7 +45,6 @@ export function BrowsePage({ onNavigate, onOpenSkillDetail }: BrowsePageProps) {
     categories: [],
     locations: [],
     minRating: 0,
-    sessionHoursRange: [0.5, 12],
   });
   const [catalog, setCatalog] = useState<BrowseSkillCardModel[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
@@ -85,11 +84,9 @@ export function BrowsePage({ onNavigate, onOpenSkillDetail }: BrowsePageProps) {
       }
 
       if (filters.locations.length > 0) {
-        const skillLocation = skill.location.toLowerCase();
         const hasMatch = filters.locations.some((loc) => {
-          if (loc === "Online" && skillLocation.includes("online")) return true;
-          if (loc === "In-Person" && !skillLocation.includes("online"))
-            return true;
+          if (loc === "Online" && skill.isOnline) return true;
+          if (loc === "In-Person" && skill.isInPerson) return true;
           return false;
         });
         if (!hasMatch) return false;
@@ -98,13 +95,6 @@ export function BrowsePage({ onNavigate, onOpenSkillDetail }: BrowsePageProps) {
       if (
         filters.minRating > 0 &&
         skill.instructor.rating < filters.minRating
-      ) {
-        return false;
-      }
-
-      if (
-        skill.sessionHours < filters.sessionHoursRange[0] ||
-        skill.sessionHours > filters.sessionHoursRange[1]
       ) {
         return false;
       }
@@ -118,8 +108,6 @@ export function BrowsePage({ onNavigate, onOpenSkillDetail }: BrowsePageProps) {
     switch (sortBy) {
       case "rated":
         return list.sort((a, b) => b.instructor.rating - a.instructor.rating);
-      case "sessionLength":
-        return list.sort((a, b) => a.sessionHours - b.sessionHours);
       case "newest":
         return list.sort(
           (a, b) =>
@@ -257,7 +245,6 @@ export function BrowsePage({ onNavigate, onOpenSkillDetail }: BrowsePageProps) {
                   <SelectContent position="popper" align="end" className="rounded-lg border-border bg-popover text-popover-foreground shadow-lg">
                     <SelectItem value="relevant">{b.sortRelevant}</SelectItem>
                     <SelectItem value="rated">{b.sortRated}</SelectItem>
-                    <SelectItem value="sessionLength">{b.sortSessionLength}</SelectItem>
                     <SelectItem value="newest">{b.sortNewest}</SelectItem>
                   </SelectContent>
                 </Select>
@@ -280,10 +267,11 @@ export function BrowsePage({ onNavigate, onOpenSkillDetail }: BrowsePageProps) {
                       title={skill.title}
                       instructor={skill.instructor}
                       category={skill.category}
-                      duration={skill.duration}
+                      availability={skill.availability}
                       location={skill.location}
-                      sessionHours={skill.sessionHours}
                       image={skill.image}
+                      isOnline={skill.isOnline}
+                      isInPerson={skill.isInPerson}
                       tags={skill.tags}
                       showBookCta={!isOwnListing}
                       onBookNow={() => onOpenSkillDetail?.(skill.id)}

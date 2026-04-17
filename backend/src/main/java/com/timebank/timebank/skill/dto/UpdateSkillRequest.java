@@ -10,7 +10,6 @@ public class UpdateSkillRequest {
     @Size(max = 100, message = "Başlık en fazla 100 karakter olabilir")
     private String title;
 
-    @NotBlank(message = "Açıklama boş olamaz")
     @Size(max = 8000, message = "Açıklama en fazla 8000 karakter olabilir")
     private String description;
 

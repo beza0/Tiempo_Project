@@ -3565,3 +3565,66 @@ html.dark {
     display: none !important;
   }
 }
+
+/* Searchable combobox (Radix Popover + native list; scrollable list region) */
+.searchable-combobox-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: min(85vh, 420px);
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+.searchable-combobox-panel .searchable-combobox-search {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.searchable-combobox-panel .searchable-combobox-search-field {
+  min-height: 3.75rem;
+}
+
+.searchable-combobox-panel .searchable-combobox-search-field svg {
+  height: 1.25rem;
+  width: 1.25rem;
+}
+
+.searchable-combobox-panel .searchable-combobox-list {
+  max-height: min(52vh, 288px);
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+
+/* react-day-picker default: .rdp-months { max-width: fit-content } takvimi sıkıştırıyor */
+.timelink-calendar .rdp-months {
+  max-width: none !important;
+  width: 100%;
+  min-width: 18rem;
+}
+
+/* Seçilemeyen günler: açık gri (day_button text-foreground’u böyle ezer) */
+.timelink-calendar .rdp-day.rdp-disabled .rdp-day_button {
+  color: #b8b8c4 !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important;
+  font-weight: 400;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.timelink-calendar .rdp-day.rdp-disabled .rdp-day_button:hover {
+  background: rgb(0 0 0 / 0.04) !important;
+  color: #b8b8c4 !important;
+}
+.dark .timelink-calendar .rdp-day.rdp-disabled .rdp-day_button {
+  color: #6b6b78 !important;
+}
+.dark .timelink-calendar .rdp-day.rdp-disabled .rdp-day_button:hover {
+  background: rgb(255 255 255 / 0.06) !important;
+  color: #8b8b9a !important;
+}

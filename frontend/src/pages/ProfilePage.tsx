@@ -18,16 +18,34 @@ import { ImageWithFallback } from "../components/common/ImageWithFallback";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useAuth } from "../contexts/AuthContext";
 import { formatTemplate } from "../language";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchMyProfile, type UserProfileDto } from "../api/user";
 import { fetchMySkills, type SkillDto } from "../api/skills";
 import {
+  createReview,
+  fetchMyGivenReviews,
+  fetchMyGivenRatingSummary,
   fetchMyReceivedReviews,
   fetchMyRatingSummary,
   type ReviewDto,
   type UserRatingSummaryDto,
 } from "../api/reviews";
+import {
+  fetchReceivedExchangeRequests,
+  fetchSentExchangeRequests,
+  type ExchangeRequestDto,
+} from "../api/exchange";
 import { initialsFromFullName } from "../lib/initials";
+import { apiErrorDisplayMessage } from "../api/client";
+import { Textarea } from "../components/ui/textarea";
+import { Label } from "../components/ui/label";
+import {
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "../components/ui/modal";
 
 interface ProfilePageProps {
   onNavigate?: (page: PageType) => void;
@@ -53,21 +71,112 @@ function skillCardDescriptionPreview(description: string): string {
   return (idx >= 0 ? description.slice(0, idx) : description).trim();
 }
 
+function formatSessionTime(
+  iso: string | null | undefined,
+  locale: string,
+): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleString(locale === "tr" ? "tr-TR" : "en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
+function formatSkillAvailability(
+  skill: SkillDto,
+  dayLabels: string[],
+): string | null {
+  const days = skill.availableDays ?? [];
+  const from = skill.availableFrom;
+  const until = skill.availableUntil;
+  if (!days.length || !from || !until) return null;
+  const dayIndex: Record<string, number> = {
+    MONDAY: 0,
+    TUESDAY: 1,
+    WEDNESDAY: 2,
+    THURSDAY: 3,
+    FRIDAY: 4,
+    SATURDAY: 5,
+    SUNDAY: 6,
+  };
+  const localizedDays = days
+    .map((d) => dayLabels[dayIndex[d]] ?? d)
+    .filter(Boolean)
+    .join(", ");
+  return `${localizedDays} · ${from} - ${until}`;
+}
+
+function fallbackAvailabilityFromDescription(
+  description: string,
+  dayLabels: string[],
+): string | null {
+  const raw =
+    description.match(
+      /(Available Days \*|Müsait günler \*):\s*([^\n]+?)\s+(Available From \*|Başlangıç \*)[–-](Available Until \*|Bitiş \*):\s*(\d{2}:\d{2})\s*[–-]\s*(\d{2}:\d{2})/i,
+    ) ??
+    description.match(
+      /(Available Days \*|Müsait günler \*):\s*([^\n]+)\n(?:.*)\s*(\d{2}:\d{2})\s*[–-]\s*(\d{2}:\d{2})/i,
+    );
+  if (!raw) return null;
+  const daysRaw = raw[2]?.trim();
+  const from = raw[5] ?? raw[3];
+  const until = raw[6] ?? raw[4];
+  if (!daysRaw || !from || !until) return null;
+  const normalizedDays = daysRaw
+    .split(",")
+    .map((d) => d.trim())
+    .filter(Boolean)
+    .map((d) => {
+      const upper = d.toUpperCase();
+      const dayIndex: Record<string, number> = {
+        MONDAY: 0,
+        TUESDAY: 1,
+        WEDNESDAY: 2,
+        THURSDAY: 3,
+        FRIDAY: 4,
+        SATURDAY: 5,
+        SUNDAY: 6,
+      };
+      return dayLabels[dayIndex[upper]] ?? d;
+    })
+    .join(", ");
+  return `${normalizedDays} · ${from} - ${until}`;
+}
+
 export function ProfilePage({
   onNavigate,
   onOpenSkillDetail,
 }: ProfilePageProps) {
   const { t, locale } = useLanguage();
   const p = t.profile;
+  const dayLabels = t.addSkill.days;
   const catLabels = t.browse.categoryLabels;
   const { user, token } = useAuth();
 
   const [profile, setProfile] = useState<UserProfileDto | null>(null);
   const [mySkills, setMySkills] = useState<SkillDto[]>([]);
+  const [receivedBookings, setReceivedBookings] = useState<ExchangeRequestDto[]>(
+    [],
+  );
+  const [sentBookings, setSentBookings] = useState<ExchangeRequestDto[]>([]);
   const [myReviews, setMyReviews] = useState<ReviewDto[]>([]);
+  const [myGivenReviews, setMyGivenReviews] = useState<ReviewDto[]>([]);
   const [ratingSummary, setRatingSummary] =
     useState<UserRatingSummaryDto | null>(null);
+  const [givenSummary, setGivenSummary] =
+    useState<UserRatingSummaryDto | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [reviewTarget, setReviewTarget] = useState<{
+    exchangeId: string;
+    skillTitle: string;
+    instructorName: string;
+  } | null>(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [reviewSaving, setReviewSaving] = useState(false);
 
   const load = useCallback(async () => {
     if (!token) {
@@ -78,8 +187,12 @@ export function ProfilePage({
     const settled = await Promise.allSettled([
       fetchMyProfile(token),
       fetchMySkills(token),
+      fetchReceivedExchangeRequests(token),
+      fetchSentExchangeRequests(token),
       fetchMyReceivedReviews(token),
       fetchMyRatingSummary(token),
+      fetchMyGivenReviews(token),
+      fetchMyGivenRatingSummary(token),
     ]);
     if (settled[0].status === "fulfilled") {
       setProfile(settled[0].value);
@@ -92,14 +205,34 @@ export function ProfilePage({
       setMySkills([]);
     }
     if (settled[2].status === "fulfilled") {
-      setMyReviews(settled[2].value);
+      setReceivedBookings(settled[2].value);
+    } else {
+      setReceivedBookings([]);
+    }
+    if (settled[3].status === "fulfilled") {
+      setSentBookings(settled[3].value);
+    } else {
+      setSentBookings([]);
+    }
+    if (settled[4].status === "fulfilled") {
+      setMyReviews(settled[4].value);
     } else {
       setMyReviews([]);
     }
-    if (settled[3].status === "fulfilled") {
-      setRatingSummary(settled[3].value);
+    if (settled[5].status === "fulfilled") {
+      setRatingSummary(settled[5].value);
     } else {
       setRatingSummary(null);
+    }
+    if (settled[6].status === "fulfilled") {
+      setMyGivenReviews(settled[6].value);
+    } else {
+      setMyGivenReviews([]);
+    }
+    if (settled[7].status === "fulfilled") {
+      setGivenSummary(settled[7].value);
+    } else {
+      setGivenSummary(null);
     }
     setLoading(false);
   }, [token]);
@@ -129,6 +262,74 @@ export function ProfilePage({
     ratingSummary != null &&
     ratingSummary.totalReviews > 0 &&
     Number.isFinite(ratingSummary.averageRating);
+
+  const learningBookings = useMemo(
+    () =>
+      sentBookings.filter(
+        (b) => b.status === "ACCEPTED" || b.status === "COMPLETED",
+      ),
+    [sentBookings],
+  );
+
+  const teachingBookingsBySkill = useMemo(() => {
+    const map = new Map<string, ExchangeRequestDto[]>();
+    for (const b of receivedBookings) {
+      if (!(b.status === "ACCEPTED" || b.status === "COMPLETED")) continue;
+      const arr = map.get(b.skillId) ?? [];
+      arr.push(b);
+      map.set(b.skillId, arr);
+    }
+    return map;
+  }, [receivedBookings]);
+
+  const givenByExchangeId = useMemo(() => {
+    const m = new Map<string, ReviewDto>();
+    for (const r of myGivenReviews) {
+      m.set(r.exchangeRequestId, r);
+    }
+    return m;
+  }, [myGivenReviews]);
+
+  const submitReview = async () => {
+    if (!token || !reviewTarget || reviewRating < 1) {
+      setReviewError(p.reviewSelectStars);
+      return;
+    }
+    setReviewSaving(true);
+    setReviewError(null);
+    try {
+      await createReview(token, reviewTarget.exchangeId, {
+        rating: reviewRating,
+        comment: reviewComment.trim() || undefined,
+      });
+      setReviewModalOpen(false);
+      setReviewTarget(null);
+      setReviewRating(0);
+      setReviewComment("");
+      await load();
+    } catch (e) {
+      setReviewError(apiErrorDisplayMessage(e, p.reviewError));
+    } finally {
+      setReviewSaving(false);
+    }
+  };
+
+  const openReviewModal = (b: ExchangeRequestDto) => {
+    setReviewTarget({
+      exchangeId: b.id,
+      skillTitle: b.skillTitle,
+      instructorName: b.ownerName,
+    });
+    setReviewRating(0);
+    setReviewComment("");
+    setReviewError(null);
+    setReviewModalOpen(true);
+  };
+
+  const showGivenSummary =
+    givenSummary != null &&
+    givenSummary.totalReviews > 0 &&
+    Number.isFinite(givenSummary.averageRating);
 
   return (
     <PageLayout onNavigate={onNavigate}>
@@ -251,9 +452,6 @@ export function ProfilePage({
               <TabsTrigger value="reviews" className="rounded-lg">
                 {p.tabReviews}
               </TabsTrigger>
-              <TabsTrigger value="achievements" className="rounded-lg">
-                {p.tabAchievements}
-              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="teaching" className="space-y-4">
@@ -275,6 +473,11 @@ export function ProfilePage({
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {mySkills.map((skill) => {
+                      const skillBookings =
+                        teachingBookingsBySkill.get(skill.id) ?? [];
+                      const learnersCount = new Set(
+                        skillBookings.map((b) => b.requesterId),
+                      ).size;
                       const levelKey = skill.level
                         ? (`${skill.level.charAt(0).toUpperCase()}${skill.level.slice(1).toLowerCase()}` as keyof typeof p.skillLevels)
                         : null;
@@ -290,6 +493,10 @@ export function ProfilePage({
                       const preview = skillCardDescriptionPreview(
                         skill.description,
                       );
+                      const availability = formatSkillAvailability(
+                        skill,
+                        dayLabels,
+                      ) ?? fallbackAvailabilityFromDescription(skill.description, dayLabels);
 
                       return (
                         <Card
@@ -312,11 +519,9 @@ export function ProfilePage({
                                     {levelText}
                                   </Badge>
                                 ) : null}
-                                <Badge variant="outline">
-                                  {formatTemplate(p.sessionDuration, {
-                                    n: String(skill.durationMinutes),
-                                  })}
-                                </Badge>
+                                {availability ? (
+                                  <Badge variant="outline">{availability}</Badge>
+                                ) : null}
                               </div>
                             </div>
                             <div className="flex items-center gap-1 shrink-0">
@@ -331,10 +536,38 @@ export function ProfilePage({
                             <div className="flex items-center gap-1">
                               <BookOpen className="w-4 h-4 shrink-0" />
                               <span>
-                                {formatTemplate(p.studentsLabel, { n: "0" })}
+                                {formatTemplate(p.studentsLabel, {
+                                  n: String(learnersCount),
+                                })}
                               </span>
                             </div>
                           </div>
+
+                          {skillBookings.length > 0 ? (
+                            <div className="mb-4 rounded-lg border border-border/70 bg-background/70 p-3">
+                              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                {p.activeLearners}
+                              </p>
+                              <div className="space-y-2">
+                                {skillBookings.slice(0, 3).map((b) => (
+                                  <div
+                                    key={b.id}
+                                    className="flex items-center justify-between gap-2 text-sm"
+                                  >
+                                    <span className="truncate text-foreground">
+                                      {b.requesterName}
+                                    </span>
+                                    <span className="shrink-0 text-xs text-muted-foreground">
+                                      {formatSessionTime(
+                                        b.scheduledStartAt ?? null,
+                                        locale,
+                                      )}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : null}
 
                           {preview ? (
                             <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
@@ -373,9 +606,118 @@ export function ProfilePage({
                 <h2 className="mb-6 text-xl text-foreground">
                   {p.skillsLearning}
                 </h2>
-                <p className="py-10 text-center text-muted-foreground">
-                  {p.emptyLearning}
-                </p>
+                {learningBookings.length === 0 ? (
+                  <p className="py-10 text-center text-muted-foreground">
+                    {p.emptyLearning}
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {learningBookings.map((b) => {
+                      const statusLabel =
+                        b.status === "COMPLETED"
+                          ? p.learningStatusCompleted
+                          : p.learningStatusAccepted;
+                      const totalTimeLabel = formatCreditMinutes(
+                        b.bookedMinutes,
+                        locale,
+                      );
+                      return (
+                        <Card
+                          key={b.id}
+                          className="rounded-xl border border-border bg-muted/25 p-5"
+                        >
+                          <div className="mb-3 flex items-start justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                              <h3 className="text-lg text-foreground">
+                                {b.skillTitle}
+                              </h3>
+                              <p className="mt-1 text-sm text-muted-foreground">
+                                {p.learningInstructor}: {b.ownerName}
+                              </p>
+                            </div>
+                            <Badge variant="secondary">{statusLabel}</Badge>
+                          </div>
+                          <div className="mb-3 space-y-1 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 shrink-0" />
+                              <span>
+                                {p.learningSession}:{" "}
+                                {formatSessionTime(
+                                  b.scheduledStartAt ?? null,
+                                  locale,
+                                )}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-4 w-4 shrink-0" />
+                              <span>
+                                {formatTemplate(p.learningTotalTime, {
+                                  time: totalTimeLabel,
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex-1"
+                                onClick={() =>
+                                  onOpenSkillDetail?.(b.skillId)
+                                }
+                              >
+                                {p.viewDetails}
+                              </Button>
+                              <Button
+                                size="sm"
+                                className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white"
+                                onClick={() => onNavigate?.("messages")}
+                              >
+                                {p.continueLearning}
+                              </Button>
+                            </div>
+                            {b.status === "COMPLETED" ? (
+                              givenByExchangeId.has(b.id) ? (
+                                <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                                  <span>{p.alreadyRated}</span>
+                                  <div
+                                    className="flex items-center gap-0.5"
+                                    aria-hidden
+                                  >
+                                    {Array.from(
+                                      {
+                                        length:
+                                          givenByExchangeId.get(b.id)!
+                                            .rating,
+                                      },
+                                      (_, i) => (
+                                        <Star
+                                          key={i}
+                                          className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                                        />
+                                      ),
+                                    )}
+                                  </div>
+                                </div>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
+                                  className="w-full"
+                                  type="button"
+                                  onClick={() => openReviewModal(b)}
+                                >
+                                  {p.rateSession}
+                                </Button>
+                              )
+                            ) : null}
+                          </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
               </Card>
             </TabsContent>
 
@@ -384,70 +726,241 @@ export function ProfilePage({
                 <h2 className="mb-6 text-xl text-foreground">
                   {p.studentReviews}
                 </h2>
-                {myReviews.length === 0 ? (
-                  <p className="py-10 text-center text-muted-foreground">
-                    {p.emptyReviews}
-                  </p>
-                ) : (
-                  <div className="space-y-4">
-                    {myReviews.map((review) => (
-                      <Card
-                        key={review.id}
-                        className="rounded-xl border border-border bg-muted/25 p-5"
-                      >
-                        <div className="flex items-start gap-4">
-                          <div
-                            className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground shrink-0"
-                            aria-hidden
+
+                <div className="space-y-8">
+                  <section>
+                    <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                      {p.reviewsFromStudents}
+                    </h3>
+                    {myReviews.length === 0 ? (
+                      <p className="py-6 text-center text-muted-foreground">
+                        {p.emptyReviews}
+                      </p>
+                    ) : (
+                      <div className="space-y-4">
+                        {myReviews.map((review) => (
+                          <Card
+                            key={review.id}
+                            className="rounded-xl border border-border bg-muted/25 p-5"
                           >
-                            {initialsFromFullName(review.reviewerName)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-2 gap-2">
-                              <div>
-                                <h4 className="text-foreground">
-                                  {review.reviewerName}
-                                </h4>
+                            <div className="flex items-start gap-4">
+                              <div
+                                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground"
+                                aria-hidden
+                              >
+                                {initialsFromFullName(review.reviewerName)}
                               </div>
-                              <div className="flex items-center gap-0.5 shrink-0">
-                                {Array.from({ length: review.rating }, (_, i) => (
-                                  <Star
-                                    key={i}
-                                    className="w-4 h-4 fill-yellow-400 text-yellow-400"
-                                  />
-                                ))}
+                              <div className="min-w-0 flex-1">
+                                <div className="mb-2 flex items-center justify-between gap-2">
+                                  <div>
+                                    <h4 className="text-foreground">
+                                      {review.reviewerName}
+                                    </h4>
+                                    {review.skillTitle ? (
+                                      <p className="text-xs text-muted-foreground">
+                                        {review.skillTitle}
+                                      </p>
+                                    ) : null}
+                                  </div>
+                                  <div className="flex shrink-0 items-center gap-0.5">
+                                    {Array.from(
+                                      { length: review.rating },
+                                      (_, i) => (
+                                        <Star
+                                          key={i}
+                                          className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                                        />
+                                      ),
+                                    )}
+                                  </div>
+                                </div>
+                                {review.comment ? (
+                                  <p className="mb-2 text-foreground/90">
+                                    {review.comment}
+                                  </p>
+                                ) : null}
+                                <p className="text-xs text-muted-foreground">
+                                  {new Date(
+                                    review.createdAt,
+                                  ).toLocaleDateString(
+                                    locale === "tr" ? "tr-TR" : "en-US",
+                                  )}
+                                </p>
                               </div>
                             </div>
-                            <p className="mb-2 text-foreground/90">
-                              {review.comment}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(review.createdAt).toLocaleDateString(
-                                locale === "tr" ? "tr-TR" : "en-US",
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </Card>
-            </TabsContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </section>
 
-            <TabsContent value="achievements" className="space-y-4">
-              <Card className="rounded-2xl border-0 p-6 shadow-lg">
-                <h2 className="mb-6 text-xl text-foreground">
-                  {p.myAchievements}
-                </h2>
-                <p className="py-10 text-center text-muted-foreground">
-                  {p.emptyAchievements}
-                </p>
+                  <section>
+                    <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                      {p.reviewsIGave}
+                    </h3>
+                    {showGivenSummary ? (
+                      <p className="mb-4 text-sm text-muted-foreground">
+                        {formatTemplate(p.reviewsGivenSummaryLine, {
+                          n: String(givenSummary!.totalReviews),
+                          rating: givenSummary!.averageRating.toFixed(1),
+                        })}
+                      </p>
+                    ) : null}
+                    {myGivenReviews.length === 0 ? (
+                      <p className="py-6 text-center text-muted-foreground">
+                        {p.emptyReviewsIGave}
+                      </p>
+                    ) : (
+                      <div className="space-y-4">
+                        {myGivenReviews.map((review) => (
+                          <Card
+                            key={review.id}
+                            className="rounded-xl border border-border bg-muted/25 p-5"
+                          >
+                            <div className="flex items-start gap-4">
+                              <div
+                                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground"
+                                aria-hidden
+                              >
+                                {initialsFromFullName(
+                                  review.reviewedUserName,
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="mb-2 flex items-center justify-between gap-2">
+                                  <div>
+                                    <h4 className="text-foreground">
+                                      {review.reviewedUserName}
+                                    </h4>
+                                    {review.skillTitle ? (
+                                      <p className="text-xs text-muted-foreground">
+                                        {review.skillTitle}
+                                      </p>
+                                    ) : null}
+                                  </div>
+                                  <div className="flex shrink-0 items-center gap-0.5">
+                                    {Array.from(
+                                      { length: review.rating },
+                                      (_, i) => (
+                                        <Star
+                                          key={i}
+                                          className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                                        />
+                                      ),
+                                    )}
+                                  </div>
+                                </div>
+                                {review.comment ? (
+                                  <p className="mb-2 text-foreground/90">
+                                    {review.comment}
+                                  </p>
+                                ) : null}
+                                <p className="text-xs text-muted-foreground">
+                                  {new Date(
+                                    review.createdAt,
+                                  ).toLocaleDateString(
+                                    locale === "tr" ? "tr-TR" : "en-US",
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                </div>
               </Card>
             </TabsContent>
           </Tabs>
         )}
       </div>
+
+      <Modal
+        open={reviewModalOpen}
+        onOpenChange={(open) => {
+          setReviewModalOpen(open);
+          if (!open) {
+            setReviewTarget(null);
+            setReviewRating(0);
+            setReviewComment("");
+            setReviewError(null);
+          }
+        }}
+      >
+        <ModalContent>
+          <ModalHeader>
+            <ModalTitle>{p.reviewModalTitle}</ModalTitle>
+            {reviewTarget ? (
+              <p className="mt-2 text-sm text-muted-foreground">
+                {reviewTarget.skillTitle} · {reviewTarget.instructorName}
+              </p>
+            ) : null}
+          </ModalHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="mb-2 block">{p.reviewSelectStars}</Label>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    className="rounded p-1 transition-opacity hover:opacity-90"
+                    onClick={() => {
+                      setReviewRating(n);
+                      setReviewError(null);
+                    }}
+                    aria-label={`${n}`}
+                  >
+                    <Star
+                      className={`h-8 w-8 ${
+                        n <= reviewRating
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-muted-foreground/40"
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="review-comment" className="mb-2 block">
+                {p.reviewCommentLabel}
+              </Label>
+              <Textarea
+                id="review-comment"
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                rows={4}
+                maxLength={1000}
+                className="resize-none"
+              />
+            </div>
+            {reviewError ? (
+              <p className="text-sm text-destructive" role="alert">
+                {reviewError}
+              </p>
+            ) : null}
+          </div>
+          <ModalFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setReviewModalOpen(false)}
+              disabled={reviewSaving}
+            >
+              {p.reviewCancel}
+            </Button>
+            <Button
+              type="button"
+              onClick={() => void submitReview()}
+              disabled={reviewSaving || reviewRating < 1}
+            >
+              {p.reviewSubmit}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </PageLayout>
   );
 }

@@ -21,6 +21,8 @@ import { useAuth } from "../contexts/AuthContext";
 import type { Messages } from "../language";
 import { createSkill } from "../api/skills";
 import { apiErrorDisplayMessage } from "../api/client";
+import { SearchableCombobox } from "../components/common/SearchableCombobox";
+import { locationOptions } from "../data/profilePicklists";
 
 interface AddSkillPageProps {
   onNavigate?: (page: PageType) => void;
@@ -92,6 +94,7 @@ function buildDescription(
   }
   const trimmed = base.trim();
   if (lines.length === 0) return trimmed;
+  if (!trimmed) return lines.join("\n");
   return `${trimmed}\n\n———\n${lines.join("\n")}`;
 }
 
@@ -100,13 +103,15 @@ export function AddSkillPage({ onNavigate }: AddSkillPageProps) {
   const a = t.addSkill;
   const catLabels = t.browse.categoryLabels;
   const { token } = useAuth();
+  const turkeyLocationOptions = locationOptions().filter((o) =>
+    o.value.endsWith(", Turkey"),
+  );
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [customCategory, setCustomCategory] = useState("");
   const [description, setDescription] = useState("");
   const [level, setLevel] = useState("");
-  const [durationMinutes, setDurationMinutes] = useState("");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [currentTag, setCurrentTag] = useState("");
@@ -147,7 +152,7 @@ export function AddSkillPage({ onNavigate }: AddSkillPageProps) {
       setError(a.errorNoAuth);
       return;
     }
-    if (!title.trim() || !description.trim()) {
+    if (!title.trim()) {
       setError(a.validationCore);
       return;
     }
@@ -171,9 +176,24 @@ export function AddSkillPage({ onNavigate }: AddSkillPageProps) {
       setError(a.validationLevel);
       return;
     }
-    const dm = parseInt(durationMinutes, 10);
-    if (!durationMinutes || Number.isNaN(dm) || dm < 30) {
-      setError(a.validationDuration);
+    if (locationType.length === 0) {
+      setError(a.validationSessionType);
+      return;
+    }
+    if (locationType.includes("in-person") && !locationText.trim()) {
+      setError(a.validationInPersonLocation);
+      return;
+    }
+    if (selectedDays.length === 0) {
+      setError(a.validationDays);
+      return;
+    }
+    if (!startTime || !endTime) {
+      setError(a.validationTimeRange);
+      return;
+    }
+    if (startTime >= endTime) {
+      setError(a.validationTimeOrder);
       return;
     }
 
@@ -197,9 +217,16 @@ export function AddSkillPage({ onNavigate }: AddSkillPageProps) {
       await createSkill(token, {
         title: title.trim(),
         description: fullDescription,
-        durationMinutes: dm,
+        durationMinutes: 60,
         category: resolvedCategory,
         level,
+        sessionTypes: locationType,
+        inPersonLocation: locationType.includes("in-person")
+          ? locationText.trim()
+          : null,
+        availableDays: selectedDays.map((d) => d.toUpperCase()),
+        availableFrom: startTime,
+        availableUntil: endTime,
       });
       onNavigate?.("profile");
     } catch (err) {
@@ -339,34 +366,17 @@ export function AddSkillPage({ onNavigate }: AddSkillPageProps) {
               {locationType.includes("in-person") && (
                 <div>
                   <Label htmlFor="location">{a.location}</Label>
-                  <Input
-                    id="location"
-                    value={locationText}
-                    onChange={(ev) => setLocationText(ev.target.value)}
-                    placeholder={a.locationPh}
+                  <SearchableCombobox
                     className="mt-2"
+                    value={locationText}
+                    onChange={setLocationText}
+                    options={turkeyLocationOptions}
+                    placeholder={a.locationPh}
+                    searchPlaceholder={a.locationPh}
+                    emptyText={a.locationEmpty}
                   />
                 </div>
               )}
-
-              <div>
-                <Label htmlFor="duration">{a.durationMin}</Label>
-                <Select
-                  value={durationMinutes || undefined}
-                  onValueChange={setDurationMinutes}
-                >
-                  <SelectTrigger id="duration" className="mt-2">
-                    <SelectValue placeholder={a.selectDuration} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="30">{a.dur30}</SelectItem>
-                    <SelectItem value="60">{a.dur60}</SelectItem>
-                    <SelectItem value="90">{a.dur90}</SelectItem>
-                    <SelectItem value="120">{a.dur120}</SelectItem>
-                    <SelectItem value="180">{a.dur180}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
 
               <div>
                 <Label>{a.availableDays}</Label>

@@ -17,12 +17,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 @Service
 public class ExchangeRequestService {
+    private static final ZoneId SCHEDULE_ZONE = ZoneId.of("Europe/Istanbul");
 
     private final ExchangeRequestRepository exchangeRequestRepository;
     private final ExchangeMessageRepository exchangeMessageRepository;
@@ -59,15 +64,9 @@ public class ExchangeRequestService {
             throw new IllegalArgumentException("Kendi skill'inize talep gönderemezsiniz");
         }
 
-        int sessionMinutes = skill.getDurationMinutes();
         int booked = req.getBookedMinutes();
-        if (booked < sessionMinutes) {
-            throw new IllegalArgumentException(
-                    "Rezervasyon süresi en az bir oturum kadar (" + sessionMinutes + " dk) olmalıdır");
-        }
-        if (booked % sessionMinutes != 0) {
-            throw new IllegalArgumentException(
-                    "Rezervasyon süresi, oturum süresinin (" + sessionMinutes + " dk) tam katı olmalıdır");
+        if (booked < 30) {
+            throw new IllegalArgumentException("Rezervasyon süresi en az 30 dakika olmalıdır");
         }
 
         Instant scheduled = req.getScheduledStartAt();
@@ -75,6 +74,7 @@ public class ExchangeRequestService {
         if (scheduled.isBefore(minStart)) {
             throw new IllegalArgumentException("Oturum başlangıcı en az 1 saat sonrası için seçilmelidir");
         }
+        validateScheduleAgainstSkillAvailability(skill, scheduled);
 
         ExchangeRequest exchangeRequest = new ExchangeRequest();
         exchangeRequest.setSkill(skill);
@@ -83,6 +83,7 @@ public class ExchangeRequestService {
         exchangeRequest.setBookedMinutes(booked);
         exchangeRequest.setScheduledStartAt(scheduled);
         exchangeRequest.setReminderSent(false);
+        exchangeRequest.setPendingFromOwner(false);
         exchangeRequest.setStatus(ExchangeRequestStatus.PENDING);
 
         ExchangeRequest saved = exchangeRequestRepository.save(exchangeRequest);
@@ -143,6 +144,49 @@ public class ExchangeRequestService {
         ExchangeRequest updated = exchangeRequestRepository.save(exchangeRequest);
 
         return mapToResponse(updated);
+    }
+
+    @Transactional
+    public ExchangeRequestResponse counterOfferRequest(
+            UUID requestId,
+            CreateExchangeRequestRequest req,
+            String ownerEmail
+    ) {
+        ExchangeRequest original = exchangeRequestRepository.findById(requestId)
+                .orElseThrow(() -> new IllegalArgumentException("Talep bulunamadı"));
+
+        if (!original.getSkill().getOwner().getEmail().equalsIgnoreCase(ownerEmail)) {
+            throw new IllegalArgumentException("Bu talep için yeni tarih önerme yetkiniz yok");
+        }
+        if (original.getStatus() != ExchangeRequestStatus.REJECTED) {
+            throw new IllegalArgumentException("Yeni tarih önerisi için önce talep reddedilmiş olmalı");
+        }
+
+        int booked = req.getBookedMinutes();
+        if (booked != original.getBookedMinutes()) {
+            throw new IllegalArgumentException("Yeni teklif, mevcut rezervasyon süresiyle aynı olmalı");
+        }
+
+        Instant scheduled = req.getScheduledStartAt();
+        Instant minStart = Instant.now().plus(1, ChronoUnit.HOURS);
+        if (scheduled.isBefore(minStart)) {
+            throw new IllegalArgumentException("Oturum başlangıcı en az 1 saat sonrası için seçilmelidir");
+        }
+        validateScheduleAgainstSkillAvailability(original.getSkill(), scheduled);
+
+        ExchangeRequest newReq = new ExchangeRequest();
+        newReq.setSkill(original.getSkill());
+        newReq.setRequester(original.getRequester());
+        newReq.setMessage(req.getMessage().trim());
+        newReq.setBookedMinutes(original.getBookedMinutes());
+        newReq.setScheduledStartAt(scheduled);
+        newReq.setReminderSent(false);
+        newReq.setPendingFromOwner(true);
+        newReq.setStatus(ExchangeRequestStatus.PENDING);
+
+        ExchangeRequest saved = exchangeRequestRepository.save(newReq);
+        notificationService.notifyCounterOffer(saved);
+        return mapToResponse(saved);
     }
 
     @Transactional
@@ -215,8 +259,8 @@ public class ExchangeRequestService {
     ) {
         ExchangeRequest ex = exchangeRequestRepository.findById(exchangeRequestId)
                 .orElseThrow(() -> new IllegalArgumentException("Talep bulunamadı"));
-        if (ex.getStatus() != ExchangeRequestStatus.ACCEPTED) {
-            throw new IllegalArgumentException("Sadece kabul edilmiş taleplerde mesaj gönderilebilir");
+        if (ex.getStatus() == ExchangeRequestStatus.PENDING && !ex.isPendingFromOwner()) {
+            throw new IllegalArgumentException("Talep beklemedeyken mesaj gönderilemez");
         }
         if (!isParticipant(ex, userEmail)) {
             throw new IllegalArgumentException("Bu konuşmaya erişim yok");
@@ -234,6 +278,28 @@ public class ExchangeRequestService {
     private static boolean isParticipant(ExchangeRequest ex, String email) {
         return ex.getRequester().getEmail().equalsIgnoreCase(email)
                 || ex.getSkill().getOwner().getEmail().equalsIgnoreCase(email);
+    }
+
+    private static void validateScheduleAgainstSkillAvailability(Skill skill, Instant scheduledStartAt) {
+        if (skill.getAvailableDays() == null || skill.getAvailableFrom() == null || skill.getAvailableUntil() == null) {
+            return;
+        }
+        var local = scheduledStartAt.atZone(SCHEDULE_ZONE);
+        String day = local.getDayOfWeek().name().toUpperCase(Locale.ROOT);
+        List<String> allowedDays = Arrays.stream(skill.getAvailableDays().split(","))
+                .map(String::trim)
+                .map(s -> s.toUpperCase(Locale.ROOT))
+                .filter(s -> !s.isEmpty())
+                .toList();
+        if (!allowedDays.contains(day)) {
+            throw new IllegalArgumentException("Seçilen gün eğitmenin uygun günleri arasında değil");
+        }
+        LocalTime start = local.toLocalTime().withSecond(0).withNano(0);
+        LocalTime from = LocalTime.parse(skill.getAvailableFrom());
+        LocalTime until = LocalTime.parse(skill.getAvailableUntil());
+        if (start.isBefore(from) || !start.isBefore(until)) {
+            throw new IllegalArgumentException("Seçilen saat eğitmenin uygun saat aralığında değil");
+        }
     }
 
     private ExchangeMessageResponse mapMessage(ExchangeMessage m) {
@@ -258,6 +324,7 @@ public class ExchangeRequestService {
                 exchangeRequest.getMessage(),
                 exchangeRequest.getBookedMinutes(),
                 exchangeRequest.getScheduledStartAt(),
+                exchangeRequest.isPendingFromOwner(),
                 exchangeRequest.getStatus(),
                 exchangeRequest.getCreatedAt()
         );

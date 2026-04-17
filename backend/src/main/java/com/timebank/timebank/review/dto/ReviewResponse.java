@@ -11,6 +11,8 @@ public class ReviewResponse {
     private String reviewerName;
     private UUID reviewedUserId;
     private String reviewedUserName;
+    /** İlgili ders / beceri başlığı */
+    private String skillTitle;
     private int rating;
     private String comment;
     private Instant createdAt;
@@ -22,6 +24,7 @@ public class ReviewResponse {
             String reviewerName,
             UUID reviewedUserId,
             String reviewedUserName,
+            String skillTitle,
             int rating,
             String comment,
             Instant createdAt
@@ -32,6 +35,7 @@ public class ReviewResponse {
         this.reviewerName = reviewerName;
         this.reviewedUserId = reviewedUserId;
         this.reviewedUserName = reviewedUserName;
+        this.skillTitle = skillTitle;
         this.rating = rating;
         this.comment = comment;
         this.createdAt = createdAt;
@@ -59,6 +63,10 @@ public class ReviewResponse {
 
     public String getReviewedUserName() {
         return reviewedUserName;
+    }
+
+    public String getSkillTitle() {
+        return skillTitle;
     }
 
     public int getRating() {

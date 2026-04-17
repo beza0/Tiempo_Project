@@ -38,6 +38,9 @@ public class ExchangeRequestSchemaPatch implements ApplicationRunner {
         patch(
                 "ALTER TABLE exchange_requests ADD COLUMN IF NOT EXISTS reminder_sent BOOLEAN NOT NULL DEFAULT false",
                 "reminder_sent");
+        patch(
+                "ALTER TABLE exchange_requests ADD COLUMN IF NOT EXISTS pending_from_owner BOOLEAN NOT NULL DEFAULT false",
+                "pending_from_owner");
     }
 
     private void patch(String sql, String label) {

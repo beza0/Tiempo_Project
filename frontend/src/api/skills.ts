@@ -7,6 +7,11 @@ export type SkillDto = {
   durationMinutes: number;
   category: string | null;
   level: string | null;
+  sessionTypes?: string[];
+  inPersonLocation?: string | null;
+  availableDays?: string[];
+  availableFrom?: string | null;
+  availableUntil?: string | null;
   ownerId: string;
   ownerName: string;
   createdAt: string;
@@ -15,9 +20,14 @@ export type SkillDto = {
 export type CreateSkillBody = {
   title: string;
   description: string;
-  durationMinutes: number;
+  durationMinutes?: number;
   category?: string | null;
   level?: string | null;
+  sessionTypes?: string[];
+  inPersonLocation?: string | null;
+  availableDays?: string[];
+  availableFrom?: string | null;
+  availableUntil?: string | null;
 };
 
 export function fetchMySkills(token: string) {

@@ -1,10 +1,18 @@
 import type { SkillDto } from "../api/skills";
 import type { Messages } from "../language";
-import { formatTemplate } from "../language";
 
 /** Nötr kapak; gerçek kapak URL’i API’de yok. */
 const BROWSE_COVER_FALLBACK =
   "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80";
+
+function parseMetaField(text: string, labels: string[]): string | null {
+  for (const label of labels) {
+    const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const m = text.match(new RegExp(`${escaped}\\s*:\\s*([^\\n]+)`, "i"));
+    if (m?.[1]?.trim()) return m[1].trim();
+  }
+  return null;
+}
 
 export type BrowseSkillCardModel = {
   id: string;
@@ -17,10 +25,10 @@ export type BrowseSkillCardModel = {
     reviews: number;
   };
   category: string;
-  duration: string;
-  location: string;
-  /** Tek oturumun süresi (saat), filtre/sıralama için */
-  sessionHours: number;
+  availability: string;
+  location: string | null;
+  isOnline: boolean;
+  isInPerson: boolean;
   image: string;
   tags: string[];
   createdAt: string;
@@ -32,20 +40,52 @@ export function mapSkillDtoToBrowseCard(
   messages: Messages,
 ): BrowseSkillCardModel {
   const b = messages.browse;
+  const dayLabels = messages.addSkill.days;
   const rawCat = skill.category?.trim();
   const categoryValue = rawCat || "Programming";
   const categoryLabel =
     b.categoryLabels[categoryValue as keyof typeof b.categoryLabels] ??
     categoryValue;
-  const duration = formatTemplate(b.durationMinutesLabel, {
-    n: String(skill.durationMinutes),
-  });
+  const dayIndex: Record<string, number> = {
+    MONDAY: 0,
+    TUESDAY: 1,
+    WEDNESDAY: 2,
+    THURSDAY: 3,
+    FRIDAY: 4,
+    SATURDAY: 5,
+    SUNDAY: 6,
+  };
+  const localizedDays = (skill.availableDays ?? [])
+    .map((d) => dayLabels[dayIndex[d]] ?? d)
+    .join(", ");
+  const meta = skill.description ?? "";
+  const fallbackDays = parseMetaField(meta, ["Available Days *", "Müsait günler *"]);
+  const fallbackTime = parseMetaField(
+    meta,
+    ["Available From *– Available Until *", "Başlangıç *–Bitiş *"],
+  );
+  const availability = localizedDays && skill.availableFrom && skill.availableUntil
+    ? `${localizedDays} · ${skill.availableFrom} - ${skill.availableUntil}`
+    : fallbackDays && fallbackTime
+      ? `${fallbackDays} · ${fallbackTime}`
+      : "";
+  const sessionTypes = skill.sessionTypes ?? [];
+  const fallbackSessionType = parseMetaField(meta, ["Session Type *", "Oturum türü *"]);
+  const isOnline = sessionTypes.includes("online");
+  const isInPerson = sessionTypes.includes("in-person");
+  const inPersonByFallback = (fallbackSessionType ?? "").toLowerCase().includes("in-person")
+    || (fallbackSessionType ?? "").toLowerCase().includes("yüz yüze");
+  const location = (isInPerson || inPersonByFallback)
+    ? (skill.inPersonLocation ?? parseMetaField(meta, ["Location", "Konum"]))
+    : null;
   const tags = rawCat ? [categoryLabel] : [];
   const searchBlob = [
     skill.title,
     skill.ownerName,
     categoryLabel,
     skill.description ?? "",
+    availability,
+    location ?? "",
   ]
     .join(" ")
     .toLowerCase();
@@ -60,9 +100,10 @@ export function mapSkillDtoToBrowseCard(
       reviews: 0,
     },
     category: categoryValue,
-    duration,
-    location: "Online",
-    sessionHours: skill.durationMinutes / 60,
+    availability,
+    location,
+    isOnline,
+    isInPerson,
     image: BROWSE_COVER_FALLBACK,
     tags,
     createdAt: skill.createdAt,

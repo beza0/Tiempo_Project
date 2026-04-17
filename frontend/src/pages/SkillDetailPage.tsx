@@ -13,6 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
+import { Calendar } from "../components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "../components/ui/popover";
+import { cn } from "../components/ui/utils";
+import { enUS, tr as trLocale } from "react-day-picker/locale";
 import {
   Modal,
   ModalContent,
@@ -27,6 +35,7 @@ import {
   Award,
   Video,
   MessageCircle,
+  CalendarIcon,
 } from "lucide-react";
 import type { PageType } from "../App";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -71,21 +80,88 @@ function localDateTimeToUtcIso(dateStr: string, timeStr: string): string {
   return local.toISOString();
 }
 
+function isWithinAvailability(skill: SkillDto, dateStr: string, timeStr: string): boolean {
+  const days = skill.availableDays ?? [];
+  const from = skill.availableFrom;
+  const until = skill.availableUntil;
+  if (!days.length || !from || !until) return true;
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dayKeys = [
+    "SUNDAY",
+    "MONDAY",
+    "TUESDAY",
+    "WEDNESDAY",
+    "THURSDAY",
+    "FRIDAY",
+    "SATURDAY",
+  ];
+  const weekday = dayKeys[new Date(y, m - 1, d).getDay()];
+  if (!days.includes(weekday)) return false;
+  return timeStr >= from && timeStr < until;
+}
+
+function parseMetaField(meta: string, labels: string[]): string | null {
+  for (const label of labels) {
+    const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const re = new RegExp(`${escaped}\\s*:\\s*([^\\n]+)`, "i");
+    const m = meta.match(re);
+    if (m?.[1]?.trim()) return m[1].trim();
+  }
+  return null;
+}
+
+function toMinutes(hhmm: string): number {
+  const [h, m] = hhmm.split(":").map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
+
+function pad2(v: number): string {
+  return String(v).padStart(2, "0");
+}
+
+function dateToYmd(d: Date): string {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+/** Yerel öğlen — timezone kayması olmadan takvim seçimi */
+function ymdToLocalDate(ymd: string): Date {
+  const [y, m, d] = ymd.split("-").map(Number);
+  return new Date(y, m - 1, d, 12, 0, 0, 0);
+}
+
+function buildHalfHourSlots(from: string, until: string): string[] {
+  const out: string[] = [];
+  let cur = toMinutes(from);
+  const end = toMinutes(until);
+  while (cur < end) {
+    const h = Math.floor(cur / 60);
+    const m = cur % 60;
+    out.push(`${pad2(h)}:${pad2(m)}`);
+    cur += 30;
+  }
+  return out;
+}
+
+const BOOKING_HORIZON_DAYS = 365;
+
 export function SkillDetailPage({ onNavigate, skillId }: SkillDetailPageProps) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const { user, token } = useAuth();
   const s = t.skillDetail;
   const b = t.browse;
   const [skill, setSkill] = useState<SkillDto | null>(null);
   const [loading, setLoading] = useState(false);
   const [bookOpen, setBookOpen] = useState(false);
-  const [sessionCount, setSessionCount] = useState(1);
   const [bookMessage, setBookMessage] = useState("");
   const [bookSubmitting, setBookSubmitting] = useState(false);
   const [bookSuccess, setBookSuccess] = useState(false);
   const [bookErr, setBookErr] = useState<string | null>(null);
   const [bookDate, setBookDate] = useState(() => tomorrowDateStr());
   const [bookTime, setBookTime] = useState("10:00");
+  const [bookDatePopoverOpen, setBookDatePopoverOpen] = useState(false);
+  const [bookCalendarMonth, setBookCalendarMonth] = useState<Date>(() =>
+    ymdToLocalDate(tomorrowDateStr()),
+  );
 
   useEffect(() => {
     if (!skillId) {
@@ -110,25 +186,146 @@ export function SkillDetailPage({ onNavigate, skillId }: SkillDetailPageProps) {
   }, [skillId]);
 
   useEffect(() => {
-    setSessionCount(1);
     setBookMessage("");
     setBookSuccess(false);
     setBookErr(null);
     setBookDate(tomorrowDateStr());
     setBookTime("10:00");
+    setBookCalendarMonth(ymdToLocalDate(tomorrowDateStr()));
   }, [skillId]);
 
-  const maxSessions = useMemo(() => {
-    if (!skill) return 1;
-    return Math.max(
-      1,
-      Math.min(48, Math.floor(14400 / skill.durationMinutes)),
+  const hasAvailabilityConstraints = useMemo(
+    () =>
+      Boolean(skill?.availableDays?.length) &&
+      Boolean(skill?.availableFrom) &&
+      Boolean(skill?.availableUntil),
+    [skill],
+  );
+
+  const allowedDays = useMemo(
+    () => new Set(skill?.availableDays ?? []),
+    [skill?.availableDays],
+  );
+
+  const dateOptions = useMemo(() => {
+    if (
+      !skill ||
+      !hasAvailabilityConstraints ||
+      !skill.availableFrom ||
+      !skill.availableUntil
+    ) {
+      return [];
+    }
+    const options: { value: string; label: string }[] = [];
+    const now = new Date();
+    const minMs = now.getTime() + 60 * 60 * 1000;
+    const dayKeys = [
+      "SUNDAY",
+      "MONDAY",
+      "TUESDAY",
+      "WEDNESDAY",
+      "THURSDAY",
+      "FRIDAY",
+      "SATURDAY",
+    ];
+    const baseSlots = buildHalfHourSlots(skill.availableFrom, skill.availableUntil);
+    for (let i = 0; i < BOOKING_HORIZON_DAYS; i++) {
+      const d = new Date(now);
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() + i);
+      const dayCode = dayKeys[d.getDay()];
+      if (!allowedDays.has(dayCode)) continue;
+      const ymd = dateToYmd(d);
+      const validSlotExists = baseSlots.some((slot) => {
+        const candidate = new Date(`${ymd}T${slot}:00`);
+        return candidate.getTime() >= minMs;
+      });
+      if (!validSlotExists) continue;
+      options.push({
+        value: ymd,
+        label: d.toLocaleDateString(locale === "tr" ? "tr-TR" : "en-US", {
+          weekday: "short",
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }),
+      });
+    }
+    return options;
+  }, [
+    skill,
+    hasAvailabilityConstraints,
+    allowedDays,
+    locale,
+  ]);
+
+  const bookableYmdSet = useMemo(
+    () => new Set(dateOptions.map((o) => o.value)),
+    [dateOptions],
+  );
+
+  const bookDateDisplayLabel = useMemo(() => {
+    const opt = dateOptions.find((o) => o.value === bookDate);
+    if (opt) return opt.label;
+    return ymdToLocalDate(bookDate).toLocaleDateString(
+      locale === "tr" ? "tr-TR" : "en-US",
+      {
+        weekday: "short",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      },
     );
-  }, [skill]);
+  }, [dateOptions, bookDate, locale]);
+
+  const calendarMonthBounds = useMemo(() => {
+    const start = new Date();
+    start.setDate(start.getDate() - 1);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setDate(end.getDate() + BOOKING_HORIZON_DAYS);
+    return {
+      startMonth: new Date(start.getFullYear(), start.getMonth(), 1),
+      endMonth: new Date(end.getFullYear(), end.getMonth(), 1),
+    };
+  }, []);
+
+  const timeOptions = useMemo(() => {
+    if (
+      !skill ||
+      !hasAvailabilityConstraints ||
+      !skill.availableFrom ||
+      !skill.availableUntil ||
+      !bookDate
+    ) {
+      return [];
+    }
+    const minMs = Date.now() + 60 * 60 * 1000;
+    return buildHalfHourSlots(skill.availableFrom, skill.availableUntil).filter((slot) => {
+      const candidate = new Date(`${bookDate}T${slot}:00`);
+      return candidate.getTime() >= minMs;
+    });
+  }, [
+    skill,
+    hasAvailabilityConstraints,
+    bookDate,
+  ]);
 
   useEffect(() => {
-    setSessionCount((c) => Math.min(c, maxSessions));
-  }, [maxSessions]);
+    if (!hasAvailabilityConstraints) return;
+    if (dateOptions.length === 0) return;
+    if (!dateOptions.some((d) => d.value === bookDate)) {
+      setBookDate(dateOptions[0].value);
+    }
+  }, [hasAvailabilityConstraints, dateOptions, bookDate]);
+
+  useEffect(() => {
+    if (!hasAvailabilityConstraints) return;
+    if (timeOptions.length === 0) return;
+    if (!timeOptions.includes(bookTime)) {
+      setBookTime(timeOptions[0]);
+    }
+  }, [hasAvailabilityConstraints, timeOptions, bookTime]);
 
   const handleBookClick = () => {
     setBookErr(null);
@@ -142,11 +339,31 @@ export function SkillDetailPage({ onNavigate, skillId }: SkillDetailPageProps) {
   const handleBookModalChange = (open: boolean) => {
     if (!open && bookSubmitting) return;
     setBookOpen(open);
-    if (!open) setBookErr(null);
+    if (!open) {
+      setBookErr(null);
+      setBookDatePopoverOpen(false);
+    }
+  };
+
+  const handleBookDatePopoverOpenChange = (open: boolean) => {
+    setBookDatePopoverOpen(open);
+    if (open) {
+      setBookCalendarMonth(ymdToLocalDate(bookDate));
+    }
   };
 
   const submitBookRequest = async () => {
     if (!token || !skill) return;
+    if (hasAvailabilityConstraints) {
+      if (!bookDate || !bookTime || !timeOptions.includes(bookTime)) {
+        setBookErr(s.bookOutsideAvailability);
+        return;
+      }
+      if (dateOptions.length === 0) {
+        setBookErr(s.bookNoSlots);
+        return;
+      }
+    }
     setBookSubmitting(true);
     setBookErr(null);
     const scheduledStartAt = localDateTimeToUtcIso(bookDate, bookTime);
@@ -156,10 +373,15 @@ export function SkillDetailPage({ onNavigate, skillId }: SkillDetailPageProps) {
       setBookSubmitting(false);
       return;
     }
+    if (!isWithinAvailability(skill, bookDate, bookTime)) {
+      setBookErr(s.bookOutsideAvailability);
+      setBookSubmitting(false);
+      return;
+    }
     try {
       const created = await createExchangeRequest(token, skill.id, {
         message: bookMessage.trim() || s.bookDefaultMessage,
-        bookedMinutes: sessionCount * skill.durationMinutes,
+        bookedMinutes: 60,
         scheduledStartAt,
       });
       try {
@@ -225,6 +447,40 @@ export function SkillDetailPage({ onNavigate, skillId }: SkillDetailPageProps) {
     s.categoryProgramming;
   const mainDesc = descriptionMain(skill.description);
   const metaBlock = descriptionMeta(skill.description);
+  const dayLabels = t.addSkill.days;
+  const dayIndex: Record<string, number> = {
+    MONDAY: 0,
+    TUESDAY: 1,
+    WEDNESDAY: 2,
+    THURSDAY: 3,
+    FRIDAY: 4,
+    SATURDAY: 5,
+    SUNDAY: 6,
+  };
+  const metaSessionType =
+    (skill.sessionTypes?.length
+      ? skill.sessionTypes
+          .map((v) => (v === "in-person" ? t.addSkill.inPerson : t.addSkill.online))
+          .join(", ")
+      : null) ??
+    parseMetaField(metaBlock, ["Session Type *", "Oturum türü *"]);
+  const metaLocation =
+    skill.inPersonLocation ??
+    parseMetaField(metaBlock, ["Location", "Konum"]);
+  const metaDays =
+    (skill.availableDays?.length
+      ? skill.availableDays
+          .map((d) => dayLabels[dayIndex[d]] ?? d)
+          .join(", ")
+      : null) ??
+    parseMetaField(metaBlock, ["Available Days *", "Müsait günler *"]);
+  const metaTime =
+    skill.availableFrom && skill.availableUntil
+      ? `${skill.availableFrom} - ${skill.availableUntil}`
+      : parseMetaField(
+          metaBlock,
+          ["Available From *– Available Until *", "Başlangıç *–Bitiş *"],
+        );
   const levelLabel = skill.level
     ? skill.level.charAt(0).toUpperCase() + skill.level.slice(1).toLowerCase()
     : "";
@@ -253,14 +509,6 @@ export function SkillDetailPage({ onNavigate, skillId }: SkillDetailPageProps) {
                     <Users className="h-5 w-5 text-muted-foreground" />
                     <span>
                       {formatTemplate(s.studentsCount, { n: "0" })}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-muted-foreground" />
-                    <span>
-                      {formatTemplate(s.perSession, {
-                        n: String(skill.durationMinutes),
-                      })}
                     </span>
                   </div>
                   {levelLabel ? (
@@ -303,14 +551,45 @@ export function SkillDetailPage({ onNavigate, skillId }: SkillDetailPageProps) {
                       </p>
                     </div>
 
-                    {metaBlock ? (
+                    {metaBlock || metaSessionType || metaLocation || metaDays || metaTime ? (
                       <div>
                         <h3 className="mb-2 text-lg text-foreground">
                           {s.prerequisitesTitle}
                         </h3>
-                        <p className="text-muted-foreground whitespace-pre-line text-sm">
-                          {metaBlock}
-                        </p>
+                        <div className="space-y-1 text-sm text-muted-foreground">
+                          {metaSessionType ? (
+                            <p>
+                              <span className="font-medium text-foreground/80">
+                                {t.addSkill.sessionType}:
+                              </span>{" "}
+                              {metaSessionType}
+                            </p>
+                          ) : null}
+                          {metaDays ? (
+                            <p>
+                              <span className="font-medium text-foreground/80">
+                                {t.addSkill.availableDays}:
+                              </span>{" "}
+                              {metaDays}
+                            </p>
+                          ) : null}
+                          {metaTime ? (
+                            <p>
+                              <span className="font-medium text-foreground/80">
+                                {locale === "tr" ? "Saat aralığı" : "Time range"}:
+                              </span>{" "}
+                              {metaTime}
+                            </p>
+                          ) : null}
+                          {metaLocation ? (
+                            <p>
+                              <span className="font-medium text-foreground/80">
+                                {t.addSkill.location}:
+                              </span>{" "}
+                              {metaLocation}
+                            </p>
+                          ) : null}
+                        </div>
                       </div>
                     ) : s.prerequisitesBody ? (
                       <div>
@@ -367,17 +646,6 @@ export function SkillDetailPage({ onNavigate, skillId }: SkillDetailPageProps) {
                       </span>
                     </div>
                   </div>
-                </div>
-
-                <div className="mb-6">
-                  <p className="mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-3xl text-transparent">
-                    {formatTemplate(s.perSession, {
-                      n: String(skill.durationMinutes),
-                    })}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {s.perSessionLabel}
-                  </p>
                 </div>
 
                 <div className="mb-6 space-y-3">
@@ -441,56 +709,111 @@ export function SkillDetailPage({ onNavigate, skillId }: SkillDetailPageProps) {
               </div>
             ) : null}
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                {formatTemplate(s.bookSessionHint, {
-                  minutes: String(skill.durationMinutes),
-                  total: String(sessionCount * skill.durationMinutes),
-                })}
-              </p>
+              {hasAvailabilityConstraints ? (
+                <div className="flex flex-wrap gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs">
+                  {metaSessionType ? <Badge variant="secondary">{metaSessionType}</Badge> : null}
+                  {metaDays ? <Badge variant="secondary">{metaDays}</Badge> : null}
+                  {metaTime ? <Badge variant="secondary">{metaTime}</Badge> : null}
+                  {metaLocation ? <Badge variant="secondary">{metaLocation}</Badge> : null}
+                </div>
+              ) : null}
               <p className="text-sm text-muted-foreground">{s.bookScheduleHint}</p>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <Label htmlFor="book-date">{s.bookDateLabel}</Label>
-                  <Input
-                    id="book-date"
-                    type="date"
-                    className="mt-2"
-                    value={bookDate}
-                    min={new Date().toISOString().slice(0, 10)}
-                    onChange={(e) => setBookDate(e.target.value)}
-                  />
+                <div className="min-w-0">
+                  <Label htmlFor="book-date-trigger">{s.bookDateLabel}</Label>
+                  {hasAvailabilityConstraints ? (
+                    <Popover
+                      open={bookDatePopoverOpen}
+                      onOpenChange={handleBookDatePopoverOpenChange}
+                    >
+                      <PopoverTrigger asChild>
+                        <Button
+                          id="book-date-trigger"
+                          type="button"
+                          variant="outline"
+                          aria-expanded={bookDatePopoverOpen}
+                          className={cn(
+                            "mt-2 flex h-10 w-full min-w-0 items-center justify-between px-3 font-normal",
+                          )}
+                        >
+                          <span className="truncate text-left">
+                            {bookDateDisplayLabel}
+                          </span>
+                          <CalendarIcon className="ml-2 size-4 shrink-0 opacity-70" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        align="start"
+                        side="bottom"
+                        sideOffset={6}
+                        collisionPadding={16}
+                        className="w-80 min-w-[18rem] max-h-[min(26rem,calc(100dvh-6rem))] max-w-[calc(100vw-1.5rem)] overflow-y-auto overscroll-contain border-border p-2 shadow-lg"
+                      >
+                        <Calendar
+                          mode="single"
+                          locale={locale === "tr" ? trLocale : enUS}
+                          weekStartsOn={locale === "tr" ? 1 : 0}
+                          month={bookCalendarMonth}
+                          onMonthChange={setBookCalendarMonth}
+                          selected={ymdToLocalDate(bookDate)}
+                          onSelect={(d) => {
+                            if (d) {
+                              setBookDate(dateToYmd(d));
+                              setBookCalendarMonth(d);
+                              setBookDatePopoverOpen(false);
+                            }
+                          }}
+                          disabled={(date) => !bookableYmdSet.has(dateToYmd(date))}
+                          defaultMonth={ymdToLocalDate(bookDate)}
+                          startMonth={calendarMonthBounds.startMonth}
+                          endMonth={calendarMonthBounds.endMonth}
+                          className="p-0"
+                          classNames={{
+                            root: "border-0 bg-transparent shadow-none",
+                          }}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  ) : (
+                    <Input
+                      id="book-date"
+                      type="date"
+                      className="mt-2"
+                      value={bookDate}
+                      min={new Date().toISOString().slice(0, 10)}
+                      onChange={(e) => setBookDate(e.target.value)}
+                    />
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="book-time">{s.bookTimeLabel}</Label>
-                  <Input
-                    id="book-time"
-                    type="time"
-                    className="mt-2"
-                    value={bookTime}
-                    onChange={(e) => setBookTime(e.target.value)}
-                  />
+                  {hasAvailabilityConstraints ? (
+                    <Select value={bookTime} onValueChange={setBookTime}>
+                      <SelectTrigger id="book-time" className="mt-2">
+                        <SelectValue placeholder={s.bookTimeLabel} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {timeOptions.map((opt) => (
+                          <SelectItem key={opt} value={opt}>
+                            {opt}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      id="book-time"
+                      type="time"
+                      className="mt-2"
+                      value={bookTime}
+                      onChange={(e) => setBookTime(e.target.value)}
+                    />
+                  )}
                 </div>
               </div>
-              <div>
-                <Label htmlFor="book-sessions">{s.bookSessionCount}</Label>
-                <Select
-                  value={String(sessionCount)}
-                  onValueChange={(v) => setSessionCount(parseInt(v, 10))}
-                >
-                  <SelectTrigger id="book-sessions" className="mt-2">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: maxSessions }, (_, i) => i + 1).map(
-                      (n) => (
-                        <SelectItem key={n} value={String(n)}>
-                          {n}
-                        </SelectItem>
-                      ),
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
+              {hasAvailabilityConstraints && dateOptions.length === 0 ? (
+                <p className="text-sm text-destructive">{s.bookNoSlots}</p>
+              ) : null}
               <div>
                 <Label htmlFor="book-msg">{s.bookMessage}</Label>
                 <Textarea
@@ -516,7 +839,7 @@ export function SkillDetailPage({ onNavigate, skillId }: SkillDetailPageProps) {
                 type="button"
                 className="bg-gradient-to-r from-blue-500 to-purple-600 text-white"
                 onClick={() => void submitBookRequest()}
-                disabled={bookSubmitting}
+                disabled={bookSubmitting || (hasAvailabilityConstraints && dateOptions.length === 0)}
               >
                 {bookSubmitting ? t.common.loading : s.bookSubmit}
               </Button>

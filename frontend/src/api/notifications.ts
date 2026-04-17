@@ -7,6 +7,7 @@ export type NotificationDto = {
   createdAt: string;
   readAt: string | null;
   exchangeRequestId: string | null;
+  skillTitle: string | null;
 };
 
 export function fetchNotifications(token: string) {

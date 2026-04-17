@@ -32,6 +32,26 @@ public class Skill {
     @Column(length = 20)
     private String level;
 
+    /** Örn: "online,in-person" */
+    @Column(name = "session_types", length = 120)
+    private String sessionTypes;
+
+    /** İn-person için Türkiye ili */
+    @Column(name = "in_person_location", length = 120)
+    private String inPersonLocation;
+
+    /** Örn: "MONDAY,TUESDAY,WEDNESDAY" */
+    @Column(name = "available_days", length = 200)
+    private String availableDays;
+
+    /** HH:mm */
+    @Column(name = "available_from", length = 5)
+    private String availableFrom;
+
+    /** HH:mm */
+    @Column(name = "available_until", length = 5)
+    private String availableUntil;
+
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
@@ -72,6 +92,26 @@ public class Skill {
         return owner;
     }
 
+    public String getSessionTypes() {
+        return sessionTypes;
+    }
+
+    public String getInPersonLocation() {
+        return inPersonLocation;
+    }
+
+    public String getAvailableDays() {
+        return availableDays;
+    }
+
+    public String getAvailableFrom() {
+        return availableFrom;
+    }
+
+    public String getAvailableUntil() {
+        return availableUntil;
+    }
+
     public Instant getCreatedAt() {
         return createdAt;
     }
@@ -98,5 +138,25 @@ public class Skill {
 
     public void setOwner(User owner) {
         this.owner = owner;
+    }
+
+    public void setSessionTypes(String sessionTypes) {
+        this.sessionTypes = sessionTypes;
+    }
+
+    public void setInPersonLocation(String inPersonLocation) {
+        this.inPersonLocation = inPersonLocation;
+    }
+
+    public void setAvailableDays(String availableDays) {
+        this.availableDays = availableDays;
+    }
+
+    public void setAvailableFrom(String availableFrom) {
+        this.availableFrom = availableFrom;
+    }
+
+    public void setAvailableUntil(String availableUntil) {
+        this.availableUntil = availableUntil;
     }
 }

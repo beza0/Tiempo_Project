@@ -17,6 +17,7 @@ public class ExchangeRequestResponse {
     private String message;
     private int bookedMinutes;
     private Instant scheduledStartAt;
+    private boolean pendingFromOwner;
     private ExchangeRequestStatus status;
     private Instant createdAt;
 
@@ -31,6 +32,7 @@ public class ExchangeRequestResponse {
             String message,
             int bookedMinutes,
             Instant scheduledStartAt,
+            boolean pendingFromOwner,
             ExchangeRequestStatus status,
             Instant createdAt
     ) {
@@ -44,6 +46,7 @@ public class ExchangeRequestResponse {
         this.message = message;
         this.bookedMinutes = bookedMinutes;
         this.scheduledStartAt = scheduledStartAt;
+        this.pendingFromOwner = pendingFromOwner;
         this.status = status;
         this.createdAt = createdAt;
     }
@@ -90,6 +93,10 @@ public class ExchangeRequestResponse {
 
     public ExchangeRequestStatus getStatus() {
         return status;
+    }
+
+    public boolean isPendingFromOwner() {
+        return pendingFromOwner;
     }
 
     public Instant getCreatedAt() {

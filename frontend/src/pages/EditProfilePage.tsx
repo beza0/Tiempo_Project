@@ -9,11 +9,17 @@ import { Camera, Trash2 } from "lucide-react";
 import type { PageType } from "../App";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useAuth } from "../contexts/AuthContext";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fetchMyProfile, updateMyProfile } from "../api/user";
 import { ApiError } from "../api/client";
 import { initialsFromFullName } from "../lib/initials";
 import { fileToResizedJpegDataUrl } from "../lib/resizeImageToDataUrl";
+import { SearchableCombobox } from "../components/common/SearchableCombobox";
+import {
+  languageOptions,
+  locationOptions,
+  mergeLegacyOption,
+} from "../data/profilePicklists";
 
 const ONBOARDING_KEY = "timelink_profile_onboarding";
 
@@ -25,7 +31,7 @@ interface EditProfilePageProps {
 const MAX_AVATAR_FILE_BYTES = 2 * 1024 * 1024;
 
 export function EditProfilePage({ onNavigate }: EditProfilePageProps) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const e = t.editProfile;
   const { token, patchUser, user, logout } = useAuth();
 
@@ -86,6 +92,16 @@ export function EditProfilePage({ onNavigate }: EditProfilePageProps) {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const locationOptionsMerged = useMemo(
+    () => mergeLegacyOption(locationOptions(), location),
+    [location],
+  );
+
+  const languageOptionsMerged = useMemo(
+    () => mergeLegacyOption(languageOptions(locale), languages),
+    [locale, languages],
+  );
 
   const finishOnboarding = () => {
     sessionStorage.removeItem(ONBOARDING_KEY);
@@ -277,11 +293,14 @@ export function EditProfilePage({ onNavigate }: EditProfilePageProps) {
 
                 <div>
                   <Label htmlFor="location">{e.location}</Label>
-                  <Input
+                  <SearchableCombobox
                     id="location"
                     value={location}
-                    onChange={(ev) => setLocation(ev.target.value)}
+                    onChange={setLocation}
+                    options={locationOptionsMerged}
                     placeholder={e.locationPh}
+                    searchPlaceholder={e.picklistSearch}
+                    emptyText={e.picklistEmpty}
                     className="mt-2"
                   />
                 </div>
@@ -300,11 +319,14 @@ export function EditProfilePage({ onNavigate }: EditProfilePageProps) {
 
                 <div>
                   <Label htmlFor="languages">{e.languages}</Label>
-                  <Input
+                  <SearchableCombobox
                     id="languages"
                     value={languages}
-                    onChange={(ev) => setLanguages(ev.target.value)}
+                    onChange={setLanguages}
+                    options={languageOptionsMerged}
                     placeholder={e.languagesPh}
+                    searchPlaceholder={e.picklistSearch}
+                    emptyText={e.picklistEmpty}
                     className="mt-2"
                   />
                 </div>

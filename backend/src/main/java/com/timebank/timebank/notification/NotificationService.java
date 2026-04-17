@@ -39,6 +39,19 @@ public class NotificationService {
     }
 
     @Transactional
+    public void notifyCounterOffer(ExchangeRequest ex) {
+        User requester = ex.getRequester();
+        String when = formatWhen(ex.getScheduledStartAt());
+        String title = "Yeni tarih önerisi";
+        String body = String.format(
+                "\"%s\" için %s başlangıçlı yeni bir zaman önerildi.",
+                ex.getSkill().getTitle(),
+                when
+        );
+        userNotificationRepository.save(new UserNotification(requester, title, body, ex));
+    }
+
+    @Transactional
     public void notifyNewBookingRequest(ExchangeRequest ex) {
         User owner = ex.getSkill().getOwner();
         User requester = ex.getRequester();
@@ -102,13 +115,17 @@ public class NotificationService {
 
     private NotificationResponse toResponse(UserNotification n) {
         UUID exId = n.getExchangeRequest() != null ? n.getExchangeRequest().getId() : null;
+        String skillTitle = n.getExchangeRequest() != null && n.getExchangeRequest().getSkill() != null
+                ? n.getExchangeRequest().getSkill().getTitle()
+                : null;
         return new NotificationResponse(
                 n.getId(),
                 n.getTitle(),
                 n.getBody(),
                 n.getCreatedAt(),
                 n.getReadAt(),
-                exId
+                exId,
+                skillTitle
         );
     }
 }

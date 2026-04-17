@@ -22,29 +22,26 @@ interface SkillCardProps {
     reviews: number;
   };
   category: string;
-  duration: string;
-  location: string;
-  sessionHours: number;
+  availability: string;
+  location: string | null;
   image: string;
+  isOnline: boolean;
+  isInPerson: boolean;
   tags: string[];
   /** Kendi ilanın; Book gösterilmez */
   showBookCta?: boolean;
   onBookNow?: () => void;
 }
 
-function formatSessionHoursLabel(hours: number): string {
-  if (Number.isInteger(hours)) return `${hours}h`;
-  return `${hours.toFixed(1)}h`;
-}
-
 export function SkillCard({
   title,
   instructor,
   category,
-  duration,
+  availability,
   location,
-  sessionHours,
   image,
+  isOnline,
+  isInPerson,
   tags,
   showBookCta = true,
   onBookNow,
@@ -53,8 +50,13 @@ export function SkillCard({
   const b = t.browse;
   const sc = t.skillCard;
   const categoryLabel = b.categoryLabels[category] ?? category;
-  const durationLabel = b.durationLabels[duration] ?? duration;
-  const locationLabel = b.locationLineLabels[location] ?? location;
+  const sessionTypeLabel =
+    isOnline && isInPerson
+      ? b.locationLineLabels["Online & In-Person"]
+      : isInPerson
+        ? b.locationLineLabels["In-Person"]
+        : b.locationLineLabels.Online;
+  const locationLabel = location;
   const hasAvatar = Boolean(instructor.image?.trim());
 
   return (
@@ -103,13 +105,21 @@ export function SkillCard({
 
         <div className="mb-4 space-y-2">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Clock className="h-4 w-4 shrink-0" />
-            <span>{durationLabel}</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4 shrink-0" />
-            <span>{locationLabel}</span>
+            <span>{sessionTypeLabel}</span>
           </div>
+          {availability ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Clock className="h-4 w-4 shrink-0" />
+              <span>{availability}</span>
+            </div>
+          ) : null}
+          {isInPerson && locationLabel ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <MapPin className="h-4 w-4 shrink-0" />
+              <span>{locationLabel}</span>
+            </div>
+          ) : null}
         </div>
 
         <div className="mb-4 flex flex-wrap gap-2">
@@ -120,15 +130,7 @@ export function SkillCard({
           ))}
         </div>
 
-        <div
-          className={`flex items-center border-t border-border pt-4 ${showBookCta ? "justify-between" : ""}`}
-        >
-          <div>
-            <p className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-2xl text-transparent">
-              {formatSessionHoursLabel(sessionHours)}
-            </p>
-            <p className="text-xs text-muted-foreground">{sc.hoursPerSession}</p>
-          </div>
+        <div className={`flex items-center border-t border-border pt-4 ${showBookCta ? "justify-end" : ""}`}>
           {showBookCta ? (
             <Button
               type="button"

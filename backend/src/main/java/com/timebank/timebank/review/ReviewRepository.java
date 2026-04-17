@@ -12,14 +12,22 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
     boolean existsByExchangeRequestId(UUID exchangeRequestId);
 
-    @EntityGraph(attributePaths = {"reviewer", "reviewedUser", "exchangeRequest"})
+    @EntityGraph(attributePaths = {"reviewer", "reviewedUser", "exchangeRequest", "exchangeRequest.skill"})
     List<Review> findByReviewedUserEmailOrderByCreatedAtDesc(String email);
 
-    @EntityGraph(attributePaths = {"reviewer", "reviewedUser", "exchangeRequest"})
+    @EntityGraph(attributePaths = {"reviewer", "reviewedUser", "exchangeRequest", "exchangeRequest.skill"})
     Optional<Review> findById(UUID id);
 
     long countByReviewedUserEmail(String email);
 
     @Query("select avg(r.rating) from Review r where r.reviewedUser.email = :email")
     Double findAverageRatingByReviewedUserEmail(String email);
+
+    @EntityGraph(attributePaths = {"reviewer", "reviewedUser", "exchangeRequest", "exchangeRequest.skill"})
+    List<Review> findByReviewer_EmailOrderByCreatedAtDesc(String reviewerEmail);
+
+    long countByReviewer_Email(String reviewerEmail);
+
+    @Query("select avg(r.rating) from Review r where r.reviewer.email = :email")
+    Double findAverageRatingByReviewerEmail(String email);
 }

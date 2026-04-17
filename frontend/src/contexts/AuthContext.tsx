@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -93,6 +94,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(AUTH_STORAGE_KEY);
     localStorage.removeItem(LEGACY_USER_KEY);
   }, []);
+
+  useEffect(() => {
+    const onAuthExpired = () => logout();
+    window.addEventListener("timelink:auth-expired", onAuthExpired);
+    return () =>
+      window.removeEventListener("timelink:auth-expired", onAuthExpired);
+  }, [logout]);
 
   const patchUser = useCallback((patch: Partial<AuthUser>) => {
     setUser((prev) => {

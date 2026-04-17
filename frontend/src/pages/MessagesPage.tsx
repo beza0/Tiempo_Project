@@ -3,19 +3,42 @@ import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
-import { Search, Send, Check, X, MessageCircle } from "lucide-react";
+import { Label } from "../components/ui/label";
+import { Textarea } from "../components/ui/textarea";
+import { Calendar } from "../components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
+import { cn } from "../components/ui/utils";
+import {
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "../components/ui/modal";
+import {
+  Search,
+  Send,
+  Check,
+  X,
+  MessageCircle,
+  CalendarPlus,
+  CalendarIcon,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { PageType } from "../App";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useAuth } from "../contexts/AuthContext";
 import { formatTemplate } from "../language";
+import { enUS, tr as trLocale } from "react-day-picker/locale";
 import {
   acceptExchangeRequest,
+  createCounterOffer,
   fetchExchangeMessages,
   fetchReceivedExchangeRequests,
   fetchSentExchangeRequests,
   postExchangeMessage,
   rejectExchangeRequest,
+  createExchangeRequest,
   type ExchangeMessageDto,
   type ExchangeRequestDto,
 } from "../api/exchange";
@@ -27,6 +50,42 @@ interface MessagesPageProps {
 }
 
 const OPEN_EXCHANGE_KEY = "timelink_open_exchange";
+const BOOKING_HORIZON_DAYS = 365;
+
+function tomorrowDateStr(): string {
+  const t = new Date();
+  t.setDate(t.getDate() + 1);
+  return t.toISOString().slice(0, 10);
+}
+
+function localDateTimeToUtcIso(dateStr: string, timeStr: string): string {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const [hh, mm] = timeStr.split(":").map(Number);
+  return new Date(y, m - 1, d, hh || 0, mm || 0, 0, 0).toISOString();
+}
+
+function dateToYmd(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function ymdToLocalDate(ymd: string): Date {
+  const [y, m, d] = ymd.split("-").map(Number);
+  return new Date(y, m - 1, d, 12, 0, 0, 0);
+}
+
+function formatScheduledAt(
+  iso: string | null | undefined,
+  locale: string,
+): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleString(locale === "tr" ? "tr-TR" : "en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
 
 type UiStatus =
   | "pending-incoming"
@@ -54,13 +113,35 @@ function isPendingExchangeStatus(status: string | undefined): boolean {
   return normalizeExchangeStatus(status) === "PENDING";
 }
 
-function isAcceptedExchangeStatus(status: string | undefined): boolean {
-  return normalizeExchangeStatus(status) === "ACCEPTED";
+function isMessageEnabledStatus(status: string | undefined): boolean {
+  const st = normalizeExchangeStatus(status);
+  return st === "ACCEPTED" || st === "REJECTED" || st === "COMPLETED";
 }
 
 function sameUserId(a: string | undefined, b: string | undefined): boolean {
   if (a == null || b == null) return false;
   return a.toLowerCase() === b.toLowerCase();
+}
+
+function isPendingOutgoingForMe(
+  ex: ExchangeRequestDto,
+  myId: string | undefined,
+): boolean {
+  const pendingFromOwner = Boolean(ex.pendingFromOwner);
+  if (pendingFromOwner) {
+    return sameUserId(ex.ownerId, myId);
+  }
+  return sameUserId(ex.requesterId, myId);
+}
+
+function isInitialMessageFromMe(
+  ex: ExchangeRequestDto,
+  myId: string | undefined,
+): boolean {
+  if (normalizeExchangeStatus(ex.status) === "PENDING" && ex.pendingFromOwner) {
+    return sameUserId(ex.ownerId, myId);
+  }
+  return sameUserId(ex.requesterId, myId);
 }
 
 function toUiStatus(
@@ -73,9 +154,7 @@ function toUiStatus(
   if (st === "COMPLETED") return "completed";
   if (st === "PENDING") {
     if (!myId) return "pending-outgoing";
-    return sameUserId(ex.requesterId, myId)
-      ? "pending-outgoing"
-      : "pending-incoming";
+    return isPendingOutgoingForMe(ex, myId) ? "pending-outgoing" : "pending-incoming";
   }
   return "completed";
 }
@@ -128,6 +207,35 @@ export function MessagesPage({ onNavigate }: MessagesPageProps) {
   const [threadLines, setThreadLines] = useState<ThreadLine[]>([]);
   const [loadingThread, setLoadingThread] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
+  const [bookOpen, setBookOpen] = useState(false);
+  const [bookDate, setBookDate] = useState(() => tomorrowDateStr());
+  const [bookTime, setBookTime] = useState("10:00");
+  const [bookMessage, setBookMessage] = useState("");
+  const [bookSubmitting, setBookSubmitting] = useState(false);
+  const [bookDatePopoverOpen, setBookDatePopoverOpen] = useState(false);
+  const [bookCalendarMonth, setBookCalendarMonth] = useState<Date>(() =>
+    ymdToLocalDate(tomorrowDateStr()),
+  );
+
+  const bookDateMin = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+  const bookDateMax = useMemo(() => {
+    const d = new Date(bookDateMin);
+    d.setDate(d.getDate() + BOOKING_HORIZON_DAYS);
+    return d;
+  }, [bookDateMin]);
+  const bookDateDisplayLabel = useMemo(
+    () =>
+      ymdToLocalDate(bookDate).toLocaleDateString(
+        locale === "tr" ? "tr-TR" : "en-US",
+        { weekday: "short", day: "2-digit", month: "2-digit", year: "numeric" },
+      ),
+    [bookDate, locale],
+  );
 
   const loadList = useCallback(async () => {
     if (!token) {
@@ -168,6 +276,10 @@ export function MessagesPage({ onNavigate }: MessagesPageProps) {
     () => rows.find((r) => r.id === selectedId) ?? null,
     [rows, selectedId],
   );
+  const canCreateNewOffer =
+    selected != null &&
+    selected.uiStatus === "rejected" &&
+    sameUserId(selected.ex.requesterId, user?.id);
 
   const loadThread = useCallback(
     async (row: ConversationRow | null) => {
@@ -181,7 +293,7 @@ export function MessagesPage({ onNavigate }: MessagesPageProps) {
         const ex = row.ex;
         const initial: ThreadLine = {
           id: `initial-${ex.id}`,
-          sender: sameUserId(ex.requesterId, user?.id) ? "me" : "other",
+          sender: isInitialMessageFromMe(ex, user?.id) ? "me" : "other",
           text: ex.message,
           timeLabel: new Date(ex.createdAt).toLocaleString(
             locale === "tr" ? "tr-TR" : "en-US",
@@ -260,9 +372,30 @@ export function MessagesPage({ onNavigate }: MessagesPageProps) {
     }
   };
 
+  const handleRejectAndOfferOtherTime = async (id: string) => {
+    if (!token || !selected) return;
+    try {
+      await rejectExchangeRequest(token, id);
+      await loadList();
+      setSelectedId(id);
+      setBookDate(tomorrowDateStr());
+      setBookTime("10:00");
+      setBookCalendarMonth(ymdToLocalDate(tomorrowDateStr()));
+      setBookMessage(
+        formatTemplate(m.offerOtherTimeDraft, {
+          skill: selected.ex.skillTitle,
+        }),
+      );
+      setBookOpen(true);
+      setSendError(null);
+    } catch (e) {
+      setSendError(apiErrorDisplayMessage(e, m.actionError));
+    }
+  };
+
   const handleSend = async () => {
     if (!token || !selected || !messageText.trim()) return;
-    if (!isAcceptedExchangeStatus(selected.ex.status)) return;
+    if (!isMessageEnabledStatus(selected.ex.status)) return;
     setSendError(null);
     try {
       await postExchangeMessage(token, selected.id, messageText.trim());
@@ -276,6 +409,61 @@ export function MessagesPage({ onNavigate }: MessagesPageProps) {
       await loadList();
     } catch {
       /* Konuşma listesi yenilenemese bile mesaj gönderildi; sessizce geç */
+    }
+  };
+
+  const openBookModal = () => {
+    if (!selected) return;
+    setBookDate(tomorrowDateStr());
+    setBookTime("10:00");
+    setBookCalendarMonth(ymdToLocalDate(tomorrowDateStr()));
+    setBookMessage(
+      formatTemplate(m.bookDefaultMessage, { skill: selected.ex.skillTitle }),
+    );
+    setBookOpen(true);
+    setSendError(null);
+  };
+
+  const handleCreateBooking = async () => {
+    if (!token || !selected) return;
+    setBookSubmitting(true);
+    setSendError(null);
+    try {
+      const scheduledStartAt = localDateTimeToUtcIso(bookDate, bookTime);
+      const minMs = Date.now() + 60 * 60 * 1000;
+      if (new Date(scheduledStartAt).getTime() < minMs) {
+        setSendError(m.bookTooSoon);
+        return;
+      }
+      const payload = {
+        message: bookMessage.trim() || selected.ex.message || m.bookFallbackMessage,
+        bookedMinutes: selected.ex.bookedMinutes,
+        scheduledStartAt,
+      };
+      const shouldCreateCounterOffer =
+        selected.uiStatus === "rejected" &&
+        sameUserId(selected.ex.ownerId, user?.id);
+      const created = shouldCreateCounterOffer
+        ? await createCounterOffer(token, selected.id, payload)
+        : await createExchangeRequest(token, selected.ex.skillId, payload);
+      try {
+        sessionStorage.setItem(OPEN_EXCHANGE_KEY, created.id);
+      } catch {
+        /* ignore */
+      }
+      setBookOpen(false);
+      await loadList();
+      if (shouldCreateCounterOffer) {
+        // Counter-offer gonderildikten sonra ayni kartta kalmasin;
+        // kullanici listeye donup guncel durumu gorur.
+        setSelectedId(null);
+      } else {
+        setSelectedId(created.id);
+      }
+    } catch (e) {
+      setSendError(apiErrorDisplayMessage(e, m.actionError));
+    } finally {
+      setBookSubmitting(false);
     }
   };
 
@@ -413,6 +601,18 @@ export function MessagesPage({ onNavigate }: MessagesPageProps) {
                           name: selected.otherName,
                         })}
                       </p>
+                      <div className="mb-3 space-y-1 text-sm text-foreground/80">
+                        <p>
+                          {m.requestSkill}: {selected.ex.skillTitle}
+                        </p>
+                        <p>
+                          {m.requestDateTime}:{" "}
+                          {formatScheduledAt(selected.ex.scheduledStartAt, locale)}
+                        </p>
+                        <p>
+                          {m.requestMessage}: {selected.ex.message}
+                        </p>
+                      </div>
                       <div className="flex gap-2">
                         <Button
                           size="sm"
@@ -430,6 +630,16 @@ export function MessagesPage({ onNavigate }: MessagesPageProps) {
                           <X className="mr-1 h-4 w-4" />
                           {m.decline}
                         </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            void handleRejectAndOfferOtherTime(selected.id)
+                          }
+                        >
+                          <CalendarPlus className="mr-1 h-4 w-4" />
+                          {m.declineAndOfferOtherTime}
+                        </Button>
                       </div>
                     </div>
                   )}
@@ -445,8 +655,19 @@ export function MessagesPage({ onNavigate }: MessagesPageProps) {
                   )}
 
                   {selected.uiStatus === "rejected" && (
-                    <div className="border-b border-border bg-muted/40 px-4 py-2 text-sm text-muted-foreground">
-                      {m.rejectedHint}
+                    <div className="border-b border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+                      <p>{m.rejectedHint}</p>
+                      {canCreateNewOffer ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="mt-2"
+                          onClick={openBookModal}
+                        >
+                          <CalendarPlus className="mr-1 h-4 w-4" />
+                          {m.createBooking}
+                        </Button>
+                      ) : null}
                     </div>
                   )}
 
@@ -490,7 +711,9 @@ export function MessagesPage({ onNavigate }: MessagesPageProps) {
                     )}
                   </div>
 
-                  {isAcceptedExchangeStatus(selected.ex.status) ? (
+                  {isMessageEnabledStatus(selected.ex.status) ||
+                  (isPendingExchangeStatus(selected.ex.status) &&
+                    Boolean(selected.ex.pendingFromOwner)) ? (
                     <div className="border-t border-border p-4">
                       <div className="flex gap-2">
                         <Input
@@ -521,6 +744,110 @@ export function MessagesPage({ onNavigate }: MessagesPageProps) {
           </Card>
         </div>
       </div>
+      <Modal open={bookOpen} onOpenChange={setBookOpen}>
+        <ModalContent>
+          <ModalHeader>
+            <ModalTitle>{m.bookModalTitle}</ModalTitle>
+          </ModalHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              {formatTemplate(m.bookHint, {
+                minutes: String(selected?.ex.bookedMinutes ?? 0),
+              })}
+            </p>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="msg-book-date-trigger">{m.bookDateLabel}</Label>
+                <Popover
+                  open={bookDatePopoverOpen}
+                  onOpenChange={(open) => {
+                    setBookDatePopoverOpen(open);
+                    if (open) setBookCalendarMonth(ymdToLocalDate(bookDate));
+                  }}
+                >
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="msg-book-date-trigger"
+                      type="button"
+                      variant="outline"
+                      className={cn(
+                        "mt-2 flex h-10 w-full items-center justify-between px-3 font-normal",
+                      )}
+                    >
+                      <span className="truncate text-left">{bookDateDisplayLabel}</span>
+                      <CalendarIcon className="ml-2 size-4 shrink-0 opacity-70" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    side="bottom"
+                    sideOffset={6}
+                    collisionPadding={16}
+                    className="w-80 min-w-[18rem] max-h-[min(26rem,calc(100dvh-6rem))] max-w-[calc(100vw-1.5rem)] overflow-y-auto overscroll-contain border-border p-2 shadow-lg"
+                  >
+                    <Calendar
+                      mode="single"
+                      locale={locale === "tr" ? trLocale : enUS}
+                      weekStartsOn={locale === "tr" ? 1 : 0}
+                      month={bookCalendarMonth}
+                      onMonthChange={setBookCalendarMonth}
+                      selected={ymdToLocalDate(bookDate)}
+                      onSelect={(d) => {
+                        if (d) {
+                          setBookDate(dateToYmd(d));
+                          setBookCalendarMonth(d);
+                          setBookDatePopoverOpen(false);
+                        }
+                      }}
+                      disabled={[
+                        { before: bookDateMin },
+                        { after: bookDateMax },
+                      ]}
+                      defaultMonth={ymdToLocalDate(bookDate)}
+                      className="p-0"
+                      classNames={{
+                        root: "border-0 bg-transparent shadow-none",
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div>
+                <Label htmlFor="msg-book-time">{m.bookTimeLabel}</Label>
+                <Input
+                  id="msg-book-time"
+                  type="time"
+                  className="mt-2"
+                  value={bookTime}
+                  onChange={(e) => setBookTime(e.target.value)}
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="msg-book-note">{m.bookMessageLabel}</Label>
+              <Textarea
+                id="msg-book-note"
+                className="mt-2 min-h-24"
+                value={bookMessage}
+                onChange={(e) => setBookMessage(e.target.value)}
+                placeholder={m.bookMessagePlaceholder}
+              />
+            </div>
+          </div>
+          <ModalFooter>
+            <Button variant="outline" onClick={() => setBookOpen(false)}>
+              {t.common.cancel}
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white"
+              onClick={() => void handleCreateBooking()}
+              disabled={bookSubmitting}
+            >
+              {bookSubmitting ? t.common.loading : m.bookSubmit}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </PageLayout>
   );
 }

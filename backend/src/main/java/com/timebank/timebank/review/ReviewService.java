@@ -80,7 +80,28 @@ public class ReviewService {
         );
     }
 
+    /** Öğrencinin eğitmenlere bıraktığı yorumlar (verdiği puanlar) */
+    public List<ReviewResponse> getReviewsWrittenByUser(String reviewerEmail) {
+        return reviewRepository.findByReviewer_EmailOrderByCreatedAtDesc(reviewerEmail)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    /** Verdiğin yorumların ortalama yıldızı ve adedi */
+    public UserRatingSummaryResponse getRatingSummaryForReviewsGiven(String reviewerEmail) {
+        long total = reviewRepository.countByReviewer_Email(reviewerEmail);
+        Double avg = reviewRepository.findAverageRatingByReviewerEmail(reviewerEmail);
+        return new UserRatingSummaryResponse(
+                total,
+                avg != null ? avg : 0.0
+        );
+    }
+
     private ReviewResponse mapToResponse(Review review) {
+        String skillTitle = review.getExchangeRequest().getSkill() != null
+                ? review.getExchangeRequest().getSkill().getTitle()
+                : null;
         return new ReviewResponse(
                 review.getId(),
                 review.getExchangeRequest().getId(),
@@ -88,6 +109,7 @@ public class ReviewService {
                 review.getReviewer().getFullName(),
                 review.getReviewedUser().getId(),
                 review.getReviewedUser().getFullName(),
+                skillTitle,
                 review.getRating(),
                 review.getComment(),
                 review.getCreatedAt()

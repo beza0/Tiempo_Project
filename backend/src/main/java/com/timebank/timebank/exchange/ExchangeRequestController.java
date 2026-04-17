@@ -88,6 +88,17 @@ public class ExchangeRequestController {
         );
     }
 
+    @PostMapping("/{requestId}/counter-offer")
+    public ResponseEntity<ExchangeRequestResponse> counterOffer(
+            @PathVariable UUID requestId,
+            @Valid @RequestBody CreateExchangeRequestRequest req,
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(
+                exchangeRequestService.counterOfferRequest(requestId, req, authentication.getName())
+        );
+    }
+
     @PutMapping("/{requestId}/complete")
     public ResponseEntity<ExchangeRequestResponse> completeRequest(
             @PathVariable UUID requestId,

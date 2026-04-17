@@ -12,6 +12,7 @@ export type ExchangeRequestDto = {
   bookedMinutes: number;
   /** ISO-8601 instant */
   scheduledStartAt?: string | null;
+  pendingFromOwner?: boolean;
   status: string;
   createdAt: string;
 };
@@ -90,5 +91,24 @@ export function rejectExchangeRequest(token: string, requestId: string) {
   return apiFetch<ExchangeRequestDto>(
     `/api/exchange-requests/${requestId}/reject`,
     { method: "PUT", token },
+  );
+}
+
+export function createCounterOffer(
+  token: string,
+  requestId: string,
+  body: {
+    message: string;
+    bookedMinutes: number;
+    scheduledStartAt: string;
+  },
+) {
+  return apiFetch<ExchangeRequestDto>(
+    `/api/exchange-requests/${requestId}/counter-offer`,
+    {
+      method: "POST",
+      token,
+      body: JSON.stringify(body),
+    },
   );
 }

@@ -42,6 +42,10 @@ public class ExchangeRequest {
     @Column(name = "reminder_sent", nullable = false)
     private boolean reminderSent;
 
+    /** Bekleyen isteğin son teklifini eğitmen tarafı mı başlattı? */
+    @Column(name = "pending_from_owner", nullable = false)
+    private boolean pendingFromOwner;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -121,6 +125,14 @@ public class ExchangeRequest {
 
     public void setReminderSent(boolean reminderSent) {
         this.reminderSent = reminderSent;
+    }
+
+    public boolean isPendingFromOwner() {
+        return pendingFromOwner;
+    }
+
+    public void setPendingFromOwner(boolean pendingFromOwner) {
+        this.pendingFromOwner = pendingFromOwner;
     }
 
     public void setCreatedAt(Instant createdAt) {
