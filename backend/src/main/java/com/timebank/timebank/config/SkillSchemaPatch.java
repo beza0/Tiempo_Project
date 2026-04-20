@@ -30,6 +30,7 @@ public class SkillSchemaPatch implements ApplicationRunner {
         patch("ALTER TABLE skills ADD COLUMN IF NOT EXISTS available_days VARCHAR(200)", "available_days");
         patch("ALTER TABLE skills ADD COLUMN IF NOT EXISTS available_from VARCHAR(5)", "available_from");
         patch("ALTER TABLE skills ADD COLUMN IF NOT EXISTS available_until VARCHAR(5)", "available_until");
+        patch("ALTER TABLE skills ADD COLUMN IF NOT EXISTS cover_image_url TEXT", "cover_image_url");
     }
 
     private void patch(String sql, String label) {

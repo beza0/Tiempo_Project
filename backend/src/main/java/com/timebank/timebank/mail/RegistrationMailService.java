@@ -1,0 +1,165 @@
+package com.timebank.timebank.mail;
+
+import com.timebank.timebank.user.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.core.env.Environment;
+import jakarta.annotation.PostConstruct;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+
+import java.util.Locale;
+
+/**
+ * Kayıt e-postaları. {@code spring.mail.host} yoksa gönderim yok; kayıt akışında doğrulama da atlanır.
+ */
+@Service
+public class RegistrationMailService {
+
+    private static final Logger log = LoggerFactory.getLogger(RegistrationMailService.class);
+
+    private final ObjectProvider<JavaMailSender> mailSenderProvider;
+    private final Environment environment;
+
+    public RegistrationMailService(
+            ObjectProvider<JavaMailSender> mailSenderProvider,
+            Environment environment
+    ) {
+        this.mailSenderProvider = mailSenderProvider;
+        this.environment = environment;
+    }
+
+    /** SMTP ile gerçek posta gönderilebiliyor mu (doğrulama zorunlu mu)? */
+    public boolean isMailDeliveryEnabled() {
+        Boolean explicit = environment.getProperty("app.mail.enabled", Boolean.class);
+        if (explicit != null) {
+            return explicit;
+        }
+        String host = environment.getProperty("spring.mail.host");
+        return host != null && !host.isBlank();
+    }
+
+    /**
+     * Yerel yakalama (Mailpit vb.): gerçek gelen kutusu değil; kod Mailpit UI veya API loglarında görünür.
+     */
+    public boolean isLocalCaptureSmtp() {
+        if (!isMailDeliveryEnabled()) {
+            return false;
+        }
+        String host = environment.getProperty("spring.mail.host");
+        if (host == null || host.isBlank()) {
+            return false;
+        }
+        String h = host.trim().toLowerCase(Locale.ROOT);
+        return "localhost".equals(h)
+                || "127.0.0.1".equals(h)
+                || "::1".equals(h)
+                || "mailpit".equals(h);
+    }
+
+    @PostConstruct
+    void logEffectiveMailBackend() {
+        String host = environment.getProperty("spring.mail.host");
+        log.info(
+                "SMTP: host={}, deliveryEnabled={}, localCapture(Mailpit)= {}",
+                host == null || host.isBlank() ? "(none)" : host.trim(),
+                isMailDeliveryEnabled(),
+                isLocalCaptureSmtp());
+    }
+
+    /**
+     * E-postaya 6 haneli doğrulama kodu (kullanıcıda saklı; aynı alan/VARCHAR).
+     */
+    public void sendVerificationEmail(User user) {
+        String code = user.getEmailVerificationToken();
+        if (code == null || code.isBlank()) {
+            log.warn("Doğrulama kodu boş, e-posta atlanıyor: {}", user.getEmail());
+            return;
+        }
+        sendVerificationCode(user.getFullName(), user.getEmail(), code);
+    }
+
+    /** Bekleyen kayıt veya doğrulama yeniden gönderimi için (User satırı olmadan). */
+    public void sendVerificationCode(String fullName, String email, String code) {
+        if (!isMailDeliveryEnabled()) {
+            return;
+        }
+        JavaMailSender mailSender = mailSenderProvider.getIfAvailable();
+        if (mailSender == null) {
+            log.debug("JavaMailSender yok, doğrulama e-postası atlanıyor");
+            return;
+        }
+        if (code == null || code.isBlank()) {
+            log.warn("Doğrulama kodu boş, e-posta atlanıyor: {}", email);
+            return;
+        }
+        String from = fromAddress();
+        String publicBase = environment.getProperty("app.public-base-url", "http://localhost:3000").trim().replaceAll("/$", "");
+        try {
+            SimpleMailMessage msg = new SimpleMailMessage();
+            msg.setFrom(from);
+            msg.setTo(email);
+            msg.setSubject("TimeLink — doğrulama kodunuz");
+            msg.setText(
+                    "Merhaba " + fullName + ",\n\n"
+                            + "TimeLink hesabınızı tamamlamak için doğrulama kodunuz:\n\n"
+                            + "    " + code + "\n\n"
+                            + "Bu kodu uygulamada girerek hesabınızı açabilirsiniz.\n"
+                            + "Uygulama adresi: " + publicBase + "\n\n"
+                            + "Kod 48 saat geçerlidir. Siz kayıt olmadıysanız bu iletiyi yok sayın.\n"
+            );
+            mailSender.send(msg);
+            log.info("Doğrulama e-postası gönderildi: {}", email);
+        } catch (Exception e) {
+            log.error("Doğrulama e-postası gönderilemedi ({})", email, e);
+            throw new IllegalStateException(
+                    "Doğrulama e-postası gönderilemedi. SMTP ayarlarını kontrol edin veya tekrar deneyin.",
+                    e
+            );
+        }
+    }
+
+    /** SMTP kapalıyken basit hoş geldin (geliştirme). */
+    public void sendWelcomeAfterRegister(User user) {
+        if (!isMailDeliveryEnabled()) {
+            return;
+        }
+        JavaMailSender mailSender = mailSenderProvider.getIfAvailable();
+        if (mailSender == null) {
+            return;
+        }
+        String from = fromAddress();
+        String to = user.getEmail();
+        String publicBase = environment.getProperty("app.public-base-url", "http://localhost:3000");
+        try {
+            SimpleMailMessage msg = new SimpleMailMessage();
+            msg.setFrom(from);
+            msg.setTo(to);
+            msg.setSubject("TimeLink — kaydınız tamamlandı");
+            msg.setText(
+                    "Merhaba " + user.getFullName() + ",\n\n"
+                            + "TimeLink'e hoş geldiniz. Hesabınız oluşturuldu.\n\n"
+                            + "Uygulama: " + publicBase + "\n\n"
+                            + "Bu e-postayı siz talep etmediyseniz yok sayabilirsiniz.\n"
+            );
+            mailSender.send(msg);
+            log.info("Kayıt hoş geldin e-postası gönderildi: {}", to);
+        } catch (Exception e) {
+            log.warn("Hoş geldin e-postası gönderilemedi ({}): {}", to, e.getMessage());
+        }
+    }
+
+    private String fromAddress() {
+        String from = environment.getProperty("app.mail.from");
+        if (from != null && !from.isBlank()) {
+            return from.trim();
+        }
+        String user = environment.getProperty("spring.mail.username");
+        if (user != null && !user.isBlank()) {
+            return user.trim();
+        }
+        return "noreply@timelink.local";
+    }
+}

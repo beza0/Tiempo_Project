@@ -1,8 +1,21 @@
 # Kullanım: docker compose up --build
 # Arayüz: http://localhost:3000  (nginx → /api → api:8080)
 # API doğrudan: http://localhost:8080
+#
+# Tüm hesapları DB'den silmek (sıfırdan kayıt): ./scripts/reset-timebank-data.sh  (db çalışırken)
+#
+# E-posta: SPRING_MAIL_* = gönderici SMTP (tek relay hesabı). Alıcı = kayıtta yazılan her e-posta (uygulama zaten böyle).
+# cp .env.example .env → relay şifresini doldurun. Yayında SendGrid/SES vb. önerilir (.env.example içinde not).
+# Yerel Mailpit: .env ile SPRING_MAIL_HOST=mailpit, PORT=1025, auth=false (.env.example).
 
 services:
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: timelink-mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
   db:
     image: postgres:16-alpine
     container_name: timelink-postgres
@@ -32,6 +45,15 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/timebank
       SPRING_DATASOURCE_USERNAME: timebank_user
       SPRING_DATASOURCE_PASSWORD: "1234"
+      APP_PUBLIC_BASE_URL: http://localhost:3000
+      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:-}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:-}
+      SPRING_MAIL_HOST: ${SPRING_MAIL_HOST:-smtp.gmail.com}
+      SPRING_MAIL_PORT: ${SPRING_MAIL_PORT:-587}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH:-true}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE:-true}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED:-true}
+      APP_MAIL_FROM: ${APP_MAIL_FROM:-}
     depends_on:
       db:
         condition: service_healthy

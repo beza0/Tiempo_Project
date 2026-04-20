@@ -13,7 +13,6 @@ function initials(name: string): string {
 }
 
 interface SkillCardProps {
-  id: string;
   title: string;
   instructor: {
     name: string;
@@ -58,15 +57,24 @@ export function SkillCard({
         : b.locationLineLabels.Online;
   const locationLabel = location;
   const hasAvatar = Boolean(instructor.image?.trim());
+  const hasCover = Boolean(image?.trim());
 
   return (
-    <Card className="overflow-hidden rounded-2xl border border-border/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+    <Card className="group overflow-hidden rounded-2xl border border-border/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
       <div className="relative h-48 overflow-hidden">
-        <ImageWithFallback
-          src={image}
-          alt={title}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-        />
+        {hasCover ? (
+          <ImageWithFallback
+            src={image}
+            alt={title}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+          />
+        ) : (
+          <div
+            className="h-full w-full bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700 opacity-90 transition-transform duration-300 motion-safe:group-hover:scale-[1.02]"
+            aria-hidden
+          />
+        )}
         <Badge className="absolute right-3 top-3 border-0 bg-background/95 text-foreground shadow-sm backdrop-blur-sm hover:bg-accent">
           {categoryLabel}
         </Badge>

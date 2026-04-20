@@ -20,6 +20,7 @@ public class SkillResponse {
     private UUID ownerId;
     private String ownerName;
     private Instant createdAt;
+    private String coverImageUrl;
 
     public SkillResponse(
             UUID id,
@@ -35,7 +36,8 @@ public class SkillResponse {
             String availableUntil,
             UUID ownerId,
             String ownerName,
-            Instant createdAt
+            Instant createdAt,
+            String coverImageUrl
     ) {
         this.id = id;
         this.title = title;
@@ -51,6 +53,7 @@ public class SkillResponse {
         this.ownerId = ownerId;
         this.ownerName = ownerName;
         this.createdAt = createdAt;
+        this.coverImageUrl = coverImageUrl;
     }
 
     public UUID getId() {
@@ -107,5 +110,9 @@ public class SkillResponse {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public String getCoverImageUrl() {
+        return coverImageUrl;
     }
 }

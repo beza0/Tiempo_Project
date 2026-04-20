@@ -59,6 +59,10 @@ public class Skill {
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
+    /** AI (Pollinations) kapak görseli; harici URL. */
+    @Column(name = "cover_image_url", columnDefinition = "TEXT")
+    private String coverImageUrl;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = Instant.now();
@@ -158,5 +162,13 @@ public class Skill {
 
     public void setAvailableUntil(String availableUntil) {
         this.availableUntil = availableUntil;
+    }
+
+    public String getCoverImageUrl() {
+        return coverImageUrl;
+    }
+
+    public void setCoverImageUrl(String coverImageUrl) {
+        this.coverImageUrl = coverImageUrl;
     }
 }

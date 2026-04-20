@@ -1,9 +1,6 @@
 import type { SkillDto } from "../api/skills";
 import type { Messages } from "../language";
-
-/** Nötr kapak; gerçek kapak URL’i API’de yok. */
-const BROWSE_COVER_FALLBACK =
-  "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80";
+import { resolveSkillCoverImageUrl } from "./skillCoverImageUrl";
 
 function parseMetaField(text: string, labels: string[]): string | null {
   for (const label of labels) {
@@ -104,7 +101,7 @@ export function mapSkillDtoToBrowseCard(
     location,
     isOnline,
     isInPerson,
-    image: BROWSE_COVER_FALLBACK,
+    image: resolveSkillCoverImageUrl(skill),
     tags,
     createdAt: skill.createdAt,
     searchBlob,

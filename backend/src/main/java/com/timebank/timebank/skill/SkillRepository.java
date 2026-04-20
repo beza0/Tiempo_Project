@@ -9,6 +9,8 @@ import java.util.UUID;
 
 public interface SkillRepository extends JpaRepository<Skill, UUID> {
 
+    void deleteAllByOwner_Id(UUID ownerId);
+
     @EntityGraph(attributePaths = "owner")
     List<Skill> findByOwnerId(UUID ownerId);
 

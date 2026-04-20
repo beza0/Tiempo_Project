@@ -12,9 +12,20 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useAuth } from "../contexts/AuthContext";
 import type { PageType } from "../App";
 import type { Locale } from "../language";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Trash2 } from "lucide-react";
+import { deleteMyAccount } from "../api/user";
+import { apiErrorDisplayMessage } from "../api/client";
+import {
+  Modal,
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "../components/ui/modal";
 
 interface SettingsPageProps {
   onNavigate?: (page: PageType) => void;
@@ -23,8 +34,13 @@ interface SettingsPageProps {
 export function SettingsPage({ onNavigate }: SettingsPageProps) {
   const { t, locale, setLocale } = useLanguage();
   const s = t.settings;
+  const { token, logout } = useAuth();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -54,6 +70,26 @@ export function SettingsPage({ onNavigate }: SettingsPageProps) {
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!token) {
+      setDeleteError(s.deleteAccountError);
+      return;
+    }
+    setDeleteError(null);
+    setDeleteLoading(true);
+    try {
+      await deleteMyAccount(token);
+      sessionStorage.removeItem("timelink_profile_onboarding");
+      logout();
+      setDeleteOpen(false);
+      onNavigate?.("landing");
+    } catch (err) {
+      setDeleteError(apiErrorDisplayMessage(err, s.deleteAccountError));
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   return (
@@ -197,8 +233,67 @@ export function SettingsPage({ onNavigate }: SettingsPageProps) {
               </div>
             </CardContent>
           </Card>
+
+          <Card className="rounded-2xl border-destructive/40 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-lg text-destructive">{s.dangerTitle}</CardTitle>
+              <CardDescription>{s.dangerDesc}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                type="button"
+                variant="destructive"
+                className="gap-2"
+                onClick={() => {
+                  setDeleteError(null);
+                  setDeleteOpen(true);
+                }}
+              >
+                <Trash2 className="h-4 w-4" aria-hidden />
+                {s.deleteAccount}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
+
+      <Modal
+        open={deleteOpen}
+        onOpenChange={(open) => {
+          setDeleteOpen(open);
+          if (!open) setDeleteError(null);
+        }}
+      >
+        <ModalContent>
+          <ModalHeader>
+            <ModalTitle>{s.deleteAccountConfirmTitle}</ModalTitle>
+            <ModalDescription>{s.deleteAccountConfirmBody}</ModalDescription>
+          </ModalHeader>
+          {deleteError ? (
+            <p className="px-6 text-sm text-destructive" role="alert">
+              {deleteError}
+            </p>
+          ) : null}
+          <ModalFooter>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={deleteLoading}
+              onClick={() => setDeleteOpen(false)}
+            >
+              {s.deleteAccountCancel}
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={deleteLoading}
+              onClick={() => void handleDeleteAccount()}
+            >
+              {deleteLoading ? t.common.loading : s.deleteAccountConfirmButton}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </PageLayout>
   );
 }

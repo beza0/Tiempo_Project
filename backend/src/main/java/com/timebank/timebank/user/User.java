@@ -72,6 +72,15 @@ public class User {
     @Column(name = "avatar_url", columnDefinition = "TEXT")
     private String avatarUrl;
 
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = true;
+
+    @Column(name = "email_verification_token", length = 128)
+    private String emailVerificationToken;
+
+    @Column(name = "email_verification_expires_at")
+    private Instant emailVerificationExpiresAt;
+
     // --- Lifecycle Hooks ---
 
     @PrePersist
@@ -193,5 +202,38 @@ public class User {
 
     public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
+    }
+
+    public String getEmailVerificationToken() {
+        return emailVerificationToken;
+    }
+
+    public void setEmailVerificationToken(String emailVerificationToken) {
+        this.emailVerificationToken = emailVerificationToken;
+    }
+
+    public Instant getEmailVerificationExpiresAt() {
+        return emailVerificationExpiresAt;
+    }
+
+    public void setEmailVerificationExpiresAt(Instant emailVerificationExpiresAt) {
+        this.emailVerificationExpiresAt = emailVerificationExpiresAt;
+    }
+
+    /**
+     * Kayıtta e-posta gönderilemeyecekse (SMTP yok) doğrulama atlansın diye kullanılır.
+     */
+    public void skipEmailVerification() {
+        this.emailVerified = true;
+        this.emailVerificationToken = null;
+        this.emailVerificationExpiresAt = null;
     }
 }

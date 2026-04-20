@@ -20,9 +20,11 @@ public class SkillController {
             "{skillId:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}";
 
     private final SkillService skillService;
+    private final SkillCoverProxyService skillCoverProxyService;
 
-    public SkillController(SkillService skillService) {
+    public SkillController(SkillService skillService, SkillCoverProxyService skillCoverProxyService) {
         this.skillService = skillService;
+        this.skillCoverProxyService = skillCoverProxyService;
     }
 
     @PostMapping
@@ -46,6 +48,14 @@ public class SkillController {
     @GetMapping("/mine")
     public ResponseEntity<List<SkillResponse>> getMySkills(Authentication authentication) {
         return ResponseEntity.ok(skillService.getMySkills(authentication.getName()));
+    }
+
+    /**
+     * Pollinations kapak görselini sunucu çeker — tarayıcı doğrudan image.pollinations.ai kullanmaz (429/limit).
+     */
+    @GetMapping("/" + UUID_SEGMENT + "/cover")
+    public ResponseEntity<byte[]> getSkillCover(@PathVariable UUID skillId) {
+        return skillCoverProxyService.fetchCover(skillId);
     }
 
     @GetMapping("/" + UUID_SEGMENT)

@@ -55,6 +55,14 @@ public class SkillService {
         skill.setAvailableUntil(normalizeTime(req.getAvailableUntil()));
         validateAvailabilityRules(skill);
         skill.setOwner(owner);
+        skill.setCoverImageUrl(
+                SkillCoverImageUrlBuilder.fromSkillContent(
+                        skill.getTitle(),
+                        skill.getDescription(),
+                        skill.getCategory(),
+                        owner.getId()
+                )
+        );
 
         Skill saved = skillRepository.save(skill);
 
@@ -99,6 +107,14 @@ public class SkillService {
         if (level != null) {
             skill.setLevel(level);
         }
+        skill.setCoverImageUrl(
+                SkillCoverImageUrlBuilder.fromSkillContent(
+                        skill.getTitle(),
+                        skill.getDescription(),
+                        skill.getCategory(),
+                        skill.getId()
+                )
+        );
         Skill updated = skillRepository.save(skill);
         return mapToResponse(updated);
     }
@@ -136,7 +152,8 @@ public class SkillService {
                 availableUntil,
                 skill.getOwner().getId(),
                 skill.getOwner().getFullName(),
-                skill.getCreatedAt()
+                skill.getCreatedAt(),
+                skill.getCoverImageUrl()
         );
     }
 

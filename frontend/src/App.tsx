@@ -37,74 +37,100 @@ export type PageType =
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageType>("landing");
   const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
+  const [loginReturnTo, setLoginReturnTo] = useState<PageType>("dashboard");
   const { isAuthenticated } = useAuth();
+
+  /** Navbar vb. ile girişe gidildiğinde varsayılan dönüş hedefi dashboard kalır */
+  const navigate = (page: PageType) => {
+    if (page === "login") {
+      setLoginReturnTo("dashboard");
+    }
+    setCurrentPage(page);
+  };
 
   const openSkillDetail = (skillId: string) => {
     setSelectedSkillId(skillId);
     setCurrentPage("skill-detail");
   };
 
+  /** Explore / Browse: giriş yoksa book ile skill detayı yerine giriş sayfası */
+  const openBrowseSkillForBooking = (skillId: string) => {
+    if (!isAuthenticated) {
+      setSelectedSkillId(skillId);
+      setLoginReturnTo("skill-detail");
+      setCurrentPage("login");
+      return;
+    }
+    openSkillDetail(skillId);
+  };
+
+  const goToLoginFromSkillBooking = () => {
+    setLoginReturnTo("skill-detail");
+    setCurrentPage("login");
+  };
+
   const renderPage = () => {
     if (pageRequiresAuth(currentPage) && !isAuthenticated) {
       return (
-        <LoginPage onNavigate={setCurrentPage} returnTo={currentPage} />
+        <LoginPage onNavigate={navigate} returnTo={currentPage} />
       );
     }
 
     switch (currentPage) {
       case "landing":
-        return <LandingPage onNavigate={setCurrentPage} />;
+        return <LandingPage onNavigate={navigate} />;
       case "browse":
         return (
           <BrowsePage
-            onNavigate={setCurrentPage}
-            onOpenSkillDetail={openSkillDetail}
+            onNavigate={navigate}
+            onOpenSkillDetail={openBrowseSkillForBooking}
           />
         );
       case "dashboard":
-        return <DashboardPage onNavigate={setCurrentPage} />;
+        return <DashboardPage onNavigate={navigate} />;
       case "profile":
         return (
           <ProfilePage
-            onNavigate={setCurrentPage}
+            onNavigate={navigate}
             onOpenSkillDetail={openSkillDetail}
           />
         );
       case "how-it-works":
-        return <HowItWorksPage onNavigate={setCurrentPage} />;
+        return <HowItWorksPage onNavigate={navigate} />;
       case "add-skill":
-        return <AddSkillPage onNavigate={setCurrentPage} />;
+        return <AddSkillPage onNavigate={navigate} />;
       case "past-sessions":
-        return <PastSessionsPage onNavigate={setCurrentPage} />;
+        return <PastSessionsPage onNavigate={navigate} />;
       case "edit-profile":
-        return <EditProfilePage onNavigate={setCurrentPage} />;
+        return <EditProfilePage onNavigate={navigate} />;
       case "settings":
-        return <SettingsPage onNavigate={setCurrentPage} />;
+        return <SettingsPage onNavigate={navigate} />;
       case "messages":
-        return <MessagesPage onNavigate={setCurrentPage} />;
+        return <MessagesPage onNavigate={navigate} />;
       case "signup":
         if (isAuthenticated) {
-          return <DashboardPage onNavigate={setCurrentPage} />;
+          return <DashboardPage onNavigate={navigate} />;
         }
-        return <SignUpPage onNavigate={setCurrentPage} />;
+        return <SignUpPage onNavigate={navigate} />;
       case "login":
         if (isAuthenticated) {
-          return <DashboardPage onNavigate={setCurrentPage} />;
+          return <DashboardPage onNavigate={navigate} />;
         }
-        return <LoginPage onNavigate={setCurrentPage} />;
+        return <LoginPage onNavigate={navigate} returnTo={loginReturnTo} />;
       case "forgot-password":
-        return <ForgotPasswordPage onNavigate={setCurrentPage} />;
+        return <ForgotPasswordPage onNavigate={navigate} />;
       case "reset-password":
-        return <ResetPasswordPage onNavigate={setCurrentPage} />;
+        return <ResetPasswordPage onNavigate={navigate} />;
       case "skill-detail":
         return (
           <SkillDetailPage
-            onNavigate={setCurrentPage}
+            onNavigate={navigate}
+            onLoginRequired={goToLoginFromSkillBooking}
             skillId={selectedSkillId}
           />
         );
       default:
-        return <LandingPage onNavigate={setCurrentPage} />;
+        return <LandingPage onNavigate={navigate} />;
     }
   };
 

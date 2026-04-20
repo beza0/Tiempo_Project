@@ -15,6 +15,8 @@ export type SkillDto = {
   ownerId: string;
   ownerName: string;
   createdAt: string;
+  /** Sunucunun skill oluştururken kaydettiği AI kapak görseli URL’si */
+  coverImageUrl?: string | null;
 };
 
 export type CreateSkillBody = {

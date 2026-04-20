@@ -67,6 +67,16 @@ export const en = {
     themeDesc: "Light or dark theme for the app.",
     themeLight: "Light",
     themeDark: "Dark",
+    dangerTitle: "Danger zone",
+    dangerDesc:
+      "Permanently delete your account and all related data (skills, requests, messages, reviews, notifications, transactions). This cannot be undone.",
+    deleteAccount: "Delete account",
+    deleteAccountConfirmTitle: "Delete your account?",
+    deleteAccountConfirmBody:
+      "Your profile, skills, exchanges, messages, reviews, notifications, and time credits history will be removed from our database. Other users may no longer see past exchanges involving you.",
+    deleteAccountConfirmButton: "Yes, delete everything",
+    deleteAccountCancel: "Cancel",
+    deleteAccountError: "Could not delete your account. Try again.",
   },
   footer: {
     tagline:
@@ -264,6 +274,9 @@ export const en = {
       orWith: "Or continue with",
       errorRequired: "Please enter your email and password.",
       errorFailed: "Could not sign in. Check your connection and try again.",
+      resendVerification: "Resend verification email",
+      verificationResentHint:
+        "If this email is registered and not verified, we sent a new 6-digit code.",
     },
     signup: {
       title: "Create your account",
@@ -282,6 +295,22 @@ export const en = {
       orWith: "Or continue with",
       errorPasswordMismatch: "Passwords do not match.",
       errorFailed: "Could not create your account. Try again.",
+      verifySentTitle: "Enter your verification code",
+      verifySentBody:
+        "We sent a 6-digit code to your email. Enter it below to open your account.",
+      verifyMailHint:
+        "Docker is using Mailpit — messages do not go to your real inbox. Open http://localhost:8025 to read the code.",
+      verifyRealInboxHint:
+        "SMTP targets a real mail server — check your inbox (and spam). Delivery may take a minute.",
+      verifyLogsHint:
+        "SMTP is off on the API — no email was sent. Check the API container logs for the verification code, or set SPRING_MAIL_HOST in your project `.env`.",
+      codeLabel: "Verification code",
+      codePlaceholder: "000000",
+      verifyAccountBtn: "Verify and continue",
+      resendCodeBtn: "Resend code",
+      resendCodeWithTimer: "Resend code ({{time}})",
+      goToSignIn: "I'll sign in later",
+      errorVerifyCodeShort: "Enter the full 6-digit code.",
     },
     forgot: {
       title: "Forgot Password?",

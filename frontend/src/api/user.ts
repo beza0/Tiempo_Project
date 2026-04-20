@@ -58,3 +58,10 @@ export function fetchMyDashboard(token: string) {
     token,
   });
 }
+
+export function deleteMyAccount(token: string) {
+  return apiFetch<void>("/api/users/me/delete", {
+    method: "POST",
+    token,
+  });
+}

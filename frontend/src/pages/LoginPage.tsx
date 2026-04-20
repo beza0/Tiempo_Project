@@ -7,7 +7,7 @@ import type { PageType } from "../App";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
-import { loginRequest } from "../api/auth";
+import { loginRequest, resendVerificationEmail } from "../api/auth";
 import { apiErrorDisplayMessage } from "../api/client";
 
 interface LoginPageProps {
@@ -24,6 +24,8 @@ export function LoginPage({
   const a = t.auth.login;
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendHint, setResendHint] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +39,7 @@ export function LoginPage({
       return;
     }
     setLoading(true);
+    setResendHint(null);
     try {
       const res = await loginRequest({ email, password });
       login(
@@ -55,6 +58,28 @@ export function LoginPage({
       setLoading(false);
     }
   };
+
+  const handleResendVerification = async () => {
+    setError(null);
+    setResendHint(null);
+    const form = document.getElementById("login-form") as HTMLFormElement | null;
+    const emailInput = form?.querySelector<HTMLInputElement>('input[name="email"]');
+    const email = emailInput?.value?.trim() ?? "";
+    if (!email) {
+      setError(a.errorRequired);
+      return;
+    }
+    setResendLoading(true);
+    try {
+      await resendVerificationEmail(email);
+      setResendHint(a.verificationResentHint);
+    } catch (err) {
+      setError(apiErrorDisplayMessage(err, a.errorFailed));
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -81,7 +106,15 @@ export function LoginPage({
               {error}
             </p>
           ) : null}
-          <form className="space-y-5" onSubmit={handleSubmit}>
+          {resendHint ? (
+            <p
+              className="mb-4 rounded-xl border border-green-500/30 bg-green-500/10 px-3 py-2 text-sm text-green-800 dark:text-green-200"
+              role="status"
+            >
+              {resendHint}
+            </p>
+          ) : null}
+          <form id="login-form" className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <Label htmlFor="email">{a.email}</Label>
               <Input
@@ -130,6 +163,15 @@ export function LoginPage({
               className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-6"
             >
               {loading ? t.common.loading : a.signIn}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full text-sm text-muted-foreground"
+              disabled={resendLoading}
+              onClick={() => void handleResendVerification()}
+            >
+              {resendLoading ? t.common.loading : a.resendVerification}
             </Button>
           </form>
 

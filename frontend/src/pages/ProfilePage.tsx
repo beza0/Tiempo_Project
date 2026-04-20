@@ -36,6 +36,7 @@ import {
   type ExchangeRequestDto,
 } from "../api/exchange";
 import { initialsFromFullName } from "../lib/initials";
+import { resolveSkillCoverImageUrl } from "../lib/skillCoverImageUrl";
 import { apiErrorDisplayMessage } from "../api/client";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
@@ -498,11 +499,27 @@ export function ProfilePage({
                         dayLabels,
                       ) ?? fallbackAvailabilityFromDescription(skill.description, dayLabels);
 
+                      const coverUrl = resolveSkillCoverImageUrl(skill);
                       return (
                         <Card
                           key={skill.id}
-                          className="rounded-xl border border-border bg-muted/25 p-5"
+                          className="overflow-hidden rounded-xl border border-border bg-muted/25 p-0"
                         >
+                          <div className="relative h-40 w-full overflow-hidden sm:h-44">
+                            {coverUrl ? (
+                              <ImageWithFallback
+                                src={coverUrl}
+                                alt={skill.title}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div
+                                className="h-full w-full bg-gradient-to-br from-blue-500/35 via-purple-500/30 to-indigo-600/35"
+                                aria-hidden
+                              />
+                            )}
+                          </div>
+                          <div className="p-5">
                           <div className="mb-3 flex items-start justify-between gap-2">
                             <div className="min-w-0 flex-1 pr-2">
                               <h3 className="text-lg text-foreground">
@@ -566,6 +583,7 @@ export function ProfilePage({
                           >
                             {p.viewDetails}
                           </Button>
+                          </div>
                           </div>
                         </Card>
                       );

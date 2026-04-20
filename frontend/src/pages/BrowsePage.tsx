@@ -268,7 +268,6 @@ export function BrowsePage({ onNavigate, onOpenSkillDetail }: BrowsePageProps) {
                   return (
                     <SkillCard
                       key={skill.id}
-                      id={skill.id}
                       title={skill.title}
                       instructor={skill.instructor}
                       category={skill.category}

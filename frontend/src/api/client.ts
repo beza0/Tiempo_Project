@@ -17,16 +17,11 @@ export type ApiFetchOptions = RequestInit & { token?: string | null };
 /** Boş veya anlamsız API mesajlarında yerelleştirilmiş fallback kullanın. */
 export function apiErrorDisplayMessage(err: unknown, fallback: string): string {
   if (err instanceof ApiError) {
-    if (err.status === 401 || err.status === 403) {
-      return fallback;
-    }
     const m = err.message.trim();
-    if (!m) return fallback;
-    const lower = m.toLowerCase();
-    if (lower === "forbidden" || lower === "unauthorized") {
-      return fallback;
+    if (m && m !== "Forbidden" && m !== "Unauthorized") {
+      return m;
     }
-    return m;
+    return fallback;
   }
   if (err instanceof Error) {
     const m = err.message.trim();
@@ -71,8 +66,11 @@ export async function apiFetch<T>(
   }
 
   if (!res.ok) {
-    if ((res.status === 401 || res.status === 403) && typeof window !== "undefined") {
-      // Session expired/invalid token: force a clean logout flow.
+    if (
+      res.status === 401 &&
+      token &&
+      typeof window !== "undefined"
+    ) {
       window.dispatchEvent(new Event("timelink:auth-expired"));
     }
     const msg =

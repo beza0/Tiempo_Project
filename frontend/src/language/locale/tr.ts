@@ -69,6 +69,16 @@ export const tr: Translation = {
     themeDesc: "Açık veya koyu tema.",
     themeLight: "Açık",
     themeDark: "Koyu",
+    dangerTitle: "Tehlikeli alan",
+    dangerDesc:
+      "Hesabınızı ve bağlı tüm verileri (beceriler, talepler, mesajlar, değerlendirmeler, bildirimler, işlemler) kalıcı olarak silin.",
+    deleteAccount: "Hesabı sil",
+    deleteAccountConfirmTitle: "Hesabınız silinsin mi?",
+    deleteAccountConfirmBody:
+      "Profiliniz, becerileriniz, talepler, mesajlar, değerlendirmeler, bildirimler ve zaman kredisi geçmişiniz veritabanından kaldırılır. Bu işlem geri alınamaz.",
+    deleteAccountConfirmButton: "Evet, tamamen sil",
+    deleteAccountCancel: "Vazgeç",
+    deleteAccountError: "Hesap silinemedi. Tekrar deneyin.",
   },
   footer: {
     tagline:
@@ -266,6 +276,9 @@ export const tr: Translation = {
       orWith: "Veya şununla devam et",
       errorRequired: "E-posta ve şifrenizi girin.",
       errorFailed: "Giriş yapılamadı. Bağlantınızı kontrol edip tekrar deneyin.",
+      resendVerification: "Doğrulama e-postasını tekrar gönder",
+      verificationResentHint:
+        "Bu adres kayıtlı ve doğrulanmadıysa yeni bir 6 haneli kod gönderdik.",
     },
     signup: {
       title: "Hesap oluştur",
@@ -284,6 +297,22 @@ export const tr: Translation = {
       orWith: "Veya şununla devam et",
       errorPasswordMismatch: "Şifreler eşleşmiyor.",
       errorFailed: "Hesap oluşturulamadı. Tekrar deneyin.",
+      verifySentTitle: "Doğrulama kodunu girin",
+      verifySentBody:
+        "E-postanıza 6 haneli bir kod gönderdik. Hesabınızı açmak için kodu aşağıya yazın.",
+      verifyMailHint:
+        "Şu an Mailpit kullanılıyor — kod gerçek gelen kutunuza gitmez. Kodu görmek için http://localhost:8025 adresini açın.",
+      verifyRealInboxHint:
+        "SMTP gerçek bir sunucuya ayarlı — gelen kutunuzu (ve gerekiyorsa spam’i) kontrol edin; ileti birkaç dakika sürebilir.",
+      verifyLogsHint:
+        "API üzerinde SMTP kapalı — e-posta gönderilmedi. Doğrulama kodu için API konteyner loglarına bakın veya proje `.env` içinde SPRING_MAIL_HOST tanımlayın.",
+      codeLabel: "Doğrulama kodu",
+      codePlaceholder: "000000",
+      verifyAccountBtn: "Doğrula ve devam et",
+      resendCodeBtn: "Kodu tekrar gönder",
+      resendCodeWithTimer: "Kodu tekrar gönder ({{time}})",
+      goToSignIn: "Daha sonra giriş yapacağım",
+      errorVerifyCodeShort: "6 haneli kodu eksiksiz girin.",
     },
     forgot: {
       title: "Şifrenizi mi unuttunuz?",

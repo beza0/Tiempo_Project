@@ -36,6 +36,7 @@ import {
   Video,
   MessageCircle,
   CalendarIcon,
+  ArrowLeft,
 } from "lucide-react";
 import type { PageType } from "../App";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -53,6 +54,8 @@ import { initialsFromFullName } from "../lib/initials";
 
 interface SkillDetailPageProps {
   onNavigate?: (page: PageType) => void;
+  /** Book için oturum yokken girişe git; giriş sonrası bu sayfaya dönmek için App kullanır */
+  onLoginRequired?: () => void;
   skillId: string | null;
 }
 
@@ -159,7 +162,11 @@ function buildHalfHourSlots(from: string, until: string): string[] {
 
 const BOOKING_HORIZON_DAYS = 365;
 
-export function SkillDetailPage({ onNavigate, skillId }: SkillDetailPageProps) {
+export function SkillDetailPage({
+  onNavigate,
+  onLoginRequired,
+  skillId,
+}: SkillDetailPageProps) {
   const { t, locale } = useLanguage();
   const { user, token } = useAuth();
   const s = t.skillDetail;
@@ -379,7 +386,11 @@ export function SkillDetailPage({ onNavigate, skillId }: SkillDetailPageProps) {
   const handleBookClick = () => {
     setBookErr(null);
     if (!token) {
-      onNavigate?.("login");
+      if (onLoginRequired) {
+        onLoginRequired();
+      } else {
+        onNavigate?.("login");
+      }
       return;
     }
     setBookOpen(true);
@@ -541,6 +552,15 @@ export function SkillDetailPage({ onNavigate, skillId }: SkillDetailPageProps) {
     <PageLayout onNavigate={onNavigate}>
       <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
+          <Button
+            type="button"
+            variant="ghost"
+            className="-ml-2 mb-6 h-auto gap-2 px-2 py-1.5 text-muted-foreground hover:text-foreground"
+            onClick={() => onNavigate?.("browse")}
+          >
+            <ArrowLeft className="h-4 w-4 shrink-0" />
+            {s.backToBrowse}
+          </Button>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
               <Card className="rounded-2xl border-0 p-8 shadow-lg">
