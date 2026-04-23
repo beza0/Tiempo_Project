@@ -1,0 +1,16 @@
+{
+  "name": "timelink-monorepo",
+  "private": true,
+  "description": "TimeLink — Vite + React frontend, Spring Boot backend",
+  "scripts": {
+    "dev": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "lint": "npm run lint --prefix frontend",
+    "preview": "npm run preview --prefix frontend",
+    "backend:run": "cd backend && ./mvnw spring-boot:run",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:db": "docker compose up -d db",
+    "docker:stop-api": "docker compose stop api"
+  }
+}
