@@ -178,6 +178,9 @@ export function ProfilePage({
   const [reviewComment, setReviewComment] = useState("");
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [reviewSaving, setReviewSaving] = useState(false);
+  const [mainTab, setMainTab] = useState<
+    "teaching" | "learning" | "reviews"
+  >("teaching");
 
   const load = useCallback(async () => {
     if (!token) {
@@ -241,6 +244,18 @@ export function ProfilePage({
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    try {
+      const t = sessionStorage.getItem("timelink_profile_tab");
+      if (t === "teaching" || t === "learning" || t === "reviews") {
+        setMainTab(t);
+        sessionStorage.removeItem("timelink_profile_tab");
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const displayName = profile?.fullName ?? user?.name ?? "";
   const displayEmail = profile?.email?.trim() || user?.email?.trim() || "";
@@ -442,7 +457,13 @@ export function ProfilePage({
         {loading ? (
           <p className="text-muted-foreground py-8">{t.common.loading}</p>
         ) : (
-          <Tabs defaultValue="teaching" className="space-y-6">
+          <Tabs
+            value={mainTab}
+            onValueChange={(v) =>
+              setMainTab(v as "teaching" | "learning" | "reviews")
+            }
+            className="space-y-6"
+          >
             <TabsList className="rounded-xl border border-border bg-muted p-1 shadow-lg">
               <TabsTrigger value="teaching" className="rounded-lg">
                 {p.tabTeaching}

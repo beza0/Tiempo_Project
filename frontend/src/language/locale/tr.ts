@@ -441,6 +441,9 @@ export const tr: Translation = {
     cancelConfirmTitle: "Bu rezervasyon iptal edilsin mi?",
     cancelConfirmBody:
       "Geri alınamaz. Zaman kredileri yalnızca oturum tamamlanınca hareket eder; bu yüzden bu işlemde bakiyeniz değişmez. Karşı taraf bilgilendirilir.",
+    markSessionComplete: "Oturumu tamamlandı işaretle",
+    instructorMarkCompleteHint:
+      "Eğitmen olarak oturum bittiğinde tamamlandı diye işaretleyin. Öğrenci sizi puanlayabilir ve zaman kredileri aktarılır.",
     sessionCompletedHint:
       "Bu oturum tamamlandı. Mesaj geçmişini okuyabilirsiniz.",
     createBooking: "Yeni rezervasyon oluştur",
@@ -617,6 +620,8 @@ export const tr: Translation = {
     taught: "Öğretildi",
     youRated: "Bu oturumu puanladınız",
     rateReview: "Puanla ve yorum yap",
+    rateOnProfileHint:
+      "Profilinizde Öğrenme sekmesine gider; oradan bu oturumu puanlayabilirsiniz.",
     emptyAll: "Henüz oturum geçmişin yok.",
     emptyLearned: "Öğrenci olarak tamamladığın oturum yok.",
     emptyTaught: "Eğitmen olarak tamamladığın oturum yok.",

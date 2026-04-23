@@ -1,0 +1,11 @@
+# Testcontainers PostgreSQL (ExchangeBookingIntegrationTest) — ana application.properties yüklenir, bu dosya ekler/üst yazar
+spring:
+  task:
+    scheduling:
+      enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  mail:
+    host: localhost
+    port: 3025

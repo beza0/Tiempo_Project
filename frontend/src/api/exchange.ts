@@ -101,6 +101,14 @@ export function cancelExchangeRequest(token: string, requestId: string) {
   );
 }
 
+/** Sadece beceri sahibi (eğitmen) çağırabilir: oturum tamamlandı → puan/ödeme. */
+export function completeExchangeRequest(token: string, requestId: string) {
+  return apiFetch<ExchangeRequestDto>(
+    `/api/exchange-requests/${requestId}/complete`,
+    { method: "PUT", token },
+  );
+}
+
 export function createCounterOffer(
   token: string,
   requestId: string,

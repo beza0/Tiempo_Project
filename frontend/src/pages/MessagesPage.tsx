@@ -24,6 +24,7 @@ import {
   MessageCircle,
   CalendarPlus,
   CalendarIcon,
+  CheckCircle2,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { PageType } from "../App";
@@ -34,6 +35,7 @@ import { enUS, tr as trLocale } from "react-day-picker/locale";
 import {
   acceptExchangeRequest,
   cancelExchangeRequest,
+  completeExchangeRequest,
   createCounterOffer,
   fetchExchangeMessages,
   fetchReceivedExchangeRequests,
@@ -311,6 +313,11 @@ export function MessagesPage({ onNavigate }: MessagesPageProps) {
   const canCancelSelected = Boolean(
     selected && canCancelExchange(selected.ex, user?.id),
   );
+  const canMarkCompleteSelected = Boolean(
+    selected &&
+      selected.uiStatus === "accepted" &&
+      sameUserId(selected.ex.ownerId, user?.id),
+  );
 
   const loadThread = useCallback(
     async (row: ConversationRow | null) => {
@@ -409,6 +416,18 @@ export function MessagesPage({ onNavigate }: MessagesPageProps) {
     try {
       await cancelExchangeRequest(token, selected.id);
       setCancelOpen(false);
+      await loadList();
+      setSelectedId(selected.id);
+    } catch (e) {
+      setSendError(apiErrorDisplayMessage(e, m.actionError));
+    }
+  };
+
+  const handleMarkComplete = async () => {
+    if (!token || !selected) return;
+    setSendError(null);
+    try {
+      await completeExchangeRequest(token, selected.id);
       await loadList();
       setSelectedId(selected.id);
     } catch (e) {
@@ -725,8 +744,24 @@ export function MessagesPage({ onNavigate }: MessagesPageProps) {
                   {selected.uiStatus === "accepted" && (
                     <div className="border-b border-emerald-100 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">
                       <p className="text-sm text-foreground/90">{m.acceptedSessionHint}</p>
-                      {canCancelSelected ? (
-                        <div className="mt-3">
+                      {canMarkCompleteSelected ? (
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          {m.instructorMarkCompleteHint}
+                        </p>
+                      ) : null}
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {canMarkCompleteSelected ? (
+                          <Button
+                            type="button"
+                            size="sm"
+                            className="bg-emerald-600 text-white hover:bg-emerald-700"
+                            onClick={() => void handleMarkComplete()}
+                          >
+                            <CheckCircle2 className="mr-1 h-4 w-4" />
+                            {m.markSessionComplete}
+                          </Button>
+                        ) : null}
+                        {canCancelSelected ? (
                           <Button
                             type="button"
                             size="sm"
@@ -737,8 +772,8 @@ export function MessagesPage({ onNavigate }: MessagesPageProps) {
                             <X className="mr-1 h-4 w-4" />
                             {m.cancelSession}
                           </Button>
-                        </div>
-                      ) : null}
+                        ) : null}
+                      </div>
                     </div>
                   )}
 

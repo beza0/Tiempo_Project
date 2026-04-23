@@ -438,6 +438,9 @@ export const en = {
     cancelConfirmTitle: "Cancel this booking?",
     cancelConfirmBody:
       "This cannot be undone. Time credits in TimeLink are only moved when the session is completed, so your balance is unchanged. The other person will be notified.",
+    markSessionComplete: "Mark session complete",
+    instructorMarkCompleteHint:
+      "As the instructor, mark the session when it’s done. The learner can then rate you, and time credits are transferred.",
     sessionCompletedHint:
       "This session is completed. You can still read the message history.",
     createBooking: "Create booking",
@@ -614,6 +617,8 @@ export const en = {
     taught: "Taught",
     youRated: "You rated this session",
     rateReview: "Rate & Review",
+    rateOnProfileHint:
+      "Opens your Profile on the Learning tab, where you can rate this session.",
     emptyAll: "No sessions in your history yet.",
     emptyLearned: "You have not completed any sessions as a learner yet.",
     emptyTaught: "You have not completed any sessions as an instructor yet.",
