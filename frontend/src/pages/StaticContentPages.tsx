@@ -5,8 +5,12 @@ import { useLanguage } from "../contexts/LanguageContext";
 import type { PageType } from "../App";
 import type { Translation } from "../language/locale/en";
 import { PATHS } from "../navigation/paths";
+import { LegalDocPage } from "./LegalDocPage";
 
-type StaticKey = keyof Translation["staticSite"];
+type StaticKey = Exclude<
+  keyof Translation["staticSite"],
+  "about" | "contact"
+>;
 
 function GenericStaticPage({
   pageKey,
@@ -39,28 +43,12 @@ function GenericStaticPage({
   );
 }
 
-export function AboutPage({
-  onNavigate,
-}: {
-  onNavigate?: (page: PageType) => void;
-}) {
-  return <GenericStaticPage pageKey="about" onNavigate={onNavigate} />;
-}
-
 export function CommunityPage({
   onNavigate,
 }: {
   onNavigate?: (page: PageType) => void;
 }) {
   return <GenericStaticPage pageKey="community" onNavigate={onNavigate} />;
-}
-
-export function ContactPage({
-  onNavigate,
-}: {
-  onNavigate?: (page: PageType) => void;
-}) {
-  return <GenericStaticPage pageKey="contact" onNavigate={onNavigate} />;
 }
 
 export function SupportPage({
@@ -76,7 +64,7 @@ export function TermsPage({
 }: {
   onNavigate?: (page: PageType) => void;
 }) {
-  return <GenericStaticPage pageKey="terms" onNavigate={onNavigate} />;
+  return <LegalDocPage pageKey="terms" onNavigate={onNavigate} />;
 }
 
 export function PrivacyPage({
@@ -84,7 +72,7 @@ export function PrivacyPage({
 }: {
   onNavigate?: (page: PageType) => void;
 }) {
-  return <GenericStaticPage pageKey="privacy" onNavigate={onNavigate} />;
+  return <LegalDocPage pageKey="privacy" onNavigate={onNavigate} />;
 }
 
 export function CancellationPolicyPage({
@@ -93,7 +81,7 @@ export function CancellationPolicyPage({
   onNavigate?: (page: PageType) => void;
 }) {
   return (
-    <GenericStaticPage pageKey="policyCancellation" onNavigate={onNavigate} />
+    <LegalDocPage pageKey="policyCancellation" onNavigate={onNavigate} />
   );
 }
 

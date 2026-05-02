@@ -27,7 +27,8 @@ export type PageType =
   | "terms"
   | "privacy"
   | "policy-cancellation"
-  | "instructor-guide";
+  | "instructor-guide"
+  | "faq";
 
 export default function App() {
   return (

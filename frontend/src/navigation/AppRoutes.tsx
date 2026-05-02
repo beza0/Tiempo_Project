@@ -24,10 +24,11 @@ import { ResetPasswordPage } from "../pages/ResetPasswordPage";
 import { SkillDetailPage } from "../pages/SkillDetailPage";
 import { NotificationsPage } from "../pages/NotificationsPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
+import { AboutPage } from "../pages/AboutPage";
+import { ContactPage } from "../pages/ContactPage";
+import { FAQPage } from "../pages/FAQPage";
 import {
-  AboutPage,
   CommunityPage,
-  ContactPage,
   SupportPage,
   TermsPage,
   PrivacyPage,
@@ -149,6 +150,7 @@ function AppRoutesContent() {
         path={PATHS.contact}
         element={<ContactPage onNavigate={onPage} />}
       />
+      <Route path={PATHS.faq} element={<FAQPage onNavigate={onPage} />} />
       <Route
         path={PATHS.support}
         element={<SupportPage onNavigate={onPage} />}

@@ -12,8 +12,6 @@ import {
 } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useAuth } from "../contexts/AuthContext";
-import { Link } from "react-router-dom";
-import { PATHS } from "../navigation/paths";
 
 const stepIcons = [UserPlus, Search, BookOpen, Award] as const;
 
@@ -209,32 +207,6 @@ export function HowItWorksPage({ onNavigate }: HowItWorksPageProps) {
               {h.ctaButton}
             </Button>
           ) : null}
-        </div>
-      </div>
-
-      <div className="mx-auto max-w-2xl px-4 pb-16 text-center text-sm text-muted-foreground">
-        <p className="mb-2 font-medium text-foreground">{h.seeAlsoTitle}</p>
-        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-          <Link
-            to={PATHS.policyCancellation}
-            className="text-primary underline-offset-2 hover:underline"
-          >
-            {h.linkPolicy}
-          </Link>
-          <span className="text-border">|</span>
-          <Link
-            to={PATHS.instructorGuide}
-            className="text-primary underline-offset-2 hover:underline"
-          >
-            {h.linkInstructor}
-          </Link>
-          <span className="text-border">|</span>
-          <Link
-            to={PATHS.browse}
-            className="text-primary underline-offset-2 hover:underline"
-          >
-            {h.linkBrowse}
-          </Link>
         </div>
       </div>
     </PageLayout>

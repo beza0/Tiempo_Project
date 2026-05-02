@@ -1,5 +1,6 @@
 /** Turkish UI strings — keys must match `en.ts`. */
 import type { Translation } from "./en";
+import { faqPageTr } from "./faq-page-tr";
 
 export const tr: Translation = {
   nav: {
@@ -86,6 +87,8 @@ export const tr: Translation = {
       "Herkesin öğrenebildiği ve öğretebildiği zaman temelli beceri takas platformu. Topluluğumuza katılın ve bugün beceri takasına başlayın.",
     quickLinks: "Hızlı bağlantılar",
     aboutUs: "Hakkımızda",
+    contactUs: "İletişim",
+    faq: "SSS",
     howItWorks: "Nasıl çalışır",
     categories: "Kategoriler",
     community: "Topluluk",
@@ -568,6 +571,50 @@ export const tr: Translation = {
     ctaSubtitle: "Topluluğumuzdaki binlerce öğrenci ve öğretmene katıl",
     ctaButton: "Ücretsiz hesap oluştur",
   },
+  contactPage: {
+    heroTitle: "İletişime geçin",
+    heroSubtitle:
+      "Sorularınız mı var? Mesajınızı bekliyoruz; en kısa sürede yanıtlıyoruz.",
+    infoTitle: "İletişim bilgileri",
+    infoIntro:
+      "Bu kanallardan bize ulaşabilirsiniz. Yardımcı olmaktan memnuniyet duyarız!",
+    emailTitle: "E-posta",
+    emailLine1: "support@timelink.local",
+    emailLine2: "hello@timelink.local",
+    phoneTitle: "Telefon",
+    phoneNumber: "+90 (555) 123 45 67",
+    phoneHours: "Hafta içi 09:00–18:00",
+    officeTitle: "Adres",
+    officeLine1: "Örnek Mah. Öğrenme Sok. No: 123",
+    officeLine2: "İstanbul, Türkiye",
+    responseTitle: "Yanıt süresi",
+    responseText:
+      "İş günlerinde genelde 24 saat içinde döneriz. Acil durumlarda lütfen telefon kullanın.",
+    formTitle: "Bize yazın",
+    labelName: "Ad Soyad",
+    labelEmail: "E-posta",
+    labelSubject: "Konu",
+    labelMessage: "Mesaj",
+    placeholderName: "Ad Soyad",
+    placeholderEmail: "ornek@email.com",
+    placeholderMessage: "Nasıl yardımcı olabileceğimizi yazın…",
+    subjectPlaceholder: "Konu seçin",
+    subjectGeneral: "Genel bilgi",
+    subjectSupport: "Teknik destek",
+    subjectBilling: "Fatura / ödeme",
+    subjectPartnership: "İş birliği",
+    subjectFeedback: "Geri bildirim",
+    subjectOther: "Diğer",
+    sendButton: "Mesajı gönder",
+    successTitle: "Mesajınız iletildi!",
+    successText:
+      "İletişime geçtiğiniz için teşekkürler. En kısa sürede size döneceğiz.",
+    faqSectionTitle: "Hızlı cevaplar mı arıyorsunuz?",
+    faqSectionText:
+      "Yaygın soruların yanıtları için SSS sayfamıza göz atın.",
+    faqButton: "SSS’ye git",
+  },
+  faqPage: faqPageTr,
   addSkill: {
     title: "Yeni beceri ekle",
     subtitle: "Uzmanlığını TimeLink topluluğuyla paylaş",
@@ -749,8 +796,58 @@ export const tr: Translation = {
   },
   staticSite: {
     about: {
-      title: "TimeLink hakkında",
-      body: "TimeLink, zaman kredili beceri takası platformudur. Üyeler para kullanmadan öğreterek kazanır, öğrenerek harcar. Amacımız; eşler arası öğrenmeyi erişilebilir, adil ve topluluk odaklı kılmaktır.\n\nEğitmen ve öğrencileri buluşturan rezervasyon, mesaj ve güven sinyalleri üzerinde çalışıyoruz. Geri bildirimleriniz ürün yol haritamızı şekillendirir.",
+      heroTitle: "TimeLink hakkında",
+      heroSubtitle:
+        "Zamanın para birimi, becerilerin özgürce paylaşıldığı bir topluluk kuruyoruz",
+      missionTitle: "Misyonumuz",
+      missionP1:
+        "TimeLink güçlü ama basit bir fikirden doğdu: herkesin öğretebileceği bir şey ve öğrenmek istediği bir şey var. Bilginin maddi engellerin arkasında kilitli olmaması gerektiğine inanıyoruz.",
+      missionP2:
+        "Platformumuzda beceriler zaman para birimiyle takas edilir. Bir saat öğretmenlik, başka birinden bir saat öğrenmeye eşittir. Adil, sade ve gerçek bağlar kurar.",
+      stats: [
+        { number: "10.000+", label: "Aktif kullanıcı" },
+        { number: "500+", label: "Paylaşılan beceri" },
+        { number: "50.000+", label: "Takas edilen saat" },
+        { number: "%95", label: "Memnuniyet oranı" },
+      ],
+      valuesTitle: "Değerlerimiz",
+      values: [
+        {
+          title: "Önce topluluk",
+          body: "Herkesin katkıda bulunduğu ve eşit şekilde fayda gördüğü güçlü, destekleyici topluluklar kurarız.",
+        },
+        {
+          title: "Adalet",
+          body: "Zaman tabanlı takas, beceri ne olursa olsun herkesin katkısının eşit değer görmesini sağlar.",
+        },
+        {
+          title: "Kaliteli öğrenme",
+          body: "Değerlendirme sistemimiz ve topluluk kurallarımızla kaliteli takasları destekleriz.",
+        },
+        {
+          title: "Erişilebilirlik",
+          body: "Bilgi, önünde maddi engeller olmadan herkese açık olmalıdır.",
+        },
+        {
+          title: "Gelişim",
+          body: "Tüm üyeler için sürekli öğrenmeyi ve kişisel gelişimi teşvik ederiz.",
+        },
+        {
+          title: "Zamana saygı",
+          body: "Herkesin zamanına eşit değer verir, saygılı ve sorunsuz takaslar hedefleriz.",
+        },
+      ],
+      storyTitle: "Hikayemiz",
+      storyParagraphs: [
+        "TimeLink, 2024’te eğitimciler ve geliştiricilerin ortak bir vizyonla bir araya gelmesiyle başladı: öğrenmenin maddi durumdan bağımsız olarak herkese erişilebilir olduğu bir dünya.",
+        "Geleneksel eğitim platformlarının, öğrenmek isteyen ama ücreti karşılayamayan insanları dışarıda bıraktığını gördük. Öte yandan birçok yetenekli insan bilgisini paylaşmak istiyor ama nereden başlayacağını bilmiyor.",
+        "Zamanı para birimi olarak kullanarak gerçekten eşitlikçi bir platform oluşturduk. İster ileri düzey programlama ister başlangıç seviyesi yemek pişirme öğretin—saatiniz aynı değerde. Bu ilke, hayatın her alanından öğrenci ve eğitmenlerden oluşan çeşitli ve aktif bir topluluk kurmamıza yardımcı oldu.",
+        "Bugün TimeLink büyümeye devam ediyor; dünya çapında binlerce insanı bir araya getiriyor, anlamlı bağlar kuruyor ve bilgi ile topluluk gibi hayattaki en iyi şeylerin etiket gerektirmediğini gösteriyor.",
+      ],
+      ctaTitle: "Topluluğumuza katılmaya hazır mısınız?",
+      ctaSubtitle:
+        "Becerilerinizi paylaşın, başkalarından öğrenin. Ücretsiz, adil ve keyifli!",
+      ctaButton: "Başlayın",
     },
     community: {
       title: "Topluluk",
@@ -765,16 +862,22 @@ export const tr: Translation = {
       body: "Yardıma mı ihtiyacınız var? Önce Nasıl çalışır, İptal ve no-show politikası ve Eğitmen rehberi sayfalarına bakın. Takıldıysanız support@timelink.local adresine hesap e-postanızı ve kısa açıklamayı yazın.\n\nHer anlaşmazlığa arabuluculuk yapamayız; ancak kötüye kullanım ve tekrarlayan no-show modellerini ciddiye alır, topluluğu korumak için hesap kısıtlayabiliriz.",
     },
     terms: {
-      title: "Hizmet şartları (özet)",
-      body: "TimeLink’i iyi niyetle kullanmayı kabul edersiniz: doğru profil, diğer üyelere saygı, yürürlükteki yasalara uyum. Zaman kredileri yasal para değildir, nakit karşılığı yoktur. Özellikleri değiştirebilir, kötüye kullanımda hesap askıya alabilir, şartları uygulama içi duyuru ile güncelleyebiliriz.\n\nBu yalnızca özet; canlıya çıkmadan önce tam metin avukatla gözden geçirilmelidir.",
+      title: "Kullanım şartları",
+      heroSubtitle:
+        "TimeLink’i adil ve güvenli kullanma kuralları: profil, davranış ve zaman kredileri.",
+      body: "TimeLink’te hesap oluşturup hizmeti kullanarak, platformu iyi niyetle kullanmayı kabul edersiniz. Profil bilgilerinizi doğru tutar, diğer üyelere saygılı davranır ve yürürlükteki yasalara uyarsınız.\n\nZaman kredileri yasal para değildir, nakde çevrilemez ve nakit değeri yoktur; yalnızca uygulama içinde beceri takası ve oturum akışını düzenlemek içindir.\n\nÖzellikleri değiştirebilir, kötüye kullanım, taciz veya tekrarlayan ihlallerde hesapları askıya alabilir veya kısıtlayabilir, gerekli durumlarda uygulama içi bildirimlerle haber verebiliriz.\n\nŞartları güncellersek makul ölçüde bildirim yapılır; güncellemeden sonra kullanımı sürdürmek güncel şartları kabul sayılır.\n\nBu metin geliştirme amaçlı sade bir özettir. Canlıya çıkmadan önce tam hukuki metin uzman avukatla hazırlanmalıdır.",
     },
     privacy: {
-      title: "Gizlilik (özet)",
-      body: "Rezervasyon, mesaj ve bildirimler için hesap verilerinizi işleriz. Eklediğiniz profil alanları, ayarlarda açıklandığı gibi diğer oturum açmış üyelere gösterilebilir. Verilerinizi satmıyoruz. Hesap silme talep edebilirsiniz; yasal veya güvenlik zorunlulukları için kayıt tutulabilir.\n\nCanlı gizlilik politikası yayımlanmalı; bu metin proje düzeyinde özet niteliğindedir.",
+      title: "Gizlilik politikası",
+      heroSubtitle:
+        "Hesap ve profil verilerinin kullanımı, görünürlük ve güvenlik hakkında özet bilgi.",
+      body: "TimeLink; hesap ve oturum bilgilerinizi, eklediğiniz profil alanlarını, rezervasyon ve mesajlaşma ile bildirim süreçlerinde oluşan verileri ve hizmeti güvenli çalıştırmak için gerekli teknik kayıtları işleyebilir.\n\nGörünürlük: Yayınladığınız profil bilgileri, her ekranda ve ayarlarınızda belirtildiği şekilde diğer oturum açmış üyelere gösterilebilir. Kişisel verilerinizi üçüncü taraflara “satmak” iş modelimiz değildir.\n\nÇerezler ve güvenlik: Oturum açma, tercihler ve güvenlik için gerekli olduğu ölçüde çerez veya benzeri teknolojiler kullanılabilir. Güçlü ve benzersiz bir şifre kullanın; hesap bilgilerinizi paylaşmayın.\n\nSaklama ve silme: Hesap silme talebinde bulunabilirsiniz. Yasal zorunluluk, ciddi güvenlik veya dolandırıcılık önleme için bazı kayıtların tutulması gerekebilir.\n\nBu özet, geliştirme aşamasında şeffaflık içindir. Canlı ortam için ülkeye özgü tam gizlilik politikası ve veri işleme düzenlemeleri yayımlanmalıdır.",
     },
     policyCancellation: {
       title: "İptal, geç iptal ve no-show",
-      body: "Zaman kredileri yalnızca eğitmen oturumu “tamamlandı” diye işaretlediğinde hareket eder; yalnızca rezervasyonda kredi rehin alınmaz (uygulama ipuçlarına bakın).\n\nBeklenti (üyeler arası netlik için):\n\n— Planlanan başlangıçtan 2 saatten fazla önce: genelde serbest iptal, kredi hareketi yok.\n\n— 1–2 saat arası: geç iptal; karşı tarafı hemen bilgilendirin. Güven sinyalleri ve topluluk notları etkilenir.\n\n— 1 saatten az veya no-show: oturum düşer; host Destek’e kayıt bırakabilir. Tekrarlayan no-show hesap incelemesine yol açabilir.\n\nYasal sözleşme değildir. İş parçacığındaki “katılım onayı” iki taraf için referanstır; kredi aktarımı hâlâ eğitmenin tamamlandı adımıyla yapılır.",
+      heroSubtitle:
+        "Oturumu ne zaman iptal edebileceğiniz, geç iptal ve gelmeme durumunda beklentiler ve kredi mantığı.",
+      body: "Zaman kredileri genelde eğitmen oturumu ürün içinde “tamamlandı” olarak işaretlendiğinde kesinleşir. Yalnızca rezervasyon veya bekleme durumunda bakiyenizin nasıl etkilendiğini uygulama içi yardımdan doğrulayın.\n\nÜyeler arasında ortak beklenti olarak şunları kullanabilirsiniz:\n\n— Planlanan başlangıçtan 2 saatten fazla önce: iptal tipik olarak kredi hareketi olmadan yapılabilir (çoğu senaryoda kesin borç henüz oluşmamıştır; uygulamayı kontrol edin).\n\n— Başlangıçtan 1–2 saat önce: geç iptal sayılır; karşı tarafı derhal bilgilendirin. Tekrarlayan örüntüler güven ve topluluk güvenilirliğini etkileyebilir.\n\n— 1 saatten az kala veya hiç gelinmemesi (no-show): oturum düşebilir; eğitmen durumu Destek üzerinden kayda geçirebilir. Tekrarlayan no-show hesap incelemesine yol açabilir.\n\nİş parçacığındaki isteğe bağlı “katılım” bilgisi iki tarafa yardımcı olur; kredi aktarımını belirleyen adım yine eğitmenin tamamlama işlemidir.\n\nBu metin topluluk yönergesidir, hukuki danışmanlık yerine geçmez. Eşik sürelerini kurulumunuza göre güncelleyebilirsiniz.",
     },
     instructorGuide: {
       title: "Eğitmen: onay ve oturum akışı",

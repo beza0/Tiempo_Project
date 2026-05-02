@@ -1,0 +1,118 @@
+/** FAQ page copy — English (imported into `en.ts` for `Translation` typing). */
+export const faqPageEn = {
+  heroTitle: "Frequently Asked Questions",
+  heroSubtitle: "Find answers to common questions about TimeLink",
+  searchPlaceholder: "Search questions…",
+  emptyText: "No questions found matching your search.",
+  ctaTitle: "Still have questions?",
+  ctaText:
+    "Can't find the answer you're looking for? Our support team is here to help.",
+  ctaButton: "Contact us",
+  categories: [
+    { id: "all", label: "All Questions" },
+    { id: "general", label: "General" },
+    { id: "getting-started", label: "Getting Started" },
+    { id: "sessions", label: "Sessions" },
+    { id: "credits", label: "Time Credits" },
+    { id: "safety", label: "Safety" },
+    { id: "technical", label: "Technical" },
+  ],
+  items: [
+    {
+      id: 1,
+      category: "general",
+      q: "What is TimeLink?",
+      a: "TimeLink is a skill exchange platform where users trade skills using time as currency. Instead of paying money, you exchange hours of teaching for hours of learning.",
+    },
+    {
+      id: 2,
+      category: "general",
+      q: "How does the time credit system work?",
+      a: "Every new user starts with 10 time credits (hours). When you teach someone for 1 hour, you earn 1 credit. When you learn from someone for 1 hour, you spend 1 credit. All skills are valued equally in terms of time.",
+    },
+    {
+      id: 3,
+      category: "general",
+      q: "Is TimeLink free to use?",
+      a: "Yes! TimeLink is completely free. We believe knowledge should be accessible to everyone. You only “pay” with your time by teaching others.",
+    },
+    {
+      id: 4,
+      category: "getting-started",
+      q: "How do I get started?",
+      a: "Simply sign up for a free account, complete your profile, add the skills you can teach, and browse available skills you'd like to learn. You'll start with 10 time credits to book your first sessions.",
+    },
+    {
+      id: 5,
+      category: "getting-started",
+      q: "What skills can I teach or learn?",
+      a: "Almost anything! From programming and design to cooking and music. If it's a skill that can be taught in a session, you can share it on TimeLink.",
+    },
+    {
+      id: 6,
+      category: "getting-started",
+      q: "How do I add a new skill?",
+      a: "Go to your Dashboard and click “Add Skill”. Fill in the details about what you're offering, set your availability, and publish it. Your skill will be visible to other users immediately.",
+    },
+    {
+      id: 7,
+      category: "sessions",
+      q: "How do sessions work?",
+      a: "Once you book a session, you'll receive the teacher's contact information. You can meet online (via video call) or in-person if both parties agree. After the session, both users confirm completion and leave ratings.",
+    },
+    {
+      id: 8,
+      category: "sessions",
+      q: "What happens if I can't attend a scheduled session?",
+      a: "You can cancel up to 24 hours before the session without penalty. Your time credits will be refunded. Late cancellations may result in credit deduction.",
+    },
+    {
+      id: 9,
+      category: "sessions",
+      q: "How long are sessions?",
+      a: "Most sessions are 1 hour, but you can book multiple hours for more in-depth learning. The duration is agreed upon when booking.",
+    },
+    {
+      id: 10,
+      category: "credits",
+      q: "What if I run out of time credits?",
+      a: "You can earn more credits by teaching others! Each hour you teach earns you 1 credit that you can use to learn something new.",
+    },
+    {
+      id: 11,
+      category: "credits",
+      q: "Can I buy time credits?",
+      a: "No, time credits cannot be purchased. This ensures fairness and maintains the community spirit of equal exchange. You earn credits by contributing your skills.",
+    },
+    {
+      id: 12,
+      category: "credits",
+      q: "Do time credits expire?",
+      a: "No! Your time credits never expire. You can save them up and use them whenever you're ready to learn something new.",
+    },
+    {
+      id: 13,
+      category: "safety",
+      q: "Is TimeLink safe?",
+      a: "Yes! We verify all users, maintain a rating system, and have community guidelines. We recommend meeting online for your first few sessions and always meeting in public places for in-person sessions.",
+    },
+    {
+      id: 14,
+      category: "safety",
+      q: "What if I have a problem with another user?",
+      a: "You can report any issues through our support system. We take all reports seriously and will investigate accordingly. Serious violations may result in account suspension.",
+    },
+    {
+      id: 15,
+      category: "technical",
+      q: "Can I use TimeLink on mobile?",
+      a: "Yes! TimeLink is fully responsive and works great on mobile devices. We're also working on dedicated mobile apps for iOS and Android.",
+    },
+    {
+      id: 16,
+      category: "technical",
+      q: "I forgot my password. What should I do?",
+      a: "Click “Forgot Password” on the login page. We'll send you a reset link to your email address. Make sure to check your spam folder if you don't see it.",
+    },
+  ],
+};

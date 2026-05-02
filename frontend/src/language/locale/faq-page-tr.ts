@@ -1,0 +1,118 @@
+/** FAQ page copy — Turkish (imported into `tr.ts`). */
+export const faqPageTr = {
+  heroTitle: "Sıkça sorulan sorular",
+  heroSubtitle: "TimeLink hakkında merak edilenlere hızlı yanıtlar",
+  searchPlaceholder: "Sorularda ara…",
+  emptyText: "Aramanızla eşleşen soru bulunamadı.",
+  ctaTitle: "Hâlâ sorunuz mu var?",
+  ctaText:
+    "Aradığınız yanıtı bulamadınız mı? Destek ekibimiz size yardımcı olmak için burada.",
+  ctaButton: "İletişime geçin",
+  categories: [
+    { id: "all", label: "Tüm sorular" },
+    { id: "general", label: "Genel" },
+    { id: "getting-started", label: "Başlangıç" },
+    { id: "sessions", label: "Oturumlar" },
+    { id: "credits", label: "Zaman kredileri" },
+    { id: "safety", label: "Güvenlik" },
+    { id: "technical", label: "Teknik" },
+  ],
+  items: [
+    {
+      id: 1,
+      category: "general",
+      q: "TimeLink nedir?",
+      a: "TimeLink, kullanıcıların becerileri zaman para birimiyle takas ettiği bir platformdur. Para ödemek yerine öğretme saatlerinizi öğrenme saatleriyle değiştirirsiniz.",
+    },
+    {
+      id: 2,
+      category: "general",
+      q: "Zaman kredisi sistemi nasıl işler?",
+      a: "Her yeni kullanıcı 10 zaman kredisi (saat) ile başlar. Birine 1 saat öğrettiğinizde 1 kredi kazanırsınız; birinden 1 saat öğrendiğinizde 1 kredi harcarsınız. Tüm beceriler süre açısından eşit değerlendirilir.",
+    },
+    {
+      id: 3,
+      category: "general",
+      q: "TimeLink ücretsiz mi?",
+      a: "Evet! TimeLink tamamen ücretsizdir. Bilginin herkese açık olması gerektiğine inanıyoruz. Ödeme yalnızca başkalarına öğreterek zamanınızla yapılır.",
+    },
+    {
+      id: 4,
+      category: "getting-started",
+      q: "Nasıl başlarım?",
+      a: "Ücretsiz hesap oluşturun, profilinizi tamamlayın, öğretebileceğiniz becerileri ekleyin ve öğrenmek istediğiniz becerilere göz atın. İlk oturumlarınızı ayırmak için 10 zaman kredisi ile başlarsınız.",
+    },
+    {
+      id: 5,
+      category: "getting-started",
+      q: "Hangi becerileri öğretebilir veya öğrenebilirim?",
+      a: "Neredeyse her şey! Programlama ve tasarımdan yemek ve müziğe kadar. Bir oturumda öğretilebilecek bir beceri ise TimeLink’te paylaşabilirsiniz.",
+    },
+    {
+      id: 6,
+      category: "getting-started",
+      q: "Yeni beceri nasıl eklerim?",
+      a: "Kontrol panelinize gidin ve “Beceri ekle”ye tıklayın. Sunduğunuz içeriği, müsaitliğinizi doldurun ve yayınlayın. Beceriniz diğer kullanıcılara hemen görünür.",
+    },
+    {
+      id: 7,
+      category: "sessions",
+      q: "Oturumlar nasıl işler?",
+      a: "Bir oturum ayırdığınızda eğitmenin iletişim bilgilerini alırsınız. İki taraf da kabul ederse çevrim içi (görüntülü görüşme) veya yüz yüze buluşabilirsiniz. Oturumdan sonra her iki taraf tamamlamayı onaylar ve değerlendirme bırakır.",
+    },
+    {
+      id: 8,
+      category: "sessions",
+      q: "Planlanmış bir oturuma katılamazsam ne olur?",
+      a: "Oturumdan en az 24 saat önce cezasız iptal edebilirsiniz; zaman kredileriniz iade edilir. Geç iptallerde kredi kesintisi olabilir.",
+    },
+    {
+      id: 9,
+      category: "sessions",
+      q: "Oturumlar ne kadar sürer?",
+      a: "Çoğu oturum 1 saattir; daha derinlemesine öğrenmek için birden fazla saat ayırabilirsiniz. Süre rezervasyon sırasında kararlaştırılır.",
+    },
+    {
+      id: 10,
+      category: "credits",
+      q: "Zaman kredim biterse ne yaparım?",
+      a: "Başkalarına öğreterek daha fazla kredi kazanabilirsiniz! Öğrettiğiniz her saat için 1 kredi kazanıp yeni şeyler öğrenmek için kullanabilirsiniz.",
+    },
+    {
+      id: 11,
+      category: "credits",
+      q: "Zaman kredisi satın alabilir miyim?",
+      a: "Hayır; zaman kredisi satın alınamaz. Bu, adilliği ve eşit takası korur. Kredileri yalnızca beceri katkınızla kazanırsınız.",
+    },
+    {
+      id: 12,
+      category: "credits",
+      q: "Zaman kredilerinin süresi doluyor mu?",
+      a: "Hayır! Kredilerinizin süresi dolmaz. İstediğiniz zaman biriktirip yeni bir şey öğrenmeye hazır olduğunuzda kullanırsınız.",
+    },
+    {
+      id: 13,
+      category: "safety",
+      q: "TimeLink güvenli mi?",
+      a: "Evet! Kullanıcıları doğrular, değerlendirme sistemi ve topluluk kurallarımız vardır. İlk oturumlar için çevrim içi buluşmayı; yüz yüze için ise kalabalık yerleri öneririz.",
+    },
+    {
+      id: 14,
+      category: "safety",
+      q: "Başka bir kullanıcıyla sorun yaşarsam ne yapmalıyım?",
+      a: "Sorunları destek sistemimiz üzerinden bildirebilirsiniz. Tüm bildirimleri ciddiye alır ve inceleriz. Ağır ihlaller hesap askıya alınmasına yol açabilir.",
+    },
+    {
+      id: 15,
+      category: "technical",
+      q: "TimeLink’i mobilde kullanabilir miyim?",
+      a: "Evet! TimeLink duyarlıdır ve mobilde iyi çalışır. iOS ve Android için özel uygulamalar üzerinde de çalışıyoruz.",
+    },
+    {
+      id: 16,
+      category: "technical",
+      q: "Şifremi unuttum, ne yapmalıyım?",
+      a: "Giriş sayfasında “Şifremi unuttum”a tıklayın. E-posta adresinize sıfırlama bağlantısı göndeririz. Görünmezse spam klasörünü kontrol edin.",
+    },
+  ],
+};

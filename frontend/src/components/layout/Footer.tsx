@@ -1,4 +1,4 @@
-import { Clock, Facebook, Twitter, Instagram, Linkedin, Mail } from "lucide-react";
+import { Clock, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { PATHS } from "../../navigation/paths";
@@ -74,26 +74,26 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  to={PATHS.contact}
+                  className="text-indigo-100/90 transition-colors duration-200 hover:text-white"
+                >
+                  {f.contactUs}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to={PATHS.faq}
+                  className="text-indigo-100/90 transition-colors duration-200 hover:text-white"
+                >
+                  {f.faq}
+                </Link>
+              </li>
+              <li>
+                <Link
                   to={PATHS.howItWorks}
                   className="text-indigo-100/90 transition-colors duration-200 hover:text-white"
                 >
                   {f.howItWorks}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={PATHS.browse}
-                  className="text-indigo-100/90 transition-colors duration-200 hover:text-white"
-                >
-                  {f.categories}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={PATHS.community}
-                  className="text-indigo-100/90 transition-colors duration-200 hover:text-white"
-                >
-                  {f.community}
                 </Link>
               </li>
             </ul>
@@ -124,23 +124,6 @@ export function Footer() {
                   className="text-indigo-100/90 transition-colors duration-200 hover:text-white"
                 >
                   {f.cancellationPolicy}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={PATHS.contact}
-                  className="text-indigo-100/90 transition-colors duration-200 hover:text-white"
-                >
-                  {f.contact}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={PATHS.support}
-                  className="inline-flex items-center gap-2 text-indigo-100/90 transition-colors duration-200 hover:text-white"
-                >
-                  <Mail className="h-4 w-4" />
-                  {f.support}
                 </Link>
               </li>
             </ul>

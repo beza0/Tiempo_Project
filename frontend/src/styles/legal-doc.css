@@ -1,0 +1,123 @@
+/* Legal documents — same visual language as About / Contact / FAQ (gradient hero + themed prose) */
+
+.legal-page {
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: var(--text-base);
+  line-height: var(--text-base--line-height);
+}
+
+.legal-content {
+  padding-top: 64px;
+}
+
+.legal-hero {
+  background: linear-gradient(135deg, #3b82f6 0%, #9333ea 100%);
+  padding: 80px 16px;
+  text-align: center;
+  color: var(--color-white);
+}
+
+.legal-hero-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.legal-hero-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  margin-bottom: 24px;
+}
+
+.legal-hero .icon-large {
+  width: 48px;
+  height: 48px;
+}
+
+.legal-hero-title {
+  font-size: var(--text-4xl);
+  line-height: var(--text-4xl--line-height);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  margin: 0 0 16px 0;
+}
+
+@media (min-width: 40rem) {
+  .legal-hero-title {
+    font-size: var(--text-5xl);
+    line-height: var(--text-5xl--line-height);
+  }
+}
+
+@media (min-width: 48rem) {
+  .legal-hero-title {
+    font-size: var(--text-6xl);
+    line-height: var(--text-6xl--line-height);
+  }
+}
+
+.legal-hero-subtitle {
+  font-size: var(--text-xl);
+  line-height: var(--text-xl--line-height);
+  margin: 0;
+  opacity: 0.95;
+}
+
+.legal-main {
+  padding: 60px 16px 80px;
+}
+
+.legal-section-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.legal-card {
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  padding: 32px;
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.06),
+    0 2px 4px -2px rgb(0 0 0 / 0.04);
+}
+
+.legal-prose {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.legal-paragraph {
+  font-size: var(--text-base);
+  line-height: 1.7;
+  color: var(--muted-foreground);
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 767px) {
+  .legal-hero {
+    padding: 60px 16px;
+  }
+
+  .legal-hero-subtitle {
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+  }
+
+  .legal-main {
+    padding: 40px 16px 60px;
+  }
+
+  .legal-card {
+    padding: 24px;
+  }
+}

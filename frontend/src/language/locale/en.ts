@@ -1,4 +1,6 @@
 /** English UI strings — keep keys in sync with `tr.ts`. */
+import { faqPageEn } from "./faq-page-en";
+
 export const en = {
   nav: {
     browseSkills: "Browse Skills",
@@ -84,6 +86,8 @@ export const en = {
       "The time-based skill exchange platform where everyone can learn and teach. Join our community and start trading skills today.",
     quickLinks: "Quick Links",
     aboutUs: "About Us",
+    contactUs: "Contact Us",
+    faq: "FAQ",
     howItWorks: "How It Works",
     categories: "Categories",
     community: "Community",
@@ -566,6 +570,50 @@ export const en = {
       "Join thousands of learners and teachers in our community",
     ctaButton: "Create Free Account",
   },
+  contactPage: {
+    heroTitle: "Get in Touch",
+    heroSubtitle:
+      "Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.",
+    infoTitle: "Contact Information",
+    infoIntro:
+      "Feel free to reach out through any of these channels. We're here to help!",
+    emailTitle: "Email",
+    emailLine1: "support@timelink.local",
+    emailLine2: "hello@timelink.local",
+    phoneTitle: "Phone",
+    phoneNumber: "+1 (555) 123-4567",
+    phoneHours: "Mon–Fri 9am–6pm EST",
+    officeTitle: "Office",
+    officeLine1: "123 Learning Street",
+    officeLine2: "San Francisco, CA 94102",
+    responseTitle: "Response Time",
+    responseText:
+      "We typically respond within 24 hours on business days. For urgent matters, please call us.",
+    formTitle: "Send us a Message",
+    labelName: "Full Name",
+    labelEmail: "Email Address",
+    labelSubject: "Subject",
+    labelMessage: "Message",
+    placeholderName: "John Doe",
+    placeholderEmail: "john@example.com",
+    placeholderMessage: "Tell us how we can help you…",
+    subjectPlaceholder: "Select a subject",
+    subjectGeneral: "General inquiry",
+    subjectSupport: "Technical support",
+    subjectBilling: "Billing question",
+    subjectPartnership: "Partnership",
+    subjectFeedback: "Feedback",
+    subjectOther: "Other",
+    sendButton: "Send Message",
+    successTitle: "Message sent!",
+    successText:
+      "Thank you for contacting us. We'll get back to you soon.",
+    faqSectionTitle: "Looking for quick answers?",
+    faqSectionText:
+      "Visit our FAQ page for answers to common questions.",
+    faqButton: "Visit FAQ",
+  },
+  faqPage: faqPageEn,
   addSkill: {
     title: "Add New Skill",
     subtitle: "Share your expertise with the TimeLink community",
@@ -743,8 +791,58 @@ export const en = {
   },
   staticSite: {
     about: {
-      title: "About TimeLink",
-      body: "TimeLink is a time-based skills exchange. Members earn and spend time credits by teaching and learning, without money. Our mission is to make peer learning accessible, fair, and community-driven.\n\nWe are building the tools, trust signals, and booking flows to connect instructors and learners—whether online or in person. Feedback from members shapes what we build next.",
+      heroTitle: "About TimeLink",
+      heroSubtitle:
+        "Building a community where time is the currency and skills are shared freely",
+      missionTitle: "Our Mission",
+      missionP1:
+        "TimeLink was born from a simple yet powerful idea: everyone has something valuable to teach, and everyone has something they want to learn. We believe that knowledge shouldn't be locked behind financial barriers.",
+      missionP2:
+        "Our platform enables people to exchange skills using time as currency. One hour of your time teaching equals one hour of learning from someone else. It's fair, it's simple, and it builds genuine connections.",
+      stats: [
+        { number: "10,000+", label: "Active Users" },
+        { number: "500+", label: "Skills Shared" },
+        { number: "50,000+", label: "Hours Exchanged" },
+        { number: "95%", label: "Satisfaction Rate" },
+      ],
+      valuesTitle: "Our Values",
+      values: [
+        {
+          title: "Community First",
+          body: "We believe in building strong, supportive communities where everyone contributes and benefits equally.",
+        },
+        {
+          title: "Fairness",
+          body: "Time-based exchange ensures everyone's contribution is valued equally, regardless of the skill.",
+        },
+        {
+          title: "Quality Learning",
+          body: "We ensure high-quality exchanges through our rating system and community guidelines.",
+        },
+        {
+          title: "Accessibility",
+          body: "Knowledge should be accessible to everyone, without financial barriers standing in the way.",
+        },
+        {
+          title: "Growth",
+          body: "We encourage continuous learning and personal development for all community members.",
+        },
+        {
+          title: "Time Respect",
+          body: "We value everyone's time equally and ensure smooth, respectful exchanges.",
+        },
+      ],
+      storyTitle: "Our Story",
+      storyParagraphs: [
+        "TimeLink started in 2024 when a group of educators and developers came together with a shared vision: to create a world where learning is accessible to everyone, regardless of their financial situation.",
+        "We noticed that traditional educational platforms often exclude talented individuals who want to learn but can't afford the fees. Meanwhile, many skilled people want to share their knowledge but don't know where to start.",
+        "By using time as currency, we've created a truly equitable platform. Whether you're teaching advanced programming or beginner cooking, your hour is worth the same. This fundamental principle has helped us build a diverse, engaged community of learners and teachers from all walks of life.",
+        "Today, TimeLink continues to grow, connecting thousands of people around the world, fostering meaningful connections, and proving that the best things in life – like knowledge and community – don't need a price tag.",
+      ],
+      ctaTitle: "Ready to Join Our Community?",
+      ctaSubtitle:
+        "Start sharing your skills and learning from others today. It's free, fair, and fun!",
+      ctaButton: "Get Started",
     },
     community: {
       title: "Community",
@@ -759,16 +857,22 @@ export const en = {
       body: "Need help? Check How it works, Cancellation & no-show policy, and the Instructor guide first. If you are stuck, email support@timelink.local with your account email and a short description.\n\nWe cannot mediate every dispute, but we take abuse and no-show patterns seriously and may restrict accounts to protect the community.",
     },
     terms: {
-      title: "Terms of Service (summary)",
-      body: "By using TimeLink you agree to use the platform in good faith: accurate profiles, respect for other members, and compliance with any applicable laws. Time credits are not legal tender and have no cash value. We may change features, suspend accounts for abuse, and update these terms with notice in the app.\n\nThis is a summary only—a full legal document should be reviewed with counsel before public launch.",
+      title: "Terms of Service",
+      heroSubtitle:
+        "The rules for using TimeLink fairly and safely—profiles, behavior, and time credits.",
+      body: "By creating an account and using TimeLink, you agree to use the service in good faith. You will provide accurate profile information, treat other members with respect, and follow applicable laws.\n\nTime credits are not legal tender, have no cash value, and cannot be redeemed for cash. They exist only to schedule and record skill exchanges inside the platform.\n\nWe may change or discontinue features, send notices in the app, and suspend or restrict accounts that abuse the platform, harass others, or repeatedly break these expectations.\n\nIf we update these terms, we will give reasonable notice where practical. Continued use after changes means you accept the updated terms.\n\nThis page is a plain-language summary for the project. Before a public launch, a complete Terms of Service should be drafted and reviewed with qualified legal counsel.",
     },
     privacy: {
-      title: "Privacy (summary)",
-      body: "We process account data to run bookings, messages, and notifications. Profile fields you add may be shown to other signed-in members as described in settings. We do not sell your data. You may request account deletion; some records may be retained as required for legal or security reasons.\n\nA complete privacy policy should be published before production; this is a high-level project summary.",
+      title: "Privacy Policy",
+      heroSubtitle:
+        "How we use account and profile data, what others can see, and how we protect your information.",
+      body: "TimeLink processes personal data that you provide and that is generated when you use the product—for example: account and login details, profile fields you choose to add, messages and notifications related to bookings, and technical data needed to keep the service secure and reliable.\n\nVisibility: Other signed-in members may see the profile information you choose to publish, according to what each screen and your settings describe (for example public profile fields and skill listings). We do not sell your personal information to third parties as a business model.\n\nCookies and security: We use cookies or similar technologies where needed for authentication, preferences, and security (such as keeping you signed in safely). Use a strong, unique password and do not share your login with others.\n\nRetention and deletion: You may request deletion of your account. Some information may be retained where the law, fraud prevention, or serious safety investigations require it.\n\nThis summary supports trust and transparency during development. A full, jurisdiction-specific privacy policy and data-processing agreements should be finalized before production.",
     },
     policyCancellation: {
-      title: "Cancellations, late cancel & no-show",
-      body: "The platform moves time credits only when the host marks a session as completed. Until then, your balance is not changed by a mere reservation. Use this policy as a clear expectation between members:\n\n— More than 2 hours before the scheduled start: cancellation is free of credit movement (nothing was debited yet in most cases; see in-app help).\n\n— Between 1 and 2 hours: treat as a late cancel; the other person should be informed promptly. The community may record patterns that affect trust.\n\n— Less than 1 hour or no-show: the learner may forfeit the session; hosts should document the case via Support. Repeated no-shows may result in account review.\n\nThis is a guideline, not a legal contract. The optional learner attendance acknowledgment in a thread helps both sides, but the instructor still completes the session in the product flow. Adjust thresholds in your deployment if needed.",
+      title: "Cancellations & no-show",
+      heroSubtitle:
+        "When you can cancel a session, what “late cancel” and no-show mean, and how time credits move.",
+      body: "Time credits on TimeLink are settled when the instructor marks a session as completed in the product flow. Until then, making or holding a booking does not permanently debit your balance in the same way as a final charge—see in-app help for the exact behavior in your build.\n\nUse this policy as a shared expectation between members:\n\n— More than 2 hours before the scheduled start: cancellation is typically free of credit movement (in most cases nothing has been finally debited yet; confirm in the app).\n\n— Between 1 and 2 hours before the start: treat this as a late cancellation. Tell the other person as soon as possible. Repeated patterns can affect trust signals and community standing.\n\n— Less than 1 hour before the start, or if someone does not show up (no-show): the session may be forfeited; the host may document the situation through Support. Repeated no-shows may lead to account review.\n\nOptional attendance acknowledgment in a thread can help both sides, but it does not replace the instructor’s “complete session” step for moving credits.\n\nThis is a community guideline, not a substitute for legal advice. Adjust time windows in your deployment if needed.",
     },
     instructorGuide: {
       title: "Instructor: approval & session flow",
