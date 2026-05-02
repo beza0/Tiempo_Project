@@ -18,6 +18,7 @@ export const tr: Translation = {
     notifUnreadTag: "Okunmadı",
     notifReadTag: "Okundu",
     profile: "Profil",
+    viewProfile: "Profili görüntüle",
     settings: "Ayarlar",
     signIn: "Giriş yap",
     getStarted: "Başla",

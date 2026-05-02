@@ -17,6 +17,7 @@ export const en = {
     notifUnreadTag: "Unread",
     notifReadTag: "Read",
     profile: "Profile",
+    viewProfile: "View Profile",
     settings: "Settings",
     signIn: "Sign In",
     getStarted: "Get Started",

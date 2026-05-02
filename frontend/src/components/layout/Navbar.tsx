@@ -1,5 +1,13 @@
 import { Button } from "../ui/button";
-import { Clock, Menu, Bell, MessageCircle } from "lucide-react";
+import {
+  Clock,
+  Menu,
+  Bell,
+  MessageCircle,
+  User,
+  Settings,
+  LogOut,
+} from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import type { PageType } from "../../App";
@@ -17,17 +25,41 @@ import {
 } from "../../api/notifications";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Sidebar } from "./Sidebar";
+import { fetchMyDashboard } from "../../api/user";
+
+function formatNavbarCreditHours(
+  minutes: number | null,
+  locale: string,
+): string {
+  if (minutes == null) return "—";
+  const h = Math.floor(minutes / 60);
+  return locale === "tr" ? `${h} sa` : `${h}h`;
+}
+
+/** İlk + soyad baş harfi; tek kelimede ilk iki harf. */
+function initialsFromName(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0]![0] ?? ""}${parts[parts.length - 1]![0] ?? ""}`.toUpperCase();
+  }
+  if (parts.length === 1 && parts[0]!.length >= 2) {
+    return parts[0]!.slice(0, 2).toUpperCase();
+  }
+  return parts[0]?.[0]?.toUpperCase() ?? "?";
+}
 
 interface NavbarProps {
   onNavigate?: (page: PageType) => void;
 }
 
 export function Navbar({ onNavigate }: NavbarProps) {
-  const { isAuthenticated, logout, token } = useAuth();
+  const { isAuthenticated, logout, token, user } = useAuth();
   const { t, locale } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [notifCount, setNotifCount] = useState(0);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [creditMinutes, setCreditMinutes] = useState<number | null>(null);
   const [notifUnreadOnly, setNotifUnreadOnly] = useState(false);
   const [notifications, setNotifications] = useState<NotificationDto[]>([]);
 
@@ -55,6 +87,25 @@ export function Navbar({ onNavigate }: NavbarProps) {
       window.clearInterval(interval);
     };
   }, [isAuthenticated, token, loadUnread]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !token) {
+      setCreditMinutes(null);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      try {
+        const dash = await fetchMyDashboard(token);
+        if (!cancelled) setCreditMinutes(dash.timeCreditMinutes);
+      } catch {
+        if (!cancelled) setCreditMinutes(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, token]);
 
   useEffect(() => {
     if (!notifOpen || !token) return;
@@ -90,6 +141,7 @@ export function Navbar({ onNavigate }: NavbarProps) {
     if (onNavigate) {
       onNavigate(page);
       setIsMenuOpen(false);
+      setIsProfileMenuOpen(false);
       window.scrollTo(0, 0);
     }
   };
@@ -97,6 +149,7 @@ export function Navbar({ onNavigate }: NavbarProps) {
   const handleLogout = () => {
     logout();
     setIsMenuOpen(false);
+    setIsProfileMenuOpen(false);
     handleNavigate("landing");
   };
 
@@ -134,27 +187,28 @@ export function Navbar({ onNavigate }: NavbarProps) {
   };
 
   const navLinkClass =
-    "cursor-pointer rounded-md px-2 py-1.5 shrink-0 whitespace-nowrap text-white/90 transition-all duration-150 hover:bg-white/30 hover:text-white hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)]";
+    "cursor-pointer shrink-0 whitespace-nowrap rounded-md px-2 py-1.5 text-gray-600 transition-colors hover:text-gray-900 dark:text-zinc-200 dark:hover:bg-zinc-900/70 dark:hover:text-white";
 
   const notificationsForPopover = notifUnreadOnly
     ? notifications.filter((n) => isNotificationUnread(n))
     : notifications;
   const displayedNotifCount = isAuthenticated ? notifCount : 0;
+  const profileDisplayName = user?.name?.trim() ?? "";
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/20 bg-gradient-to-r from-blue-500 to-purple-600 backdrop-blur-md">
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-md dark:border-[color:var(--border)] dark:bg-[color-mix(in_oklab,var(--background),black_14%)] dark:backdrop-blur-none dark:shadow-[inset_0_-1px_0_0_rgba(255,255,255,0.05)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 min-w-0 items-center justify-between gap-3">
             {/* Logo */}
             <button
               onClick={() => handleNavigate("landing")}
-              className="flex shrink-0 cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 transition-all hover:bg-white/10 hover:opacity-100"
+              className="flex shrink-0 cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 transition-opacity hover:opacity-80"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
                 <Clock className="h-6 w-6 text-white" />
               </div>
-              <span className="text-xl whitespace-nowrap text-white">
+              <span className="text-xl whitespace-nowrap text-gray-900 dark:text-zinc-50">
                 TimeLink
               </span>
             </button>
@@ -182,12 +236,6 @@ export function Navbar({ onNavigate }: NavbarProps) {
                   >
                     {t.nav.messages}
                   </button>
-                  <button
-                    onClick={() => handleNavigate("profile")}
-                    className={navLinkClass}
-                  >
-                    {t.nav.profile}
-                  </button>
                 </>
               )}
               <button
@@ -201,14 +249,22 @@ export function Navbar({ onNavigate }: NavbarProps) {
             {/* Auth cluster: bell outside nav-xl-row so it stays next to hamburger on narrow screens */}
             <div className="flex shrink-0 items-center gap-3 sm:gap-2 md:gap-3 pl-2 pr-[max(0.75rem,env(safe-area-inset-right))] sm:pl-1 sm:pr-[max(0rem,env(safe-area-inset-right))]">
               {isAuthenticated ? (
-                <Popover modal={false} open={notifOpen} onOpenChange={setNotifOpen}>
+                <>
+                <Popover
+                  modal={false}
+                  open={notifOpen}
+                  onOpenChange={(open) => {
+                    setNotifOpen(open);
+                    if (open) setIsProfileMenuOpen(false);
+                  }}
+                >
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      className="nav-notification-bell-btn inline-flex h-9 shrink-0 cursor-pointer items-center gap-2 rounded-full bg-white/20 px-3 py-1.5 text-white ring-1 ring-white/30 transition hover:bg-white/30 sm:mx-1"
+                      className="nav-notification-bell-btn relative z-30 inline-flex h-9 shrink-0 cursor-pointer items-center gap-2 rounded-full bg-gray-100 px-3 py-1.5 text-gray-700 transition hover:bg-gray-200 dark:bg-muted dark:text-foreground dark:hover:bg-accent sm:mx-1"
                       aria-label={t.nav.notifications}
                     >
-                      <Bell className="h-4 w-4 shrink-0 text-white" />
+                      <Bell className="h-4 w-4 shrink-0" />
                       <span className="text-sm font-semibold tabular-nums">
                         {displayedNotifCount > 99 ? "99+" : displayedNotifCount}
                       </span>
@@ -417,40 +473,131 @@ export function Navbar({ onNavigate }: NavbarProps) {
                     </div>
                   </PopoverContent>
                 </Popover>
+
+                <div className="relative z-30 flex min-w-0 max-w-full items-center gap-3">
+                  <div className="flex shrink-0 items-center gap-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 px-3 py-1.5 text-white">
+                    <Clock className="h-4 w-4 shrink-0" />
+                    <span className="text-sm font-medium tabular-nums">
+                      {formatNavbarCreditHours(creditMinutes, locale)}
+                    </span>
+                  </div>
+
+                  <div className="relative min-w-0 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsProfileMenuOpen((open) => !open);
+                        setNotifOpen(false);
+                      }}
+                      className="relative z-30 flex max-w-[min(100vw-12rem,280px)] min-w-0 items-center gap-2 rounded-lg px-3 py-1.5 transition-colors hover:bg-gray-100 dark:hover:bg-zinc-900"
+                      aria-expanded={isProfileMenuOpen}
+                      aria-haspopup="menu"
+                      aria-label={t.nav.profile}
+                    >
+                      {user?.avatarUrl ? (
+                        <img
+                          src={user.avatarUrl}
+                          alt=""
+                          className="h-8 w-8 shrink-0 rounded-full object-cover ring-1 ring-black/5 dark:ring-white/10"
+                        />
+                      ) : (
+                        <span
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-[11px] font-semibold uppercase leading-none tracking-tight text-white sm:text-xs"
+                          aria-hidden
+                        >
+                          {initialsFromName(user?.name ?? "")}
+                        </span>
+                      )}
+                      <span className="hidden max-w-[10rem] truncate text-sm font-medium text-gray-900 sm:inline dark:text-zinc-100">
+                        {profileDisplayName}
+                      </span>
+                    </button>
+
+                    {isProfileMenuOpen ? (
+                      <>
+                        <div
+                          className="fixed inset-0 z-10"
+                          aria-hidden
+                          onClick={() => setIsProfileMenuOpen(false)}
+                        />
+                        <div className="absolute right-0 top-full z-20 mt-3 w-[min(28rem,calc(100vw-2rem))] rounded-2xl border border-border bg-popover px-6 py-4 text-popover-foreground shadow-lg ring-1 ring-black/5 dark:shadow-black/50 dark:ring-white/10">
+                          <div className="flex flex-col gap-3">
+                            <button
+                              type="button"
+                              className="flex w-full items-center gap-3 whitespace-nowrap rounded-xl py-2 text-left text-sm font-medium text-popover-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                              onClick={() => {
+                                setIsProfileMenuOpen(false);
+                                handleNavigate("profile");
+                              }}
+                            >
+                              <User
+                                className="h-5 w-5 shrink-0 text-muted-foreground"
+                                strokeWidth={1.5}
+                              />
+                              {t.nav.viewProfile}
+                            </button>
+                            <button
+                              type="button"
+                              className="flex w-full items-center gap-3 whitespace-nowrap rounded-xl py-2 text-left text-sm font-medium text-popover-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                              onClick={() => {
+                                setIsProfileMenuOpen(false);
+                                handleNavigate("settings");
+                              }}
+                            >
+                              <Settings
+                                className="h-5 w-5 shrink-0 text-muted-foreground"
+                                strokeWidth={1.5}
+                              />
+                              {t.nav.settings}
+                            </button>
+                            <div className="border-t border-border" />
+                            <button
+                              type="button"
+                              className="flex w-full items-center gap-3 whitespace-nowrap rounded-xl py-2 text-left text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 dark:text-red-500 dark:hover:bg-red-950/45"
+                              onClick={() => handleLogout()}
+                            >
+                              <LogOut
+                                className="h-5 w-5 shrink-0 text-red-600 dark:text-red-500"
+                                strokeWidth={1.5}
+                                aria-hidden
+                              />
+                              <span className="text-red-600 dark:text-red-500">
+                                {t.nav.logout}
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
+                </div>
+                </>
               ) : null}
 
               <div className="nav-xl-row shrink-0 gap-3">
-                {isAuthenticated ? (
-                  <Button
-                    variant="ghost"
-                    className="cursor-pointer text-white/90 hover:bg-white/15 hover:text-white"
-                    onClick={handleLogout}
-                  >
-                    {t.nav.logout}
-                  </Button>
-                ) : (
+                {!isAuthenticated ? (
                   <>
                     <Button
                       variant="ghost"
-                      className="cursor-pointer text-white/90 hover:bg-white/15 hover:text-white"
+                      className="cursor-pointer text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-zinc-200 dark:hover:bg-zinc-900"
                       onClick={() => handleNavigate("login")}
                     >
                       {t.nav.signIn}
                     </Button>
                     <Button
                       onClick={() => handleNavigate("signup")}
-                      className="cursor-pointer whitespace-nowrap bg-gradient-to-r from-blue-500 to-purple-600 text-white"
+                      className="cursor-pointer whitespace-nowrap bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-sm"
                     >
                       {t.nav.getStarted}
                     </Button>
                   </>
-                )}
+                ) : null}
               </div>
 
               {/* Narrow screens: hamburger → sidebar */}
               <button
                 type="button"
-                className="nav-xl-menu-btn shrink-0 rounded-lg p-2 text-white hover:bg-white/15 hover:text-white"
+                className="nav-xl-menu-btn shrink-0 rounded-lg p-2 text-gray-700 hover:bg-gray-100 dark:text-zinc-200 dark:hover:bg-zinc-900"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 aria-label="Toggle menu"
                 aria-expanded={isMenuOpen}
