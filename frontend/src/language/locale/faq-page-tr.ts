@@ -1,7 +1,7 @@
 /** FAQ page copy — Turkish (imported into `tr.ts`). */
 export const faqPageTr = {
   heroTitle: "Sıkça sorulan sorular",
-  heroSubtitle: "TimeLink hakkında merak edilenlere hızlı yanıtlar",
+  heroSubtitle: "Tiempo hakkında merak edilenlere hızlı yanıtlar",
   searchPlaceholder: "Sorularda ara…",
   emptyText: "Aramanızla eşleşen soru bulunamadı.",
   ctaTitle: "Hâlâ sorunuz mu var?",
@@ -21,8 +21,8 @@ export const faqPageTr = {
     {
       id: 1,
       category: "general",
-      q: "TimeLink nedir?",
-      a: "TimeLink, kullanıcıların becerileri zaman para birimiyle takas ettiği bir platformdur. Para ödemek yerine öğretme saatlerinizi öğrenme saatleriyle değiştirirsiniz.",
+      q: "Tiempo nedir?",
+      a: "Tiempo, kullanıcıların becerileri zaman para birimiyle takas ettiği bir platformdur. Para ödemek yerine öğretme saatlerinizi öğrenme saatleriyle değiştirirsiniz.",
     },
     {
       id: 2,
@@ -33,8 +33,8 @@ export const faqPageTr = {
     {
       id: 3,
       category: "general",
-      q: "TimeLink ücretsiz mi?",
-      a: "Evet! TimeLink tamamen ücretsizdir. Bilginin herkese açık olması gerektiğine inanıyoruz. Ödeme yalnızca başkalarına öğreterek zamanınızla yapılır.",
+      q: "Tiempo ücretsiz mi?",
+      a: "Evet! Tiempo tamamen ücretsizdir. Bilginin herkese açık olması gerektiğine inanıyoruz. Ödeme yalnızca başkalarına öğreterek zamanınızla yapılır.",
     },
     {
       id: 4,
@@ -46,7 +46,7 @@ export const faqPageTr = {
       id: 5,
       category: "getting-started",
       q: "Hangi becerileri öğretebilir veya öğrenebilirim?",
-      a: "Neredeyse her şey! Programlama ve tasarımdan yemek ve müziğe kadar. Bir oturumda öğretilebilecek bir beceri ise TimeLink’te paylaşabilirsiniz.",
+      a: "Neredeyse her şey! Programlama ve tasarımdan yemek ve müziğe kadar. Bir oturumda öğretilebilecek bir beceri ise Tiempo’te paylaşabilirsiniz.",
     },
     {
       id: 6,
@@ -93,7 +93,7 @@ export const faqPageTr = {
     {
       id: 13,
       category: "safety",
-      q: "TimeLink güvenli mi?",
+      q: "Tiempo güvenli mi?",
       a: "Evet! Kullanıcıları doğrular, değerlendirme sistemi ve topluluk kurallarımız vardır. İlk oturumlar için çevrim içi buluşmayı; yüz yüze için ise kalabalık yerleri öneririz.",
     },
     {
@@ -105,8 +105,8 @@ export const faqPageTr = {
     {
       id: 15,
       category: "technical",
-      q: "TimeLink’i mobilde kullanabilir miyim?",
-      a: "Evet! TimeLink duyarlıdır ve mobilde iyi çalışır. iOS ve Android için özel uygulamalar üzerinde de çalışıyoruz.",
+      q: "Tiempo’i mobilde kullanabilir miyim?",
+      a: "Evet! Tiempo duyarlıdır ve mobilde iyi çalışır. iOS ve Android için özel uygulamalar üzerinde de çalışıyoruz.",
     },
     {
       id: 16,

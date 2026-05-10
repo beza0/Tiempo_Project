@@ -1,7 +1,7 @@
 {
   "name": "timelink-monorepo",
   "private": true,
-  "description": "TimeLink — Vite + React frontend, Spring Boot backend",
+  "description": "Tiempo — Vite + React frontend, Spring Boot backend",
   "scripts": {
     "dev": "npm run dev --prefix frontend",
     "build": "npm run build --prefix frontend",

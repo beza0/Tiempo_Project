@@ -2,7 +2,6 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Checkbox } from "../components/ui/checkbox";
-import { Clock } from "lucide-react";
 import type { PageType } from "../App";
 import { useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -12,6 +11,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { loginRequest, resendVerificationEmail, socialLoginRequest } from "../api/auth";
 import { apiErrorDisplayMessage } from "../api/client";
 import { beginFacebookLogin, beginGoogleLogin } from "../lib/socialAuth";
+import { BrandLogo } from "../components/common/BrandLogo";
 
 interface LoginPageProps {
   onNavigate?: (page: PageType) => void;
@@ -132,10 +132,10 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
             onClick={() => onNavigate?.("landing")}
             className="inline-flex items-center gap-2 mb-4"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-card text-primary shadow-sm">
-              <Clock className="h-7 w-7 text-primary" />
+            <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl bg-white shadow-sm">
+              <BrandLogo className="h-full w-full object-cover" />
             </div>
-            <span className="text-2xl text-white">TimeLink</span>
+            <span className="text-2xl text-white">Tiempo</span>
           </button>
           <h1 className="text-3xl text-white mb-2">{a.welcome}</h1>
           <p className="text-white/80">{a.subtitle}</p>

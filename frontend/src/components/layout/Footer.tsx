@@ -1,7 +1,8 @@
-import { Clock, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { PATHS } from "../../navigation/paths";
+import { BrandLogo } from "../common/BrandLogo";
 
 export function Footer() {
   const { t } = useLanguage();
@@ -14,9 +15,9 @@ export function Footer() {
           <div className="col-span-1 md:col-span-2">
             <div className="mb-4 flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm">
-                <Clock className="h-6 w-6 text-white" />
+                <BrandLogo className="h-8 w-8 object-contain" />
               </div>
-              <span className="text-2xl font-semibold">TimeLink</span>
+              <span className="text-2xl font-semibold">Tiempo</span>
             </div>
             <p className="mb-4 max-w-md text-indigo-100/90">
               {f.tagline}

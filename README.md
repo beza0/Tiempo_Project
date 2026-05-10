@@ -1,4 +1,4 @@
-# TimeLink
+# Tiempo
 
 Monorepo: **frontend** (Vite + React + TypeScript) ve **backend** (Spring Boot + PostgreSQL).
 

@@ -119,10 +119,10 @@ public class RegistrationMailService {
             SimpleMailMessage msg = new SimpleMailMessage();
             msg.setFrom(from);
             msg.setTo(email);
-            msg.setSubject("TimeLink — doğrulama kodunuz");
+            msg.setSubject("Tiempo — doğrulama kodunuz");
             msg.setText(
                     "Merhaba " + fullName + ",\n\n"
-                            + "TimeLink hesabınızı tamamlamak için doğrulama kodunuz:\n\n"
+                            + "Tiempo hesabınızı tamamlamak için doğrulama kodunuz:\n\n"
                             + "    " + code + "\n\n"
                             + "Bu kodu uygulamada girerek hesabınızı açabilirsiniz.\n"
                             + "Uygulama adresi: " + publicBase + "\n\n"
@@ -155,10 +155,10 @@ public class RegistrationMailService {
             SimpleMailMessage msg = new SimpleMailMessage();
             msg.setFrom(from);
             msg.setTo(to);
-            msg.setSubject("TimeLink — kaydınız tamamlandı");
+            msg.setSubject("Tiempo — kaydınız tamamlandı");
             msg.setText(
                     "Merhaba " + user.getFullName() + ",\n\n"
-                            + "TimeLink'e hoş geldiniz. Hesabınız oluşturuldu.\n\n"
+                            + "Tiempo'e hoş geldiniz. Hesabınız oluşturuldu.\n\n"
                             + "Uygulama: " + publicBase + "\n\n"
                             + "Bu e-postayı siz talep etmediyseniz yok sayabilirsiniz.\n"
             );

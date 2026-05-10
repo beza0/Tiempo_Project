@@ -1,7 +1,7 @@
 /** FAQ page copy — English (imported into `en.ts` for `Translation` typing). */
 export const faqPageEn = {
   heroTitle: "Frequently Asked Questions",
-  heroSubtitle: "Find answers to common questions about TimeLink",
+  heroSubtitle: "Find answers to common questions about Tiempo",
   searchPlaceholder: "Search questions…",
   emptyText: "No questions found matching your search.",
   ctaTitle: "Still have questions?",
@@ -21,8 +21,8 @@ export const faqPageEn = {
     {
       id: 1,
       category: "general",
-      q: "What is TimeLink?",
-      a: "TimeLink is a skill exchange platform where users trade skills using time as currency. Instead of paying money, you exchange hours of teaching for hours of learning.",
+      q: "What is Tiempo?",
+      a: "Tiempo is a skill exchange platform where users trade skills using time as currency. Instead of paying money, you exchange hours of teaching for hours of learning.",
     },
     {
       id: 2,
@@ -33,8 +33,8 @@ export const faqPageEn = {
     {
       id: 3,
       category: "general",
-      q: "Is TimeLink free to use?",
-      a: "Yes! TimeLink is completely free. We believe knowledge should be accessible to everyone. You only “pay” with your time by teaching others.",
+      q: "Is Tiempo free to use?",
+      a: "Yes! Tiempo is completely free. We believe knowledge should be accessible to everyone. You only “pay” with your time by teaching others.",
     },
     {
       id: 4,
@@ -46,7 +46,7 @@ export const faqPageEn = {
       id: 5,
       category: "getting-started",
       q: "What skills can I teach or learn?",
-      a: "Almost anything! From programming and design to cooking and music. If it's a skill that can be taught in a session, you can share it on TimeLink.",
+      a: "Almost anything! From programming and design to cooking and music. If it's a skill that can be taught in a session, you can share it on Tiempo.",
     },
     {
       id: 6,
@@ -93,7 +93,7 @@ export const faqPageEn = {
     {
       id: 13,
       category: "safety",
-      q: "Is TimeLink safe?",
+      q: "Is Tiempo safe?",
       a: "Yes! We verify all users, maintain a rating system, and have community guidelines. We recommend meeting online for your first few sessions and always meeting in public places for in-person sessions.",
     },
     {
@@ -105,8 +105,8 @@ export const faqPageEn = {
     {
       id: 15,
       category: "technical",
-      q: "Can I use TimeLink on mobile?",
-      a: "Yes! TimeLink is fully responsive and works great on mobile devices. We're also working on dedicated mobile apps for iOS and Android.",
+      q: "Can I use Tiempo on mobile?",
+      a: "Yes! Tiempo is fully responsive and works great on mobile devices. We're also working on dedicated mobile apps for iOS and Android.",
     },
     {
       id: 16,

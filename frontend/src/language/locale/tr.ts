@@ -100,7 +100,7 @@ export const tr: Translation = {
     support: "Destek",
     cancellationPolicy: "İptal ve no-show",
     copyright:
-      "TimeLink. Tüm hakları saklıdır. Öğrenmeye tutkuyla.",
+      "Tiempo. Tüm hakları saklıdır. Öğrenmeye tutkuyla.",
   },
   landing: {
     hero: {
@@ -117,7 +117,7 @@ export const tr: Translation = {
       statHours: "Programına göre öğren",
     },
     features: {
-      title: "TimeLink nasıl çalışır",
+      title: "Tiempo nasıl çalışır",
       subtitle:
         "Beceri takasına başlamak ve topluluğunuzu oluşturmak için üç basit adım",
       items: [
@@ -514,7 +514,7 @@ export const tr: Translation = {
     reviewsSummary: "{{rating}} ortalama · {{count}} yorum",
   },
   howItWorks: {
-    heroTitle: "TimeLink nasıl çalışır",
+    heroTitle: "Tiempo nasıl çalışır",
     heroSubtitle:
       "Beceri takası ve topluluk oluşturmak için basit ve adil bir yol",
     getStartedFree: "Ücretsiz başla",
@@ -548,7 +548,7 @@ export const tr: Translation = {
     ],
     creditsTitle: "Zaman kredilerini anlamak",
     creditsIntro:
-      "Zaman kredileri TimeLink'in para birimidir. Sistem son derece basit:",
+      "Zaman kredileri Tiempo'in para birimidir. Sistem son derece basit:",
     teachHour: "1 saat öğretim = 1 zaman kredisi",
     teachHourSub: "Bilgini paylaşarak kredi kazan",
     learnHour: "1 zaman kredisi = 1 saat öğrenme",
@@ -556,9 +556,9 @@ export const tr: Translation = {
     bonusTitle: "Yeni üye bonusu",
     bonusCredits: "5 ücretsiz zaman kredisi kazan",
     bonusDesc:
-      "TimeLink'e katıldığında hemen öğrenmeye başla. Başlamak için öğretmen olmana gerek yok!",
+      "Tiempo'e katıldığında hemen öğrenmeye başla. Başlamak için öğretmen olmana gerek yok!",
     claimBonus: "Bonusunu al",
-    whyTitle: "Neden TimeLink?",
+    whyTitle: "Neden Tiempo?",
     benefits: [
       "Para gerekmez — zamanı zamana takas et",
       "Topluluğundaki tutkulu uzmanlardan öğren",
@@ -575,14 +575,14 @@ export const tr: Translation = {
       },
       {
         q: "Öğretecek becerim yoksa?",
-        a: "Herkesin paylaşacak bir şeyi vardır! Yemek, bahçecilik, konuştuğun bir dil veya mesleki uzmanlık — TimeLink'te tüm beceriler değerlidir.",
+        a: "Herkesin paylaşacak bir şeyi vardır! Yemek, bahçecilik, konuştuğun bir dil veya mesleki uzmanlık — Tiempo'te tüm beceriler değerlidir.",
       },
       {
         q: "Hem öğrenip hem öğretebilir miyim?",
         a: "Kesinlikle! Üyelerimizin çoğu hem öğretmen hem öğrenci. Öğretirken aynı anda yeni şeyler öğrenebilirsin.",
       },
       {
-        q: "TimeLink ücretsiz mi?",
+        q: "Tiempo ücretsiz mi?",
         a: "Evet! Hesap oluşturmak ve beceri takası tamamen ücretsiz. Öğrenmeyi herkes için erişilebilir kılmayı hedefliyoruz.",
       },
       {
@@ -644,7 +644,7 @@ export const tr: Translation = {
   faqPage: faqPageTr,
   addSkill: {
     title: "Yeni beceri ekle",
-    subtitle: "Uzmanlığını TimeLink topluluğuyla paylaş",
+    subtitle: "Uzmanlığını Tiempo topluluğuyla paylaş",
     skillTitle: "Beceri başlığı *",
     skillTitlePh: "örn. Başlangıç gitar dersleri",
     category: "Kategori *",
@@ -823,12 +823,12 @@ export const tr: Translation = {
   },
   staticSite: {
     about: {
-      heroTitle: "TimeLink hakkında",
+      heroTitle: "Tiempo hakkında",
       heroSubtitle:
         "Zamanın para birimi, becerilerin özgürce paylaşıldığı bir topluluk kuruyoruz",
       missionTitle: "Misyonumuz",
       missionP1:
-        "TimeLink güçlü ama basit bir fikirden doğdu: herkesin öğretebileceği bir şey ve öğrenmek istediği bir şey var. Bilginin maddi engellerin arkasında kilitli olmaması gerektiğine inanıyoruz.",
+        "Tiempo güçlü ama basit bir fikirden doğdu: herkesin öğretebileceği bir şey ve öğrenmek istediği bir şey var. Bilginin maddi engellerin arkasında kilitli olmaması gerektiğine inanıyoruz.",
       missionP2:
         "Platformumuzda beceriler zaman para birimiyle takas edilir. Bir saat öğretmenlik, başka birinden bir saat öğrenmeye eşittir. Adil, sade ve gerçek bağlar kurar.",
       stats: [
@@ -866,10 +866,10 @@ export const tr: Translation = {
       ],
       storyTitle: "Hikayemiz",
       storyParagraphs: [
-        "TimeLink, 2024’te eğitimciler ve geliştiricilerin ortak bir vizyonla bir araya gelmesiyle başladı: öğrenmenin maddi durumdan bağımsız olarak herkese erişilebilir olduğu bir dünya.",
+        "Tiempo, 2024’te eğitimciler ve geliştiricilerin ortak bir vizyonla bir araya gelmesiyle başladı: öğrenmenin maddi durumdan bağımsız olarak herkese erişilebilir olduğu bir dünya.",
         "Geleneksel eğitim platformlarının, öğrenmek isteyen ama ücreti karşılayamayan insanları dışarıda bıraktığını gördük. Öte yandan birçok yetenekli insan bilgisini paylaşmak istiyor ama nereden başlayacağını bilmiyor.",
         "Zamanı para birimi olarak kullanarak gerçekten eşitlikçi bir platform oluşturduk. İster ileri düzey programlama ister başlangıç seviyesi yemek pişirme öğretin—saatiniz aynı değerde. Bu ilke, hayatın her alanından öğrenci ve eğitmenlerden oluşan çeşitli ve aktif bir topluluk kurmamıza yardımcı oldu.",
-        "Bugün TimeLink büyümeye devam ediyor; dünya çapında binlerce insanı bir araya getiriyor, anlamlı bağlar kuruyor ve bilgi ile topluluk gibi hayattaki en iyi şeylerin etiket gerektirmediğini gösteriyor.",
+        "Bugün Tiempo büyümeye devam ediyor; dünya çapında binlerce insanı bir araya getiriyor, anlamlı bağlar kuruyor ve bilgi ile topluluk gibi hayattaki en iyi şeylerin etiket gerektirmediğini gösteriyor.",
       ],
       ctaTitle: "Topluluğumuza katılmaya hazır mısınız?",
       ctaSubtitle:
@@ -891,14 +891,14 @@ export const tr: Translation = {
     terms: {
       title: "Kullanım şartları",
       heroSubtitle:
-        "TimeLink’i adil ve güvenli kullanma kuralları: profil, davranış ve zaman kredileri.",
-      body: "TimeLink’te hesap oluşturup hizmeti kullanarak, platformu iyi niyetle kullanmayı kabul edersiniz. Profil bilgilerinizi doğru tutar, diğer üyelere saygılı davranır ve yürürlükteki yasalara uyarsınız.\n\nZaman kredileri yasal para değildir, nakde çevrilemez ve nakit değeri yoktur; yalnızca uygulama içinde beceri takası ve oturum akışını düzenlemek içindir.\n\nÖzellikleri değiştirebilir, kötüye kullanım, taciz veya tekrarlayan ihlallerde hesapları askıya alabilir veya kısıtlayabilir, gerekli durumlarda uygulama içi bildirimlerle haber verebiliriz.\n\nŞartları güncellersek makul ölçüde bildirim yapılır; güncellemeden sonra kullanımı sürdürmek güncel şartları kabul sayılır.\n\nBu metin geliştirme amaçlı sade bir özettir. Canlıya çıkmadan önce tam hukuki metin uzman avukatla hazırlanmalıdır.",
+        "Tiempo’i adil ve güvenli kullanma kuralları: profil, davranış ve zaman kredileri.",
+      body: "Tiempo’te hesap oluşturup hizmeti kullanarak, platformu iyi niyetle kullanmayı kabul edersiniz. Profil bilgilerinizi doğru tutar, diğer üyelere saygılı davranır ve yürürlükteki yasalara uyarsınız.\n\nZaman kredileri yasal para değildir, nakde çevrilemez ve nakit değeri yoktur; yalnızca uygulama içinde beceri takası ve oturum akışını düzenlemek içindir.\n\nÖzellikleri değiştirebilir, kötüye kullanım, taciz veya tekrarlayan ihlallerde hesapları askıya alabilir veya kısıtlayabilir, gerekli durumlarda uygulama içi bildirimlerle haber verebiliriz.\n\nŞartları güncellersek makul ölçüde bildirim yapılır; güncellemeden sonra kullanımı sürdürmek güncel şartları kabul sayılır.\n\nBu metin geliştirme amaçlı sade bir özettir. Canlıya çıkmadan önce tam hukuki metin uzman avukatla hazırlanmalıdır.",
     },
     privacy: {
       title: "Gizlilik politikası",
       heroSubtitle:
         "Hesap ve profil verilerinin kullanımı, görünürlük ve güvenlik hakkında özet bilgi.",
-      body: "TimeLink; hesap ve oturum bilgilerinizi, eklediğiniz profil alanlarını, rezervasyon ve mesajlaşma ile bildirim süreçlerinde oluşan verileri ve hizmeti güvenli çalıştırmak için gerekli teknik kayıtları işleyebilir.\n\nGörünürlük: Yayınladığınız profil bilgileri, her ekranda ve ayarlarınızda belirtildiği şekilde diğer oturum açmış üyelere gösterilebilir. Kişisel verilerinizi üçüncü taraflara “satmak” iş modelimiz değildir.\n\nÇerezler ve güvenlik: Oturum açma, tercihler ve güvenlik için gerekli olduğu ölçüde çerez veya benzeri teknolojiler kullanılabilir. Güçlü ve benzersiz bir şifre kullanın; hesap bilgilerinizi paylaşmayın.\n\nSaklama ve silme: Hesap silme talebinde bulunabilirsiniz. Yasal zorunluluk, ciddi güvenlik veya dolandırıcılık önleme için bazı kayıtların tutulması gerekebilir.\n\nBu özet, geliştirme aşamasında şeffaflık içindir. Canlı ortam için ülkeye özgü tam gizlilik politikası ve veri işleme düzenlemeleri yayımlanmalıdır.",
+      body: "Tiempo; hesap ve oturum bilgilerinizi, eklediğiniz profil alanlarını, rezervasyon ve mesajlaşma ile bildirim süreçlerinde oluşan verileri ve hizmeti güvenli çalıştırmak için gerekli teknik kayıtları işleyebilir.\n\nGörünürlük: Yayınladığınız profil bilgileri, her ekranda ve ayarlarınızda belirtildiği şekilde diğer oturum açmış üyelere gösterilebilir. Kişisel verilerinizi üçüncü taraflara “satmak” iş modelimiz değildir.\n\nÇerezler ve güvenlik: Oturum açma, tercihler ve güvenlik için gerekli olduğu ölçüde çerez veya benzeri teknolojiler kullanılabilir. Güçlü ve benzersiz bir şifre kullanın; hesap bilgilerinizi paylaşmayın.\n\nSaklama ve silme: Hesap silme talebinde bulunabilirsiniz. Yasal zorunluluk, ciddi güvenlik veya dolandırıcılık önleme için bazı kayıtların tutulması gerekebilir.\n\nBu özet, geliştirme aşamasında şeffaflık içindir. Canlı ortam için ülkeye özgü tam gizlilik politikası ve veri işleme düzenlemeleri yayımlanmalıdır.",
     },
     policyCancellation: {
       title: "İptal, geç iptal ve no-show",

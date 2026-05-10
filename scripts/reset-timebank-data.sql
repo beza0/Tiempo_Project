@@ -1,4 +1,4 @@
--- TimeLink yerel / Docker PostgreSQL: tüm kullanıcı ve bağlı kayıtları siler.
+-- Tiempo yerel / Docker PostgreSQL: tüm kullanıcı ve bağlı kayıtları siler.
 -- flyway_schema_history tablosuna dokunmaz; migrasyon geçmişi kalır.
 \set ON_ERROR_STOP on
 

@@ -15,7 +15,7 @@
 
 /* Hero — same scale as HowItWorksPage hero (text-4xl → sm:text-5xl → md:text-6xl) */
 .about-hero {
-  background: linear-gradient(135deg, #3b82f6 0%, #9333ea 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
   padding: 80px 16px;
   text-align: center;
   color: var(--color-white);
@@ -140,7 +140,7 @@
 }
 
 .about-stat-card {
-  background: linear-gradient(135deg, #3b82f6 0%, #9333ea 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
   padding: 24px;
   border-radius: var(--radius-2xl);
   text-align: center;
@@ -228,15 +228,15 @@
 }
 
 .value-icon-blue {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
 }
 
 .value-icon-purple {
-  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
 }
 
 .value-icon-indigo {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
 }
 
 /* Card titles — same band as HowItWorks step cards (text-2xl) */
@@ -269,7 +269,7 @@
 
 /* CTA — mirror HowItWorks gradient sections */
 .about-cta {
-  background: linear-gradient(135deg, #3b82f6 0%, #9333ea 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
   padding: 80px 16px;
   text-align: center;
   color: var(--color-white);

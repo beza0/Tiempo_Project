@@ -27,6 +27,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Sidebar } from "./Sidebar";
 import { fetchMyDashboard, fetchMyProfile } from "../../api/user";
+import { BrandLogo } from "../common/BrandLogo";
 
 function formatNavbarCreditHours(
   minutes: number | null,
@@ -296,11 +297,11 @@ export function Navbar({ onNavigate }: NavbarProps) {
               onClick={() => handleNavigate("landing")}
               className="flex shrink-0 cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 transition-opacity hover:opacity-80"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
-                <Clock className="h-6 w-6 text-white" />
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white">
+                <BrandLogo className="h-8 w-8 object-contain" />
               </div>
               <span className="text-xl whitespace-nowrap text-gray-900 dark:text-zinc-50">
-                TimeLink
+                Tiempo
               </span>
             </button>
 
@@ -639,7 +640,7 @@ export function Navbar({ onNavigate }: NavbarProps) {
                           aria-hidden
                           onClick={() => setIsProfileMenuOpen(false)}
                         />
-                        <div className="absolute right-0 top-full z-20 mt-3 w-[min(28rem,calc(100vw-2rem))] rounded-2xl border border-border bg-popover px-6 py-4 text-popover-foreground shadow-lg ring-1 ring-black/5 dark:shadow-black/50 dark:ring-white/10">
+                        <div className="fixed right-4 top-[4.75rem] z-20 w-[min(28rem,calc(100vw-2rem))] rounded-2xl border border-border bg-popover px-6 py-4 text-popover-foreground shadow-lg ring-1 ring-black/5 sm:right-6 lg:right-8 dark:shadow-black/50 dark:ring-white/10">
                           <div className="flex flex-col gap-3">
                             <button
                               type="button"

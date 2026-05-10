@@ -79,7 +79,7 @@ public class SkillCoverProxyService {
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(Duration.ofSeconds(120))
-                .header(HttpHeaders.USER_AGENT, "TimeLink/1.0 (skill-cover-proxy)")
+                .header(HttpHeaders.USER_AGENT, "Tiempo/1.0 (skill-cover-proxy)")
                 .GET()
                 .build();
         return httpClient.send(req, HttpResponse.BodyHandlers.ofByteArray());

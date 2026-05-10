@@ -14,7 +14,7 @@
 }
 
 .contact-hero {
-  background: linear-gradient(135deg, #3b82f6 0%, #9333ea 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
   padding: 80px 16px;
   text-align: center;
   color: var(--color-white);
@@ -155,15 +155,15 @@
 }
 
 .contact-info-icon-blue {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
 }
 
 .contact-info-icon-purple {
-  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
 }
 
 .contact-info-icon-indigo {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
 }
 
 .contact-info-card-title {
@@ -291,7 +291,7 @@
 }
 
 .contact-form-button {
-  background: linear-gradient(135deg, #3b82f6 0%, #9333ea 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
   color: var(--color-white);
   font-size: var(--text-base);
   font-weight: 600;

@@ -1,7 +1,8 @@
 import { Button } from "../ui/button";
-import { Clock, LogOut, Settings, X } from "lucide-react";
+import { LogOut, Settings, X } from "lucide-react";
 import type { PageType } from "../../App";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { BrandLogo } from "../common/BrandLogo";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -39,10 +40,10 @@ export function Sidebar({
             }}
             className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-              <Clock className="w-6 h-6 text-white" />
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white">
+              <BrandLogo className="h-8 w-8 object-contain" />
             </div>
-            <span className="text-xl text-foreground">TimeLink</span>
+            <span className="text-xl text-foreground">Tiempo</span>
           </button>
 
           <button

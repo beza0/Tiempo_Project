@@ -419,7 +419,7 @@ export function ProfilePage({
       return;
     }
     const shareUrl = `${window.location.origin}${PATHS.user(profile.id)}`;
-    const shareTitle = displayName || "TimeLink";
+    const shareTitle = displayName || "Tiempo";
     try {
       if (navigator.share) {
         await navigator.share({
