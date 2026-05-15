@@ -1,6 +1,7 @@
 package com.timebank.timebank.user;
 
 import com.timebank.timebank.user.dto.ChangePasswordRequest;
+import com.timebank.timebank.user.dto.GoogleAuthConfigResponse;
 import com.timebank.timebank.user.dto.ForgotPasswordRequest;
 import com.timebank.timebank.user.dto.LoginRequest;
 import com.timebank.timebank.user.dto.LoginResponse;
@@ -83,6 +84,12 @@ public class UserController {
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest req) {
         LoginResponse response = userService.login(req);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/auth/google-config")
+    public ResponseEntity<GoogleAuthConfigResponse> googleConfig() {
+        String clientId = userService.getGoogleOAuthClientId().orElse("");
+        return ResponseEntity.ok(new GoogleAuthConfigResponse(clientId));
     }
 
     @PostMapping("/auth/social-login")

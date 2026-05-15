@@ -84,9 +84,18 @@ export async function resetPasswordRequest(body: {
   });
 }
 
+export type GoogleAuthConfig = {
+  clientId: string;
+};
+
+export async function fetchGoogleAuthConfig(): Promise<GoogleAuthConfig> {
+  return apiFetch<GoogleAuthConfig>("/api/auth/google-config");
+}
+
 export async function socialLoginRequest(body: {
-  provider: "google" | "facebook";
-  accessToken: string;
+  provider: "google";
+  idToken?: string;
+  accessToken?: string;
 }): Promise<LoginResponse> {
   return apiFetch<LoginResponse>("/api/auth/social-login", {
     method: "POST",

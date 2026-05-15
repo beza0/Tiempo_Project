@@ -7,8 +7,9 @@ public class SocialLoginRequest {
     @NotBlank
     private String provider;
 
-    @NotBlank
     private String accessToken;
+
+    private String idToken;
 
     public String getProvider() {
         return provider;
@@ -24,5 +25,13 @@ public class SocialLoginRequest {
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    public String getIdToken() {
+        return idToken;
+    }
+
+    public void setIdToken(String idToken) {
+        this.idToken = idToken;
     }
 }

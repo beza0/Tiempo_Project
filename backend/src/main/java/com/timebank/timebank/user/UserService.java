@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -68,6 +69,17 @@ public class UserService {
     private final RegistrationMailService registrationMailService;
     private final EntityManager entityManager;
     private final ObjectMapper objectMapper;
+
+    @Value("${app.google.client-id:}")
+    private String googleClientId;
+
+    /** OAuth Web client id (public) — frontend Google giriş butonu için. */
+    public Optional<String> getGoogleOAuthClientId() {
+        if (googleClientId == null || googleClientId.isBlank()) {
+            return Optional.empty();
+        }
+        return Optional.of(googleClientId.trim());
+    }
 
     public UserService(UserRepository userRepository,
                        BCryptPasswordEncoder passwordEncoder,
@@ -351,14 +363,20 @@ public class UserService {
     @Transactional
     public LoginResponse socialLogin(SocialLoginRequest req) {
         String provider = req.getProvider() == null ? "" : req.getProvider().trim().toLowerCase();
-        String token = req.getAccessToken() == null ? "" : req.getAccessToken().trim();
-        if (provider.isEmpty() || token.isEmpty()) {
+        String accessToken = req.getAccessToken() == null ? "" : req.getAccessToken().trim();
+        String idToken = req.getIdToken() == null ? "" : req.getIdToken().trim();
+        if (provider.isEmpty() || (accessToken.isEmpty() && idToken.isEmpty())) {
             throw new IllegalArgumentException("Sosyal giriş bilgisi eksik");
         }
 
         SocialIdentity identity = switch (provider) {
-            case "google" -> fetchGoogleIdentity(token);
-            case "facebook" -> fetchFacebookIdentity(token);
+            case "google" -> fetchGoogleIdentity(accessToken, idToken);
+            case "facebook" -> {
+                if (accessToken.isEmpty()) {
+                    throw new IllegalArgumentException("Facebook girişi için erişim jetonu gerekli");
+                }
+                yield fetchFacebookIdentity(accessToken);
+            }
             default -> throw new IllegalArgumentException("Desteklenmeyen sosyal sağlayıcı");
         };
 
@@ -394,7 +412,50 @@ public class UserService {
         );
     }
 
-    private SocialIdentity fetchGoogleIdentity(String accessToken) {
+    private SocialIdentity fetchGoogleIdentity(String accessToken, String idToken) {
+        if (!idToken.isEmpty()) {
+            return fetchGoogleIdentityFromIdToken(idToken);
+        }
+        if (accessToken.isEmpty()) {
+            throw new IllegalArgumentException("Google giriş bilgisi eksik");
+        }
+        return fetchGoogleIdentityFromAccessToken(accessToken);
+    }
+
+    private SocialIdentity fetchGoogleIdentityFromIdToken(String idToken) {
+        try {
+            String url = "https://oauth2.googleapis.com/tokeninfo?id_token="
+                    + URLEncoder.encode(idToken, StandardCharsets.UTF_8);
+            HttpRequest request = HttpRequest.newBuilder(URI.create(url)).GET().build();
+            HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                log.warn("Google ID token doğrulaması başarısız: status={}", response.statusCode());
+                throw new IllegalArgumentException("Google doğrulaması başarısız");
+            }
+            JsonNode body = objectMapper.readTree(response.body());
+            if (body.hasNonNull("error_description")) {
+                throw new IllegalArgumentException("Google doğrulaması başarısız");
+            }
+            verifyGoogleAudience(body);
+            verifyGoogleTokenNotExpired(body);
+            String email = text(body, "email");
+            String name = text(body, "name");
+            if (name.isBlank()) {
+                name = text(body, "given_name");
+            }
+            if (email.isBlank()) {
+                throw new IllegalArgumentException("Google hesabı e-posta bilgisi döndürmedi");
+            }
+            return new SocialIdentity(email, name);
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            log.warn("Google ID token işlenemedi", e);
+            throw new IllegalArgumentException("Google ile giriş tamamlanamadı");
+        }
+    }
+
+    private SocialIdentity fetchGoogleIdentityFromAccessToken(String accessToken) {
         try {
             HttpRequest request = HttpRequest.newBuilder(
                             URI.create("https://www.googleapis.com/oauth2/v3/userinfo"))
@@ -403,6 +464,7 @@ public class UserService {
                     .build();
             HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                log.warn("Google userinfo başarısız: status={} body={}", response.statusCode(), response.body());
                 throw new IllegalArgumentException("Google doğrulaması başarısız");
             }
             JsonNode body = objectMapper.readTree(response.body());
@@ -415,7 +477,35 @@ public class UserService {
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
+            log.warn("Google access token işlenemedi", e);
             throw new IllegalArgumentException("Google ile giriş tamamlanamadı");
+        }
+    }
+
+    private void verifyGoogleAudience(JsonNode tokenInfo) {
+        String configured = googleClientId == null ? "" : googleClientId.trim();
+        if (configured.isEmpty()) {
+            return;
+        }
+        String aud = text(tokenInfo, "aud");
+        if (!configured.equals(aud)) {
+            log.warn("Google aud eşleşmedi: beklenen={}, gelen={}", configured, aud);
+            throw new IllegalArgumentException("Google doğrulaması başarısız");
+        }
+    }
+
+    private void verifyGoogleTokenNotExpired(JsonNode tokenInfo) {
+        String expRaw = text(tokenInfo, "exp");
+        if (expRaw.isBlank()) {
+            return;
+        }
+        try {
+            long exp = Long.parseLong(expRaw);
+            if (Instant.now().getEpochSecond() >= exp) {
+                throw new IllegalArgumentException("Google oturumu süresi doldu");
+            }
+        } catch (NumberFormatException ignored) {
+            // exp parse edilemezse Google yanıtına güven
         }
     }
 

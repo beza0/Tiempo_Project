@@ -280,6 +280,10 @@ export const tr: Translation = {
       orContinue: "veya",
       continueGuest: "Kayıt olmadan devam et",
       orWith: "Veya şununla devam et",
+      googleSignIn: "Google ile giriş yap",
+      errorGoogleNotConfigured:
+        "Google ile giriş şu an kullanılamıyor. Proje .env dosyasına GOOGLE_CLIENT_ID ekleyip backend ve frontend'i yeniden başlatın.",
+      errorGoogleFailed: "Google ile giriş tamamlanamadı. Tekrar deneyin.",
       errorRequired: "E-posta ve şifrenizi girin.",
       errorFailed: "Giriş yapılamadı. Bağlantınızı kontrol edip tekrar deneyin.",
       resendVerification: "Doğrulama e-postasını tekrar gönder",

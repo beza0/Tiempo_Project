@@ -279,6 +279,10 @@ export const en = {
       orContinue: "or",
       continueGuest: "Continue without signing in",
       orWith: "Or continue with",
+      googleSignIn: "Sign in with Google",
+      errorGoogleNotConfigured:
+        "Google sign-in is unavailable. Add GOOGLE_CLIENT_ID to the project .env file and restart the backend and frontend.",
+      errorGoogleFailed: "Google sign-in could not be completed. Try again.",
       errorRequired: "Please enter your email and password.",
       errorFailed: "Could not sign in. Check your connection and try again.",
       resendVerification: "Resend verification email",

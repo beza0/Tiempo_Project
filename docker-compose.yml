@@ -46,6 +46,8 @@ services:
       SPRING_DATASOURCE_USERNAME: timebank_user
       SPRING_DATASOURCE_PASSWORD: "1234"
       APP_PUBLIC_BASE_URL: http://localhost:3000
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      JWT_SECRET: ${JWT_SECRET:-local-dev-jwt-secret-at-least-32-chars-long}
       SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:-}
       SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:-}
       SPRING_MAIL_HOST: ${SPRING_MAIL_HOST:-smtp.gmail.com}
@@ -62,6 +64,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-${GOOGLE_CLIENT_ID:-}}
     container_name: timelink-web
     ports:
       - "3000:80"

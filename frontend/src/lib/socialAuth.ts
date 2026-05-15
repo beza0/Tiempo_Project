@@ -1,3 +1,10 @@
+import { fetchGoogleAuthConfig } from "../api/auth";
+
+type GoogleCredentialResponse = {
+  credential?: string;
+  select_by?: string;
+};
+
 type GoogleTokenResponse = {
   access_token?: string;
   error?: string;
@@ -8,33 +15,56 @@ declare global {
   interface Window {
     google?: {
       accounts?: {
+        id?: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: GoogleCredentialResponse) => void;
+            auto_select?: boolean;
+            cancel_on_tap_outside?: boolean;
+            itp_support?: boolean;
+          }) => void;
+          renderButton: (
+            parent: HTMLElement,
+            options: {
+              type?: string;
+              theme?: string;
+              size?: string;
+              text?: string;
+              width?: number | string;
+              locale?: string;
+              shape?: string;
+              logo_alignment?: string;
+            },
+          ) => void;
+        };
         oauth2?: {
           initTokenClient: (config: {
             client_id: string;
             scope: string;
             prompt?: string;
             callback: (response: GoogleTokenResponse) => void;
-          }) => { requestAccessToken: () => void };
+            error_callback?: (error: { type?: string; message?: string }) => void;
+          }) => { requestAccessToken: (overrideConfig?: { prompt?: string }) => void };
         };
       };
     };
-    FB?: {
-      init: (config: {
-        appId: string;
-        cookie: boolean;
-        xfbml: boolean;
-        version: string;
-      }) => void;
-      login: (
-        callback: (response: {
-          status: string;
-          authResponse?: { accessToken?: string };
-        }) => void,
-        opts: { scope: string },
-      ) => void;
-    };
-    fbAsyncInit?: () => void;
   }
+}
+
+let gsiScriptPromise: Promise<void> | null = null;
+let gsiInitializedClientId: string | null = null;
+let gsiCredentialHandler: ((credential: string) => void) | null = null;
+
+/** Build-time veya runtime (API) client id önbelleği. */
+let resolvedClientId: string | null | undefined;
+let resolveClientIdPromise: Promise<string | null> | null = null;
+
+function readClientIdFromEnv(): string | null {
+  const clientId =
+    (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined) ??
+    (import.meta.env.GOOGLE_CLIENT_ID as string | undefined);
+  const trimmed = clientId?.trim();
+  return trimmed ? trimmed : null;
 }
 
 function loadScriptOnce(id: string, src: string): Promise<void> {
@@ -65,12 +95,118 @@ function loadScriptOnce(id: string, src: string): Promise<void> {
   });
 }
 
-export async function beginGoogleLogin(): Promise<string> {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
-  if (!clientId || !clientId.trim()) {
-    throw new Error("Google sign-in is not configured");
+/** Vite .env veya backend /api/auth/google-config üzerinden client id. */
+export async function resolveGoogleClientId(): Promise<string | null> {
+  if (resolvedClientId !== undefined) {
+    return resolvedClientId;
   }
-  await loadScriptOnce("google-gsi-sdk", "https://accounts.google.com/gsi/client");
+  if (!resolveClientIdPromise) {
+    resolveClientIdPromise = (async () => {
+      const fromEnv = readClientIdFromEnv();
+      if (fromEnv) {
+        return fromEnv;
+      }
+      try {
+        const cfg = await fetchGoogleAuthConfig();
+        const id = cfg.clientId?.trim();
+        return id ? id : null;
+      } catch {
+        return null;
+      }
+    })();
+  }
+  resolvedClientId = await resolveClientIdPromise;
+  return resolvedClientId;
+}
+
+export function getGoogleClientId(): string | null {
+  if (resolvedClientId !== undefined) {
+    return resolvedClientId;
+  }
+  return readClientIdFromEnv();
+}
+
+export function isGoogleLoginConfigured(): boolean {
+  return Boolean(getGoogleClientId());
+}
+
+export async function isGoogleLoginConfiguredAsync(): Promise<boolean> {
+  return Boolean(await resolveGoogleClientId());
+}
+
+function loadGoogleGsi(): Promise<void> {
+  if (!gsiScriptPromise) {
+    gsiScriptPromise = loadScriptOnce(
+      "google-gsi-sdk",
+      "https://accounts.google.com/gsi/client",
+    );
+  }
+  return gsiScriptPromise;
+}
+
+function ensureGsiInitialized(clientId: string): void {
+  const idApi = window.google?.accounts?.id;
+  if (!idApi) {
+    throw new Error("Google sign-in is unavailable");
+  }
+  if (gsiInitializedClientId === clientId) {
+    return;
+  }
+  idApi.initialize({
+    client_id: clientId,
+    callback: (response) => {
+      const credential = response.credential?.trim();
+      if (credential && gsiCredentialHandler) {
+        gsiCredentialHandler(credential);
+      }
+    },
+    auto_select: false,
+    cancel_on_tap_outside: true,
+    itp_support: true,
+  });
+  gsiInitializedClientId = clientId;
+}
+
+export async function mountGoogleSignInButton(
+  container: HTMLElement,
+  options: {
+    locale: string;
+    onCredential: (idToken: string) => void;
+  },
+): Promise<void> {
+  const clientId = await resolveGoogleClientId();
+  if (!clientId) {
+    throw new Error("GOOGLE_NOT_CONFIGURED");
+  }
+  await loadGoogleGsi();
+  gsiCredentialHandler = options.onCredential;
+  ensureGsiInitialized(clientId);
+
+  const idApi = window.google?.accounts?.id;
+  if (!idApi?.renderButton) {
+    throw new Error("Google sign-in is unavailable");
+  }
+
+  container.replaceChildren();
+  const width = Math.max(280, Math.floor(container.getBoundingClientRect().width) || 320);
+  idApi.renderButton(container, {
+    type: "standard",
+    theme: "outline",
+    size: "large",
+    text: "signin_with",
+    shape: "rectangular",
+    logo_alignment: "left",
+    width,
+    locale: options.locale === "tr" ? "tr" : "en",
+  });
+}
+
+export async function beginGoogleAccessTokenLogin(): Promise<string> {
+  const clientId = await resolveGoogleClientId();
+  if (!clientId) {
+    throw new Error("GOOGLE_NOT_CONFIGURED");
+  }
+  await loadGoogleGsi();
   const initTokenClient = window.google?.accounts?.oauth2?.initTokenClient;
   if (!initTokenClient) {
     throw new Error("Google sign-in is unavailable");
@@ -79,45 +215,30 @@ export async function beginGoogleLogin(): Promise<string> {
     const client = initTokenClient({
       client_id: clientId,
       scope: "openid email profile",
-      prompt: "select_account",
+      prompt: "",
       callback: (response) => {
         if (response.error || !response.access_token) {
-          reject(new Error(response.error_description || "Google login failed"));
+          reject(
+            new Error(
+              response.error === "access_denied"
+                ? "GOOGLE_CANCELLED"
+                : response.error_description || "Google login failed",
+            ),
+          );
           return;
         }
         resolve(response.access_token);
       },
-    });
-    client.requestAccessToken();
-  });
-}
-
-export async function beginFacebookLogin(): Promise<string> {
-  const appId = import.meta.env.VITE_FACEBOOK_APP_ID as string | undefined;
-  if (!appId || !appId.trim()) {
-    throw new Error("Facebook sign-in is not configured");
-  }
-  await loadScriptOnce("facebook-sdk", "https://connect.facebook.net/en_US/sdk.js");
-  if (!window.FB) {
-    throw new Error("Facebook sign-in is unavailable");
-  }
-  window.FB.init({
-    appId,
-    cookie: true,
-    xfbml: false,
-    version: "v19.0",
-  });
-  return new Promise((resolve, reject) => {
-    window.FB?.login(
-      (response) => {
-        const token = response.authResponse?.accessToken;
-        if (response.status !== "connected" || !token) {
-          reject(new Error("Facebook login failed"));
-          return;
-        }
-        resolve(token);
+      error_callback: (error) => {
+        reject(
+          new Error(
+            error.type === "popup_closed"
+              ? "GOOGLE_CANCELLED"
+              : error.message || "Google login failed",
+          ),
+        );
       },
-      { scope: "public_profile,email" },
-    );
+    });
+    client.requestAccessToken({ prompt: "select_account" });
   });
 }
