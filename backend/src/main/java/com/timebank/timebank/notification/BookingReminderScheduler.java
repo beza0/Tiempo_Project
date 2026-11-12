@@ -51,7 +51,9 @@ public class BookingReminderScheduler {
     @Transactional
     public void sendReminders() {
         Instant now = Instant.now();
-        Instant windowStart = now.plus(59, ChronoUnit.MINUTES);
+        // Yakalama (catch-up) pencereleri: sunucu uykudan döndüğünde kaçırılan bildirimler de gönderilir.
+        // Önceden ±1 dk'lık dar pencere, Render uykusunda bildirimin hiç gitmemesine yol açıyordu.
+        Instant windowStart = now;
         Instant windowEnd = now.plus(61, ChronoUnit.MINUTES);
         List<ExchangeRequest> due = exchangeRequestRepository
                 .findByStatusAndReminderSentFalseAndScheduledStartAtBetween(
@@ -69,7 +71,7 @@ public class BookingReminderScheduler {
             }
         }
 
-        Instant startWindow = now.minus(1, ChronoUnit.MINUTES);
+        Instant startWindow = now.minus(15, ChronoUnit.MINUTES);
         Instant endWindow = now.plus(1, ChronoUnit.MINUTES);
         List<ExchangeRequest> startDue = exchangeRequestRepository
                 .findByStatusAndStartedPromptSentFalseAndScheduledStartAtBetween(
@@ -94,7 +96,7 @@ public class BookingReminderScheduler {
             preEnd = now.plus(7, ChronoUnit.DAYS);
             log.debug("tiempos.pre-session-demo=true: seans onayı penceresi geniş (şimdi → +7 gün)");
         } else {
-            preStart = now.plus(9, ChronoUnit.MINUTES);
+            preStart = now;
             preEnd = now.plus(11, ChronoUnit.MINUTES);
         }
         List<ExchangeRequest> preSessionDue = exchangeRequestRepository
@@ -117,8 +119,8 @@ public class BookingReminderScheduler {
         }
     }
 
+    /** Kayıt başına transaction servis içinde açılır; burada dış transaction yoktur. */
     @Scheduled(fixedRate = 60_000)
-    @Transactional
     public void settleCompletedSessions() {
         try {
             exchangeRequestService.settleDueSessionsAtEnd();

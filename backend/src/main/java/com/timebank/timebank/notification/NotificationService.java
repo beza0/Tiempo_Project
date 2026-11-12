@@ -334,6 +334,23 @@ public class NotificationService {
         userNotificationRepository.save(new UserNotification(requester, title, body, ex));
     }
 
+    /** Seans bitti ancak katılım hiçbir şekilde onaylanmadı: askıdaki saat öğrenciye iade edildi. */
+    @Transactional
+    public void notifyUnconfirmedSessionRefunded(ExchangeRequest ex) {
+        User owner = ex.getSkill().getOwner();
+        User requester = ex.getRequester();
+        String when = formatWhen(ex.getScheduledStartAt());
+        String title = "Seans onaylanmadı — saat iade edildi";
+        String body = String.format(
+                "\"%s\" (%s) oturumu için katılım onayı alınamadı. Rezervasyon kapatıldı; %d dakika öğrencinin bakiyesine iade edildi.",
+                ex.getSkill().getTitle(),
+                when,
+                ex.getBookedMinutes()
+        );
+        userNotificationRepository.save(new UserNotification(owner, title, body, ex));
+        userNotificationRepository.save(new UserNotification(requester, title, body, ex));
+    }
+
     private static String formatWhen(Instant scheduledStartAt) {
         if (scheduledStartAt == null) {
             return "(tarih seçilmedi)";

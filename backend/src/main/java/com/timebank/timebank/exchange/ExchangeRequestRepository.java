@@ -2,8 +2,11 @@ package com.timebank.timebank.exchange;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import jakarta.persistence.LockModeType;
 
 import java.time.Instant;
 import java.util.List;
@@ -21,6 +24,25 @@ public interface ExchangeRequestRepository extends JpaRepository<ExchangeRequest
     @Override
     @EntityGraph(attributePaths = {"skill", "skill.owner", "requester"})
     Optional<ExchangeRequest> findById(UUID id);
+
+    /**
+     * Satır kilidi (SELECT ... FOR UPDATE): kabul, iptal, kapanış gibi kredi etkileyen geçişleri
+     * aynı talep üzerinde sıraya sokar; çift tıklama / eşzamanlı istekte çift işlem olmaz.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT e FROM ExchangeRequest e WHERE e.id = :id")
+    Optional<ExchangeRequest> findByIdForUpdate(@Param("id") UUID id);
+
+    /** Bitişi geçmiş, kredisi kesinleşmemiş onaylı oturumlar (no-show / onaysız kapanış adayı). */
+    @Query("SELECT e.id FROM ExchangeRequest e WHERE e.status = :st "
+            + "AND e.inquiryOnly = false "
+            + "AND e.scheduledStartAt IS NOT NULL "
+            + "AND e.scheduledStartAt < :startedBefore "
+            + "AND e.creditsSettledAt IS NULL")
+    List<UUID> findUnsettledAcceptedStartedBefore(
+            @Param("st") ExchangeRequestStatus st,
+            @Param("startedBefore") Instant startedBefore
+    );
 
     long countByRequesterEmail(String requesterEmail);
 
@@ -58,12 +80,11 @@ public interface ExchangeRequestRepository extends JpaRepository<ExchangeRequest
             @Param("email") String email
     );
 
-    @EntityGraph(attributePaths = {"skill", "skill.owner", "requester"})
-    @Query("SELECT e FROM ExchangeRequest e WHERE e.status = :st "
+    @Query("SELECT e.id FROM ExchangeRequest e WHERE e.status = :st "
             + "AND e.inquiryOnly = false "
             + "AND e.preSessionBothConfirmedAt IS NOT NULL "
             + "AND e.creditsSettledAt IS NULL")
-    List<ExchangeRequest> findPendingSessionCreditSettlement(
+    List<UUID> findPendingSessionCreditSettlement(
             @Param("st") ExchangeRequestStatus st
     );
     @EntityGraph(attributePaths = {"skill", "skill.owner", "requester"})

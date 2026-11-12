@@ -142,6 +142,10 @@ public class ReviewService {
         if (ex.isInquiryOnly()) {
             return false;
         }
+        // Henüz başlamamış oturum değerlendirilemez (eski erken-aktarım kayıtları dahil).
+        if (ex.getScheduledStartAt() != null && Instant.now().isBefore(ex.getScheduledStartAt())) {
+            return false;
+        }
         if (ex.getStatus() == ExchangeRequestStatus.COMPLETED) {
             return true;
         }

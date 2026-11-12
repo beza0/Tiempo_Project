@@ -194,6 +194,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    /** Servislerin bilinçli fırlattığı durum kodlarını (400/403/409…) korur; genel işleyiciye düşüp 500 olmaz. */
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> handleResponseStatus(
+            org.springframework.web.server.ResponseStatusException ex,
+            HttpServletRequest request
+    ) {
+        int status = ex.getStatusCode().value();
+        String reason = ex.getReason();
+        ErrorResponse error = new ErrorResponse(
+                Instant.now(),
+                status,
+                reason == null || reason.isBlank() ? "İstek işlenemedi" : reason,
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(status).body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(
             Exception ex,

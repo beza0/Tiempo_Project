@@ -37,8 +37,14 @@ public class User {
     @Column(nullable = false, length = 100)
     private String passwordHash;
 
-    // TimeBank sistemi: dakika bazlı kredi
-    @Column(nullable = false)
+    /**
+     * TimeBank sistemi: dakika bazlı kredi.
+     * {@code updatable = false}: bakiye yalnızca {@link UserRepository#debitIfSufficient} /
+     * {@link UserRepository#credit} atomik sorgularıyla değişir. Böylece profil güncellemesi gibi
+     * eşzamanlı bir kayıt, bayat bakiyeyi geri yazamaz. {@link #setTimeCreditMinutes} yalnızca
+     * ilk INSERT (kayıt) için anlamlıdır.
+     */
+    @Column(nullable = false, updatable = false)
     private long timeCreditMinutes = 0;
 
     @Column(nullable = false, updatable = false)

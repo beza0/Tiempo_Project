@@ -41,5 +41,18 @@ class CreditPurchaseIntegrationTest extends AbstractPostgresIntegrationTest {
                 .andExpect(jsonPath("$.minutesAdded").value(60));
 
         assertThat(requesterCreditMinutes()).isEqualTo(before + 60);
+
+        // Demo satın alma deftere PURCHASE olarak yazılır; aynı oturum ikinci kez kullanılamaz.
+        mockMvc.perform(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                                .get("/api/transactions/mine")
+                                .header("Authorization", "Bearer " + requesterToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].type").value("PURCHASE"));
+        mockMvc.perform(
+                        post("/api/credits/complete/{sessionId}", sessionId)
+                                .header("Authorization", "Bearer " + requesterToken))
+                .andExpect(status().isBadRequest());
+        assertThat(requesterCreditMinutes()).isEqualTo(before + 60);
     }
 }

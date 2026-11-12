@@ -111,8 +111,10 @@ public abstract class AbstractPostgresIntegrationTest {
         body.put("category", "Sport");
         body.set("sessionTypes", objectMapper.valueToTree(List.of("online")));
         body.set("availableDays", objectMapper.valueToTree(List.of(day)));
-        body.put("availableFrom", "08:00");
-        body.put("availableUntil", "20:00");
+        // Gün boyu uygunluk: testler günün saatinden bağımsız çalışsın (önceden 08–20 aralığı,
+        // "şimdi + 2 saat" gece saatlerinde aralık dışına düşüp testleri kırıyordu).
+        body.put("availableFrom", "00:00");
+        body.put("availableUntil", "23:59");
 
         MvcResult r = mockMvc.perform(
                         post("/api/skills")
@@ -180,6 +182,17 @@ public abstract class AbstractPostgresIntegrationTest {
 
     protected long requesterCreditMinutes() {
         return userRepository.findByEmailIgnoreCase(requesterEmail).orElseThrow().getTimeCreditMinutes();
+    }
+
+    protected long ownerCreditMinutes() {
+        return userRepository.findByEmailIgnoreCase(ownerEmail).orElseThrow().getTimeCreditMinutes();
+    }
+
+    /** Bakiye entity üzerinden güncellenemez (updatable=false); testte doğrudan ayarla. */
+    protected void setRequesterCreditMinutes(long minutes) {
+        User u = userRepository.findByEmailIgnoreCase(requesterEmail).orElseThrow();
+        long current = userRepository.readBalance(u.getId());
+        userRepository.credit(u.getId(), minutes - current);
     }
 
     protected MvcResult getJson(String path, String token) throws Exception {

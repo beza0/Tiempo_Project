@@ -20,6 +20,8 @@ class ExchangeBookingIntegrationTest extends AbstractPostgresIntegrationTest {
         String skillId = createSkill();
         String exchangeId = createBookingRequest(skillId);
         accept(exchangeId);
+        // Katılım onayı yalnızca seans başladıktan sonra geçerli: başlangıcı geçmişe al.
+        setScheduledStart(java.util.UUID.fromString(exchangeId), java.time.Instant.now().minusSeconds(300));
         ownerMarksSessionComplete(exchangeId);
         requesterAcknowledgesAttendance(exchangeId);
         postReview(exchangeId);
