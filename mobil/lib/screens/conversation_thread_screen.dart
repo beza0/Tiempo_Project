@@ -1014,6 +1014,9 @@ class _ConversationThreadScreenState extends State<ConversationThreadScreen> {
       );
     }
     if (ui == 'accepted') {
+      // Katılım onayı yalnızca seans başladıktan sonra (sunucu erken onayı reddeder).
+      final startAt = DateTime.tryParse(_active.scheduledStartAt ?? '');
+      final sessionStarted = startAt == null || !DateTime.now().isBefore(startAt);
       return Padding(
         padding: const EdgeInsets.all(8),
         child: Wrap(
@@ -1025,12 +1028,12 @@ class _ConversationThreadScreenState extends State<ConversationThreadScreen> {
                 onPressed: _cancel,
                 child: Text(c.cancelSession),
               ),
-            if (isRequester && (_active.requesterAttendanceAckAt == null))
+            if (sessionStarted && isRequester && (_active.requesterAttendanceAckAt == null))
               FilledButton.tonal(
                 onPressed: _ackRequester,
                 child: Text(c.iStartedLearner),
               ),
-            if (isOwner && (_active.ownerAttendanceAckAt == null))
+            if (sessionStarted && isOwner && (_active.ownerAttendanceAckAt == null))
               FilledButton.tonal(
                 onPressed: _ackOwner,
                 child: Text(c.iStartedInstructor),

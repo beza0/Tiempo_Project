@@ -3,9 +3,8 @@ import {
   ArrowLeft,
   Check,
   CheckCircle,
-  CreditCard,
+  Info,
   Loader2,
-  Lock,
   XCircle,
 } from "lucide-react";
 import { PageLayout } from "../components/layout/PageLayout";
@@ -15,6 +14,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { formatTemplate } from "../language";
 import {
   completeCreditPurchase,
+  fetchCreditPurchaseAvailability,
   startCreditCheckout,
 } from "../api/credits";
 import { apiErrorDisplayMessage } from "../api/client";
@@ -35,7 +35,7 @@ type PaymentLocale = typeof import("../language/locale/tr").tr.payment;
 export function PaymentPage({ onNavigate }: PaymentPageProps) {
   const { t } = useLanguage();
   const p = t.payment;
-  const { token } = useAuth();
+  const { token, isAuthenticated } = useAuth();
   const [selectedPackage, setSelectedPackage] = useState<CreditPackage | null>(
     null,
   );
@@ -44,76 +44,54 @@ export function PaymentPage({ onNavigate }: PaymentPageProps) {
   const [resultHours, setResultHours] = useState(0);
   const [resultAmount, setResultAmount] = useState(0);
 
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardName, setCardName] = useState("");
-  const [expiryDate, setExpiryDate] = useState("");
-  const [cvv, setCvv] = useState("");
-
   useEffect(() => {
+    let cancelled = false;
+    let pkg: CreditPackage | null = null;
     try {
       const raw = localStorage.getItem(SELECTED_PACKAGE_KEY);
-      if (raw) {
-        setSelectedPackage(JSON.parse(raw) as CreditPackage);
-        return;
-      }
+      if (raw) pkg = JSON.parse(raw) as CreditPackage;
     } catch {
       /* ignore */
     }
-    onNavigate?.("buy-credits");
-  }, [onNavigate]);
-
-  const formatCardNumber = (value: string) => {
-    const cleaned = value.replace(/\s/g, "");
-    const groups = cleaned.match(/.{1,4}/g);
-    return groups ? groups.join(" ") : cleaned;
-  };
-
-  const handleCardNumberChange = (value: string) => {
-    const cleaned = value.replace(/\s/g, "");
-    if (cleaned.length <= 16 && /^\d*$/.test(cleaned)) {
-      setCardNumber(formatCardNumber(cleaned));
+    if (!pkg) {
+      onNavigate?.("buy-credits");
+      return;
     }
-  };
+    // Satın alma kapalıysa (gerçek ödeme altyapısı yok) paket ekranına dön: orada açıklama gösterilir.
+    void fetchCreditPurchaseAvailability(token)
+      .then((a) => {
+        if (cancelled) return;
+        if (!a.purchaseEnabled) {
+          onNavigate?.("buy-credits");
+          return;
+        }
+        setSelectedPackage(pkg);
+      })
+      .catch(() => {
+        if (!cancelled) onNavigate?.("buy-credits");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [onNavigate, token]);
 
-  const handleExpiryChange = (value: string) => {
-    let v = value.replace(/\D/g, "");
-    if (v.length >= 2) v = `${v.slice(0, 2)}/${v.slice(2, 4)}`;
-    if (v.length <= 5) setExpiryDate(v);
-  };
-
-  const handleCvvChange = (value: string) => {
-    if (value.length <= 3 && /^\d*$/.test(value)) setCvv(value);
-  };
-
-  const isFormValid = () =>
-    cardNumber.replace(/\s/g, "").length === 16 &&
-    cardName.trim().length > 0 &&
-    expiryDate.length === 5 &&
-    cvv.length === 3;
-
-  const processPayment = async () => {
-    if (!selectedPackage || !token || !isFormValid()) return;
+  /**
+   * Yalnızca demo mod: sunucu ödeme almadan kredi ekler. Gerçek ödeme altyapısı bağlandığında
+   * kart bilgisi bu sayfada değil, ödeme sağlayıcısının sayfasında girilir. Önceden burada
+   * hiçbir yere gönderilmeyen bir kart formu ve %10 rastgele "hata" vardı.
+   */
+  const confirmDemoPurchase = async () => {
+    if (!selectedPackage || !isAuthenticated) return;
     setErrorMessage(null);
     setPaymentStatus("processing");
-
     try {
       const session = await startCreditCheckout(selectedPackage.id, token);
-
-      if (session.checkoutUrl && !session.demoMode) {
-        window.location.href = session.checkoutUrl;
-        return;
-      }
-
-      await new Promise((r) => setTimeout(r, 3000));
-
-      if (Math.random() < 0.1) {
-        setErrorMessage(p.failedMessage);
-        setPaymentStatus("error");
-        return;
-      }
-
       const result = await completeCreditPurchase(session.sessionId, token);
-      localStorage.removeItem(SELECTED_PACKAGE_KEY);
+      try {
+        localStorage.removeItem(SELECTED_PACKAGE_KEY);
+      } catch {
+        /* ignore */
+      }
       setResultHours(result.displayHours);
       setResultAmount(result.amountTry);
       setPaymentStatus("success");
@@ -126,10 +104,6 @@ export function PaymentPage({ onNavigate }: PaymentPageProps) {
   const handleRetry = () => {
     setPaymentStatus("form");
     setErrorMessage(null);
-    setCardNumber("");
-    setCardName("");
-    setExpiryDate("");
-    setCvv("");
   };
 
   if (!selectedPackage) {
@@ -149,22 +123,33 @@ export function PaymentPage({ onNavigate }: PaymentPageProps) {
         )}
 
         {paymentStatus === "form" && (
-          <PaymentFormGrid
-            p={p}
-            pkg={selectedPackage}
-            features={features}
-            cardNumber={cardNumber}
-            cardName={cardName}
-            expiryDate={expiryDate}
-            cvv={cvv}
-            token={token}
-            isFormValid={isFormValid()}
-            onCardNumber={handleCardNumberChange}
-            onCardName={setCardName}
-            onExpiry={handleExpiryChange}
-            onCvv={handleCvvChange}
-            onSubmit={processPayment}
-          />
+          <div className="payment-page__grid">
+            <div className="payment-card">
+              <span className="payment-badge payment-badge--secure">
+                <Info className="h-3.5 w-3.5" aria-hidden />
+                {p.demoBadge}
+              </span>
+              <p className="payment-form__footer-note" style={{ textAlign: "left" }}>
+                {p.demoNotice}
+              </p>
+              <button
+                type="button"
+                className="payment-form__submit"
+                disabled={!isAuthenticated}
+                onClick={() => void confirmDemoPurchase()}
+              >
+                {formatTemplate(p.demoConfirm, {
+                  hours: selectedPackage.hours,
+                })}
+              </button>
+              {!isAuthenticated && (
+                <p className="payment-form__footer-note text-red-600">
+                  {p.authRequired}
+                </p>
+              )}
+            </div>
+            <OrderSummary p={p} pkg={selectedPackage} features={features} />
+          </div>
         )}
 
         {paymentStatus === "processing" && <ProcessingStatus p={p} />}
@@ -195,7 +180,7 @@ export function PaymentPage({ onNavigate }: PaymentPageProps) {
 
 function PaymentPageLoading() {
   return (
-    <div className="payment-page__loading">
+    <div className="payment-page__loading" role="status" aria-live="polite">
       <Loader2 className="payment-page__loading-icon" />
     </div>
   );
@@ -217,165 +202,6 @@ function PaymentPageHeader({
       <h1 className="payment-page__title">{p.title}</h1>
       <p className="payment-page__subtitle">{p.subtitle}</p>
     </header>
-  );
-}
-
-function PaymentFormGrid({
-  p,
-  pkg,
-  features,
-  cardNumber,
-  cardName,
-  expiryDate,
-  cvv,
-  token,
-  isFormValid,
-  onCardNumber,
-  onCardName,
-  onExpiry,
-  onCvv,
-  onSubmit,
-}: {
-  p: PaymentLocale;
-  pkg: CreditPackage;
-  features: string[];
-  cardNumber: string;
-  cardName: string;
-  expiryDate: string;
-  cvv: string;
-  token: string | null;
-  isFormValid: boolean;
-  onCardNumber: (v: string) => void;
-  onCardName: (v: string) => void;
-  onExpiry: (v: string) => void;
-  onCvv: (v: string) => void;
-  onSubmit: () => void;
-}) {
-  return (
-    <div className="payment-page__grid">
-      <div className="payment-card">
-        <span className="payment-badge payment-badge--secure">
-          <Lock className="h-3.5 w-3.5" aria-hidden />
-          {p.secureBadge}
-        </span>
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            onSubmit();
-          }}
-        >
-          <div className="payment-form__group">
-            <label className="payment-form__label" htmlFor="card-number">
-              {p.cardNumber}
-            </label>
-            <div className="payment-form__input-wrap">
-              <CreditCard className="payment-form__input-icon" aria-hidden />
-              <input
-                id="card-number"
-                type="text"
-                inputMode="numeric"
-                autoComplete="cc-number"
-                className="payment-form__input payment-form__input--icon"
-                placeholder="1234 5678 9012 3456"
-                value={cardNumber}
-                onChange={(e) => onCardNumber(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="payment-form__group">
-            <label className="payment-form__label" htmlFor="card-name">
-              {p.cardName}
-            </label>
-            <input
-              id="card-name"
-              type="text"
-              autoComplete="cc-name"
-              className="payment-form__input"
-              placeholder={p.cardNamePlaceholder}
-              value={cardName}
-              onChange={(e) => onCardName(e.target.value.toUpperCase())}
-            />
-          </div>
-
-          <ExpiryCvvRow
-            p={p}
-            expiryDate={expiryDate}
-            cvv={cvv}
-            onExpiry={onExpiry}
-            onCvv={onCvv}
-          />
-
-          <button
-            type="submit"
-            className="payment-form__submit"
-            disabled={!isFormValid || !token}
-          >
-            <Lock className="h-4 w-4" aria-hidden />
-            {formatTemplate(p.payButton, { amount: pkg.discountedPrice })}
-          </button>
-
-          {!token && (
-            <p className="payment-form__footer-note text-red-600">
-              {p.authRequired}
-            </p>
-          )}
-          <p className="payment-form__footer-note">{p.securityNote}</p>
-        </form>
-      </div>
-
-      <OrderSummary p={p} pkg={pkg} features={features} />
-    </div>
-  );
-}
-
-function ExpiryCvvRow({
-  p,
-  expiryDate,
-  cvv,
-  onExpiry,
-  onCvv,
-}: {
-  p: PaymentLocale;
-  expiryDate: string;
-  cvv: string;
-  onExpiry: (v: string) => void;
-  onCvv: (v: string) => void;
-}) {
-  return (
-    <div className="payment-form__row">
-      <div className="payment-form__group">
-        <label className="payment-form__label" htmlFor="expiry">
-          {p.expiry}
-        </label>
-        <input
-          id="expiry"
-          type="text"
-          inputMode="numeric"
-          autoComplete="cc-exp"
-          className="payment-form__input"
-          placeholder="MM/YY"
-          value={expiryDate}
-          onChange={(e) => onExpiry(e.target.value)}
-        />
-      </div>
-      <div className="payment-form__group">
-        <label className="payment-form__label" htmlFor="cvv">
-          {p.cvv}
-        </label>
-        <input
-          id="cvv"
-          type="text"
-          inputMode="numeric"
-          autoComplete="cc-csc"
-          className="payment-form__input"
-          placeholder="123"
-          value={cvv}
-          onChange={(e) => onCvv(e.target.value)}
-        />
-      </div>
-    </div>
   );
 }
 

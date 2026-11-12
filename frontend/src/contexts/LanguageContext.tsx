@@ -18,6 +18,19 @@ function readLocale(): Locale {
   } catch {
     /* ignore */
   }
+  // Kayıtlı tercih yoksa tarayıcı dili: Türkçe tarayıcıda varsayılan TR (önceden her zaman EN'di
+  // ve sunucu hataları Türkçe geldiği için arayüz karışık dilde görünüyordu).
+  try {
+    const langs =
+      typeof navigator !== "undefined"
+        ? [...(navigator.languages ?? []), navigator.language]
+        : [];
+    if (langs.some((l) => typeof l === "string" && l.toLowerCase().startsWith("tr"))) {
+      return "tr";
+    }
+  } catch {
+    /* ignore */
+  }
   return "en";
 }
 

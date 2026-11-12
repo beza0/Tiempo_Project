@@ -32,7 +32,8 @@ export function PaymentReturnPage({ onNavigate }: PaymentReturnPageProps) {
     const sessionId = searchParams.get("sessionId");
     const paymentStatus = searchParams.get("status");
 
-    if (!sessionId || paymentStatus !== "success" || !token) {
+    // Oturum çerezle geri yüklendiğinde token null'dır; istek çerezle doğrulanır.
+    if (!sessionId || paymentStatus !== "success") {
       setStatus("error");
       return;
     }

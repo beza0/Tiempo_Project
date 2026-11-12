@@ -12,6 +12,14 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Oturum yalnızca HttpOnly çerezle taşınıyorsa (sayfa yenileme sonrası geri yükleme) AuthContext
+ * bu değeri `token` olarak verir. Sayfalardaki `if (!token) return` korumaları geçer, ancak
+ * Authorization başlığı eklenmez; istek çerezle doğrulanır. (Önceden token null kaldığı için
+ * yenilemeden sonra panel, mesajlar, bildirimler boş görünüyordu.)
+ */
+export const COOKIE_SESSION_TOKEN = "__cookie_session__";
+
 export type ApiFetchOptions = RequestInit & {
   token?: string | null;
   /** Varsayılan: sınırsız. Render cold start için auth çağrılarında kullanın. */
@@ -50,7 +58,7 @@ export async function apiFetch<T>(
   ) {
     h.set("Content-Type", "application/json");
   }
-  if (token) {
+  if (token && token !== COOKIE_SESSION_TOKEN) {
     h.set("Authorization", `Bearer ${token}`);
   }
 

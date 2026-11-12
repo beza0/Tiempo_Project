@@ -1,8 +1,10 @@
-import { useState } from "react";
-import { Check, CreditCard, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Check, Clock, CreditCard, Loader2, Sparkles } from "lucide-react";
 import { PageLayout } from "../components/layout/PageLayout";
 import type { PageType } from "../App";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useAuth } from "../contexts/AuthContext";
+import { fetchCreditPurchaseAvailability } from "../api/credits";
 import {
   CREDIT_PACKAGES,
   SELECTED_PACKAGE_KEY,
@@ -16,7 +18,27 @@ interface BuyCreditsPageProps {
 export function BuyCreditsPage({ onNavigate }: BuyCreditsPageProps) {
   const { t } = useLanguage();
   const b = t.buyCredits;
+  const { token } = useAuth();
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  /** null: kontrol ediliyor. Gerçek ödeme altyapısı yokken sunucu satın almayı kapatır. */
+  const [availability, setAvailability] = useState<{
+    purchaseEnabled: boolean;
+    demoMode: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchCreditPurchaseAvailability(token)
+      .then((a) => {
+        if (!cancelled) setAvailability(a);
+      })
+      .catch(() => {
+        if (!cancelled) setAvailability({ purchaseEnabled: false, demoMode: false });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   const handleProceedToPayment = () => {
     if (!selectedPackage || !onNavigate) return;
@@ -38,6 +60,22 @@ export function BuyCreditsPage({ onNavigate }: BuyCreditsPageProps) {
       </section>
 
       <main className="buy-credits-main">
+        {availability === null && (
+          <div className="tp-route-loading" role="status" aria-live="polite">
+            <Loader2 className="h-4 w-4 tp-spin" aria-hidden />
+            {b.checking}
+          </div>
+        )}
+        {availability !== null && !availability.purchaseEnabled && (
+          <PurchaseUnavailable b={b} onNavigate={onNavigate} />
+        )}
+        {availability?.purchaseEnabled && (
+        <>
+        {availability.demoMode && (
+          <p className="buy-credits-checkout__hint" role="note">
+            {b.demoNotice}
+          </p>
+        )}
         <div className="buy-credits-campaign">
           <Sparkles
             className="mt-0.5 h-5 w-5 shrink-0 sm:h-6 sm:w-6"
@@ -76,8 +114,46 @@ export function BuyCreditsPage({ onNavigate }: BuyCreditsPageProps) {
           )}
           <p className="buy-credits-checkout__security">{b.securityNote}</p>
         </div>
+        </>
+        )}
       </main>
     </PageLayout>
+  );
+}
+
+function PurchaseUnavailable({
+  b,
+  onNavigate,
+}: {
+  b: typeof import("../language/locale/tr").tr.buyCredits;
+  onNavigate?: (page: PageType) => void;
+}) {
+  return (
+    <section className="buy-credits-campaign" aria-labelledby="buy-unavailable-title">
+      <Clock className="h-6 w-6" aria-hidden />
+      <div className="tp-unavailable">
+        <h2 id="buy-unavailable-title" className="buy-credits-campaign__title">
+          {b.unavailableTitle}
+        </h2>
+        <p className="buy-credits-campaign__text">{b.unavailableText}</p>
+        <div className="tp-unavailable__actions">
+          <button
+            type="button"
+            className="tp-btn-on-accent"
+            onClick={() => onNavigate?.("add-skill")}
+          >
+            {b.unavailableCta}
+          </button>
+          <button
+            type="button"
+            className="tp-btn-secondary"
+            onClick={() => onNavigate?.("browse")}
+          >
+            {b.unavailableSecondary}
+          </button>
+        </div>
+      </div>
+    </section>
   );
 }
 

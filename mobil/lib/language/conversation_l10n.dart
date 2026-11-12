@@ -96,8 +96,8 @@ class ConversationL10n {
       _e('This request was declined. You can send a new proposal.', 'Bu talep reddedildi. Yeni bir öneri gönderebilirsiniz.');
   String get sendNewProposal => _e('Send new proposal', 'Yeni öneri gönder');
   String get cancelSession => _e('Cancel session', 'Oturumu iptal et');
-  String get iStartedLearner => _e('I started (learner)', 'Başladım (öğrenci)');
-  String get iStartedInstructor => _e('I started (instructor)', 'Başladım (eğitmen)');
+  String get iStartedLearner => _e('Confirm the session took place', 'Seansın yapıldığını onayla');
+  String get iStartedInstructor => _e('Confirm the session took place', 'Seansın yapıldığını onayla');
   String get leaveReview => _e('Leave a review', 'Değerlendirme bırak');
   String get meetingUrlLabel => _e('Meeting URL (Zoom, Meet…)', 'Toplantı bağlantısı (Zoom, Meet…)');
   String get messageHint => _e('Type a message…', 'Mesaj yazın…');

@@ -18,9 +18,24 @@ export type CreditPurchaseCompleteDto = {
   amountTry: number;
 };
 
+export type CreditPurchaseAvailabilityDto = {
+  /** Satın alma akışı açık mı (gerçek ödeme altyapısı yoksa yalnızca demo ortamında). */
+  purchaseEnabled: boolean;
+  demoMode: boolean;
+};
+
+/** Oturum HttpOnly çerezle de taşınır; token yalnızca varsa Bearer olarak eklenir. */
+export async function fetchCreditPurchaseAvailability(
+  token?: string | null,
+): Promise<CreditPurchaseAvailabilityDto> {
+  return apiFetch<CreditPurchaseAvailabilityDto>("/api/credits/availability", {
+    token,
+  });
+}
+
 export async function startCreditCheckout(
   packageId: string,
-  token: string,
+  token?: string | null,
 ): Promise<CreditCheckoutDto> {
   return apiFetch<CreditCheckoutDto>("/api/credits/checkout", {
     method: "POST",
@@ -32,7 +47,7 @@ export async function startCreditCheckout(
 
 export async function completeCreditPurchase(
   sessionId: string,
-  token: string,
+  token?: string | null,
 ): Promise<CreditPurchaseCompleteDto> {
   return apiFetch<CreditPurchaseCompleteDto>(
     `/api/credits/complete/${encodeURIComponent(sessionId)}`,

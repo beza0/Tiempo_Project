@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { COOKIE_SESSION_TOKEN } from "../api/client";
 import { fetchSession, logoutRequest } from "../api/auth";
 import { fetchMyProfile } from "../api/user";
 
@@ -122,7 +123,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: session.email,
           role: session.role,
         });
-        setToken(null);
+        // Çerezle geri yüklenen oturum: sayfalar token beklediği için işaret değeri (başlık eklenmez).
+        setToken(COOKIE_SESSION_TOKEN);
         clearLegacyAuthStorage();
       } catch {
         const legacy = readLegacyStoredUser();

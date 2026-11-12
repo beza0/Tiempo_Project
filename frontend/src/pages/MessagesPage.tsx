@@ -903,6 +903,38 @@ export function MessagesPage({ onNavigate, onViewUserProfile }: MessagesPageProp
   const isSelectedRequesterSide = Boolean(
     selected && sameUserId(selected.ex.requesterId, user?.id),
   );
+  // Seans zamanına bağlı arayüz (onay butonu, sonraki adım) için dakikalık saat.
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNowMs(Date.now()), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
+  const selectedStartMs = selected?.ex.scheduledStartAt
+    ? new Date(selected.ex.scheduledStartAt).getTime()
+    : null;
+  const selectedEndMs =
+    selectedStartMs != null && selected
+      ? selectedStartMs + selected.ex.bookedMinutes * 60_000
+      : null;
+  /** Katılım onayı yalnızca başlangıçtan sonra (sunucu da erken onayı reddeder). */
+  const sessionStarted = selectedStartMs == null || nowMs >= selectedStartMs;
+  const myAckDone = Boolean(
+    selected &&
+      ((isSelectedRequesterSide && selected.ex.requesterAttendanceAckAt) ||
+        (isSelectedOwnerSide && selected.ex.ownerAttendanceAckAt)),
+  );
+  const acceptedNextStep = !selected
+    ? ""
+    : !sessionStarted
+      ? formatTemplate(
+          isSelectedOwnerSide ? m.nextStepOwnerBefore : m.nextStepLearnerBefore,
+          { minutes: selected.ex.bookedMinutes },
+        )
+      : myAckDone
+        ? m.nextStepWaitingPeer
+        : selectedEndMs != null && nowMs > selectedEndMs
+          ? m.nextStepEnded
+          : m.nextStepLive;
   const openOtherProfile = useCallback(() => {
     if (!selected) return;
     const oid = getOtherUserId(selected.ex, user?.id);
@@ -1773,6 +1805,9 @@ export function MessagesPage({ onNavigate, onViewUserProfile }: MessagesPageProp
                           <p className="truncate text-muted-foreground">
                             {formatScheduledAt(selected.ex.scheduledStartAt, locale)}
                           </p>
+                          <p className="tp-next-step" role="status">
+                            {acceptedNextStep}
+                          </p>
                         </div>
                         <div className="flex max-w-full shrink-0 flex-wrap items-center justify-end gap-1.5 sm:gap-2">
                           {canCancelSelected ? (
@@ -1790,7 +1825,7 @@ export function MessagesPage({ onNavigate, onViewUserProfile }: MessagesPageProp
                               {m.cancelSession}
                             </Button>
                           ) : null}
-                          {isSelectedRequesterSide && !selected.ex.requesterAttendanceAckAt ? (
+                          {sessionStarted && isSelectedRequesterSide && !selected.ex.requesterAttendanceAckAt ? (
                             <Button
                               type="button"
                               size="sm"
@@ -1801,7 +1836,7 @@ export function MessagesPage({ onNavigate, onViewUserProfile }: MessagesPageProp
                               {m.requesterConfirmStarted}
                             </Button>
                           ) : null}
-                          {isSelectedOwnerSide && !selected.ex.ownerAttendanceAckAt ? (
+                          {sessionStarted && isSelectedOwnerSide && !selected.ex.ownerAttendanceAckAt ? (
                             <Button
                               type="button"
                               size="sm"

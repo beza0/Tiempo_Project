@@ -19,7 +19,8 @@ export function resolvePostAuthRedirect(
     return fallback;
   }
   const p = pathname.trim();
-  if (!p.startsWith("/") || p.startsWith("//") || p.includes("..")) {
+  // Ters eğik çizgi: bazı tarayıcılar "/\\evil.com" yolunu "//evil.com" gibi yorumlar (açık yönlendirme).
+  if (!p.startsWith("/") || p.startsWith("//") || p.includes("..") || p.includes("\\")) {
     return fallback;
   }
   const rawSearch = st?.from?.search;

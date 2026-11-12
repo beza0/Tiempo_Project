@@ -108,13 +108,21 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
         const map = new Map<string, ExchangeRequestDto>();
         for (const e of sent) map.set(e.id, e);
         for (const e of received) map.set(e.id, e);
+        // Yalnızca henüz bitmemiş onaylı seanslar, en yakın başlangıç önce
+        // (önceden geçmiş seanslar da "yaklaşan" olarak, oluşturulma tarihine göre listeleniyordu).
+        const nowMs = Date.now();
+        const endMs = (e: ExchangeRequestDto) =>
+          e.scheduledStartAt
+            ? new Date(e.scheduledStartAt).getTime() + e.bookedMinutes * 60_000
+            : Number.POSITIVE_INFINITY;
         const accepted = Array.from(map.values()).filter(
-          (e) => e.status.toUpperCase() === "ACCEPTED",
+          (e) => e.status.toUpperCase() === "ACCEPTED" && endMs(e) > nowMs,
         );
-        accepted.sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        );
+        accepted.sort((a, b) => {
+          const sa = a.scheduledStartAt ? new Date(a.scheduledStartAt).getTime() : Infinity;
+          const sb = b.scheduledStartAt ? new Date(b.scheduledStartAt).getTime() : Infinity;
+          return sa - sb;
+        });
         if (!cancelled) setUpcoming(accepted);
       } catch (err) {
         if (!cancelled) {
@@ -205,10 +213,31 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
                                 name: partnerName,
                               })}
                             </p>
+                            {ex.scheduledStartAt && (
+                              <p className="mt-1 text-sm font-medium text-foreground">
+                                <time dateTime={ex.scheduledStartAt}>
+                                  {new Intl.DateTimeFormat(
+                                    locale === "tr" ? "tr-TR" : "en-GB",
+                                    {
+                                      weekday: "short",
+                                      day: "numeric",
+                                      month: "short",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    },
+                                  ).format(new Date(ex.scheduledStartAt))}
+                                </time>
+                                <span className="text-muted-foreground"> · {dur}</span>
+                              </p>
+                            )}
                             <p className="mt-1 text-xs text-muted-foreground">
-                              {formatTemplate(d.upcomingBooked, {
-                                duration: dur,
-                              })}
+                              {ex.requesterId === myId
+                                ? formatTemplate(d.upcomingHeldLearner, {
+                                    duration: dur,
+                                  })
+                                : formatTemplate(d.upcomingHeldOwner, {
+                                    duration: dur,
+                                  })}
                             </p>
                           </div>
                           <Button

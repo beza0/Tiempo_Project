@@ -14,7 +14,18 @@ export default defineConfig({
     baseURL,
     trace: "on-first-retry",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    {
+      name: "chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+        // İsteğe bağlı: önceden kurulmuş bir Chromium (ör. sürümü farklı sandbox) — CI'da tanımsız.
+        launchOptions: process.env.PW_CHROMIUM_PATH
+          ? { executablePath: process.env.PW_CHROMIUM_PATH }
+          : undefined,
+      },
+    },
+  ],
   webServer: {
     command: `npm run preview -- --host 127.0.0.1 --port ${port}`,
     url: baseURL,

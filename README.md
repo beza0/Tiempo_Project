@@ -188,12 +188,14 @@ Spring’deki `SPRING_DATASOURCE_URL` ile uyumlu olmalıdır.
 | Değişken | Öneri |
 |----------|--------|
 | `TIEMPOS_PRE_SESSION_DEMO` | `false` |
-| `PAYMENT_MODE` | `redirect` + `PAYMENT_REDIRECT_URL_TEMPLATE` |
+| `PAYMENT_MODE` | `redirect` (varsayılan): doğrulanmış ödeme sağlayıcısı entegrasyonu olmadığı için **saat satın alma kapalıdır** (checkout/complete 409). `demo` yalnızca yerel/test içindir — ödeme alınmadan kredi ekler. |
 | `JPA_SHOW_SQL` | `false` |
 | `CORS_ALLOWED_ORIGINS` | Canlı domainleriniz |
 | `GOOGLE_CLIENT_ID` | Web istemcisi (prod) |
 
 Yerel profil: `SPRING_PROFILES_ACTIVE=local` (`.env.example`) — demo ödeme, SQL log, geliştirici CORS.
+
+Yeni migration: `V22__time_transactions_type_purchase.sql` (yalnızca `time_transactions.type` üzerindeki Hibernate CHECK kısıtını kaldırır; veri değiştirmez).
 
 ---
 

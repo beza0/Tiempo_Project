@@ -2,7 +2,6 @@ import { useCallback } from "react";
 import {
   Routes,
   Route,
-  Navigate,
   useNavigate,
   useLocation,
 } from "react-router-dom";
@@ -38,11 +37,10 @@ import {
   CancellationPolicyPage,
   InstructorGuidePage,
 } from "../pages/StaticContentPages";
-import { useAuth } from "../contexts/AuthContext";
 import { PUBLIC_PROFILE_USER_ID_KEY } from "../api/user";
 import type { PageType } from "../App";
 import { pageToPath, PATHS } from "./paths";
-import { ProtectedRoute } from "./ProtectedRoute";
+import { GuestOnlyRoute, ProtectedRoute } from "./ProtectedRoute";
 import { ScrollToTop } from "./ScrollToTop";
 import { AnalyticsPageView } from "./AnalyticsPageView";
 
@@ -63,7 +61,6 @@ function SkillWithLogin({ onPage }: { onPage: (p: PageType) => void }) {
 
 function AppRoutesContent() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
 
   const onPage = useCallback(
     (page: PageType) => {
@@ -119,21 +116,17 @@ function AppRoutesContent() {
       <Route
         path={PATHS.login}
         element={
-          isAuthenticated ? (
-            <Navigate to={PATHS.dashboard} replace />
-          ) : (
+          <GuestOnlyRoute>
             <LoginPage onNavigate={onPage} />
-          )
+          </GuestOnlyRoute>
         }
       />
       <Route
         path={PATHS.signup}
         element={
-          isAuthenticated ? (
-            <Navigate to={PATHS.dashboard} replace />
-          ) : (
+          <GuestOnlyRoute>
             <SignUpPage onNavigate={onPage} />
-          )
+          </GuestOnlyRoute>
         }
       />
       <Route
