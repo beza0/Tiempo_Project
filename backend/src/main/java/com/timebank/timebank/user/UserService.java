@@ -71,6 +71,7 @@ public class UserService {
     private final RegistrationMailService registrationMailService;
     private final EntityManager entityManager;
     private final ObjectMapper objectMapper;
+    private final CodeAttemptTracker codeAttemptTracker;
 
     @Value("${app.google.client-id:}")
     private String googleClientId;
@@ -102,7 +103,9 @@ public class UserService {
                        UserBlockRepository userBlockRepository,
                        RegistrationMailService registrationMailService,
                        EntityManager entityManager,
-                       ObjectMapper objectMapper) {
+                       ObjectMapper objectMapper,
+                       CodeAttemptTracker codeAttemptTracker) {
+        this.codeAttemptTracker = codeAttemptTracker;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -171,7 +174,7 @@ public class UserService {
     /**
      * E-postaya gelen 6 haneli kod ile doğrular ve oturum token'ı döner.
      */
-    @Transactional
+    @Transactional(noRollbackFor = IllegalArgumentException.class)
     public LoginResponse verifyEmailWithCode(String emailRaw, String codeRaw) {
         if (emailRaw == null || emailRaw.isBlank() || codeRaw == null || codeRaw.isBlank()) {
             throw new IllegalArgumentException("E-posta ve doğrulama kodu gerekli.");
@@ -190,8 +193,17 @@ public class UserService {
                         "Doğrulama süresi dolmuş. Yeni kod için \"Tekrar gönder\" kullanın.");
             }
             if (!constantTimeEquals(normalizeVerificationDigits(p.getVerificationCode()), code)) {
+                if (codeAttemptTracker.recordFailure("verify", email)) {
+                    // Kodu geçersiz kıl: süresini şimdiye çek, kullanıcı "Tekrar gönder" ile yenisini alır.
+                    p.setExpiresAt(Instant.now().minusSeconds(1));
+                    pendingSignupRepository.save(p);
+                    codeAttemptTracker.reset("verify", email);
+                    throw new IllegalArgumentException(
+                            "Çok fazla hatalı deneme. Yeni kod için \"Tekrar gönder\" kullanın.");
+                }
                 throw new IllegalArgumentException("Doğrulama kodu hatalı.");
             }
+            codeAttemptTracker.reset("verify", email);
 
             User user = new User();
             user.setFullName(p.getFullName());
@@ -285,6 +297,7 @@ public class UserService {
         if (pendingOpt.isPresent()) {
             PendingSignup p = pendingOpt.get();
             String newCode = newVerificationCode();
+            codeAttemptTracker.reset("verify", email);
             p.setVerificationCode(newCode);
             p.setExpiresAt(Instant.now().plus(48, ChronoUnit.HOURS));
             pendingSignupRepository.save(p);
@@ -403,12 +416,8 @@ public class UserService {
 
         SocialIdentity identity = switch (provider) {
             case "google" -> fetchGoogleIdentity(accessToken, idToken);
-            case "facebook" -> {
-                if (accessToken.isEmpty()) {
-                    throw new IllegalArgumentException("Facebook girişi için erişim jetonu gerekli");
-                }
-                yield fetchFacebookIdentity(accessToken);
-            }
+            // Facebook: hiçbir istemci kullanmıyor ve sunucu, jetonun bu uygulamaya verildiğini
+            // (app id) doğrulamıyordu — başka bir uygulamanın jetonuyla giriş mümkündü. Kapatıldı.
             default -> throw new IllegalArgumentException("Desteklenmeyen sosyal sağlayıcı");
         };
 
@@ -474,6 +483,7 @@ public class UserService {
             }
             verifyGoogleAudience(body);
             verifyGoogleTokenNotExpired(body);
+            verifyGoogleEmailVerified(body);
             String email = text(body, "email");
             String name = text(body, "name");
             if (name.isBlank()) {
@@ -493,6 +503,23 @@ public class UserService {
 
     private SocialIdentity fetchGoogleIdentityFromAccessToken(String accessToken) {
         try {
+            // Önce tokeninfo: jetonun BU uygulamanın istemci kimliğine verildiğini doğrula.
+            // Aksi halde başka bir uygulamanın (saldırganın) aldığı Google jetonuyla giriş yapılabilirdi.
+            HttpRequest infoRequest = HttpRequest.newBuilder(URI.create(
+                            "https://oauth2.googleapis.com/tokeninfo?access_token="
+                                    + URLEncoder.encode(accessToken, StandardCharsets.UTF_8)))
+                    .GET()
+                    .build();
+            HttpResponse<String> infoResponse = HTTP_CLIENT.send(infoRequest, HttpResponse.BodyHandlers.ofString());
+            if (infoResponse.statusCode() < 200 || infoResponse.statusCode() >= 300) {
+                log.warn("Google access token tokeninfo başarısız: status={}", infoResponse.statusCode());
+                throw new IllegalArgumentException("Google doğrulaması başarısız");
+            }
+            JsonNode info = objectMapper.readTree(infoResponse.body());
+            verifyGoogleAudience(info);
+            verifyGoogleEmailVerified(info);
+            String verifiedEmail = text(info, "email");
+
             HttpRequest request = HttpRequest.newBuilder(
                             URI.create("https://www.googleapis.com/oauth2/v3/userinfo"))
                     .header("Authorization", "Bearer " + accessToken)
@@ -500,13 +527,13 @@ public class UserService {
                     .build();
             HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                log.warn("Google userinfo başarısız: status={} body={}", response.statusCode(), response.body());
+                log.warn("Google userinfo başarısız: status={}", response.statusCode());
                 throw new IllegalArgumentException("Google doğrulaması başarısız");
             }
             JsonNode body = objectMapper.readTree(response.body());
             String email = text(body, "email");
             String name = text(body, "name");
-            if (email.isBlank()) {
+            if (email.isBlank() || (!verifiedEmail.isBlank() && !verifiedEmail.equalsIgnoreCase(email))) {
                 throw new IllegalArgumentException("Google hesabı e-posta bilgisi döndürmedi");
             }
             return new SocialIdentity(email, name);
@@ -543,6 +570,15 @@ public class UserService {
         }
     }
 
+    /** Google, doğrulanmamış e-postayı da döndürebilir; hesap eşleştirmesi yalnızca doğrulanmış e-postayla. */
+    private static void verifyGoogleEmailVerified(JsonNode tokenInfo) {
+        JsonNode v = tokenInfo.get("email_verified");
+        boolean verified = v != null && (v.asBoolean(false) || "true".equalsIgnoreCase(v.asText("")));
+        if (!verified) {
+            throw new IllegalArgumentException("Google hesabının e-posta adresi doğrulanmamış");
+        }
+    }
+
     private void verifyGoogleTokenNotExpired(JsonNode tokenInfo) {
         String expRaw = text(tokenInfo, "exp");
         if (expRaw.isBlank()) {
@@ -555,31 +591,6 @@ public class UserService {
             }
         } catch (NumberFormatException ignored) {
             // exp parse edilemezse Google yanıtına güven
-        }
-    }
-
-    private SocialIdentity fetchFacebookIdentity(String accessToken) {
-        try {
-            String url = "https://graph.facebook.com/me?fields=id,name,email&access_token="
-                    + URLEncoder.encode(accessToken, StandardCharsets.UTF_8);
-            HttpRequest request = HttpRequest.newBuilder(URI.create(url))
-                    .GET()
-                    .build();
-            HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                throw new IllegalArgumentException("Facebook doğrulaması başarısız");
-            }
-            JsonNode body = objectMapper.readTree(response.body());
-            String email = text(body, "email");
-            String name = text(body, "name");
-            if (email.isBlank()) {
-                throw new IllegalArgumentException("Facebook hesabı e-posta bilgisi döndürmedi");
-            }
-            return new SocialIdentity(email, name);
-        } catch (IllegalArgumentException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Facebook ile giriş tamamlanamadı");
         }
     }
 
@@ -700,6 +711,7 @@ public class UserService {
             return;
         }
         String code = newVerificationCode();
+        codeAttemptTracker.reset("reset", email);
         user.setPasswordResetToken(code);
         user.setPasswordResetExpiresAt(Instant.now().plus(1, ChronoUnit.HOURS));
         userRepository.save(user);
@@ -714,7 +726,7 @@ public class UserService {
     /**
      * Sıfırlama kodu ile yeni şifre belirler.
      */
-    @Transactional
+    @Transactional(noRollbackFor = IllegalArgumentException.class)
     public void resetPassword(String emailRaw, String tokenRaw, String newPassword) {
         if (emailRaw == null || emailRaw.isBlank()
                 || tokenRaw == null || tokenRaw.isBlank()
@@ -736,8 +748,17 @@ public class UserService {
             throw new IllegalArgumentException("Sıfırlama kodunun süresi dolmuş. Lütfen yeni bir kod talep edin.");
         }
         if (!constantTimeEquals(expected, token)) {
+            if (codeAttemptTracker.recordFailure("reset", email)) {
+                user.setPasswordResetToken(null);
+                user.setPasswordResetExpiresAt(null);
+                userRepository.save(user);
+                codeAttemptTracker.reset("reset", email);
+                throw new IllegalArgumentException(
+                        "Çok fazla hatalı deneme. Lütfen yeni bir sıfırlama kodu isteyin.");
+            }
             throw new IllegalArgumentException("Geçersiz sıfırlama kodu.");
         }
+        codeAttemptTracker.reset("reset", email);
 
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         user.setPasswordResetToken(null);
@@ -780,6 +801,11 @@ public class UserService {
         }
         for (ExchangeRequest er : exchangeRequestRepository.findBySkillOwnerEmailOrderByCreatedAtDesc(email)) {
             erIdSet.add(er.getId());
+            // Silinen kullanıcı eğitmen: karşı tarafın (öğrencinin) askıdaki saati kaybolmasın, iade et.
+            if (er.isRequesterCreditHeld() && er.getCreditsSettledAt() == null
+                    && !er.getRequester().getId().equals(userId)) {
+                userRepository.credit(er.getRequester().getId(), er.getBookedMinutes());
+            }
         }
         List<UUID> erIds = new ArrayList<>(erIdSet);
 

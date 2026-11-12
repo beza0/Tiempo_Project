@@ -29,13 +29,16 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private final int loginPerMinute;
     private final int contactPerMinute;
     private final int messagesPerMinute;
+    private final int codeAttemptsPerMinute;
     private final Map<String, Window> windows = new ConcurrentHashMap<>();
 
     public RateLimitFilter(
             @Value("${app.rate-limit.login-per-minute:20}") int loginPerMinute,
             @Value("${app.rate-limit.contact-per-minute:8}") int contactPerMinute,
-            @Value("${app.rate-limit.messages-per-minute:90}") int messagesPerMinute
+            @Value("${app.rate-limit.messages-per-minute:90}") int messagesPerMinute,
+            @Value("${app.rate-limit.code-attempts-per-minute:10}") int codeAttemptsPerMinute
     ) {
+        this.codeAttemptsPerMinute = codeAttemptsPerMinute;
         this.loginPerMinute = loginPerMinute;
         this.contactPerMinute = contactPerMinute;
         this.messagesPerMinute = messagesPerMinute;
@@ -77,6 +80,12 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 || path.startsWith("/api/auth/social-login")
                 || path.startsWith("/api/auth/forgot-password")) {
             return loginPerMinute;
+        }
+        // 6 haneli kodlarla çalışan uçlar: kaba kuvvet denemesini sınırla (önceden limitsizdi).
+        if (path.startsWith("/api/auth/reset-password")
+                || path.startsWith("/api/auth/verify-email")
+                || path.startsWith("/api/auth/resend-verification")) {
+            return codeAttemptsPerMinute;
         }
         if (path.startsWith("/api/public/contact")) {
             return contactPerMinute;
