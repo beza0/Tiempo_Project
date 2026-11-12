@@ -102,15 +102,16 @@ public abstract class AbstractPostgresIntegrationTest {
     }
 
     protected String createSkill(Instant startAt) throws Exception {
-        ZonedDateTime z = startAt.atZone(TZ);
-        String day = z.getDayOfWeek().name();
         var body = objectMapper.createObjectNode();
         body.put("title", "Test skill");
         body.put("description", "Desc");
         body.put("durationMinutes", 60);
         body.put("category", "Sport");
         body.set("sessionTypes", objectMapper.valueToTree(List.of("online")));
-        body.set("availableDays", objectMapper.valueToTree(List.of(day)));
+        // Haftanın her günü: testler takvim gününe / saate bağlı kalmasın (gece yarısına yakın
+        // çalışınca "+N saat" sonraki güne taşabiliyor).
+        body.set("availableDays", objectMapper.valueToTree(List.of(
+                "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY")));
         // Gün boyu uygunluk: testler günün saatinden bağımsız çalışsın (önceden 08–20 aralığı,
         // "şimdi + 2 saat" gece saatlerinde aralık dışına düşüp testleri kırıyordu).
         body.put("availableFrom", "00:00");
