@@ -56,7 +56,7 @@ export function HeroSection({ onNavigate }: HeroSectionProps) {
           {!isAuthenticated ? (
             <Button 
               size="lg" 
-              className="bg-gradient-to-r from-blue-500 to-blue-700 text-white hover:opacity-90 shadow-xl px-8 py-6 rounded-full"
+              className="tp-hero-primary shadow-xl px-8 py-6 rounded-full"
               onClick={() => onNavigate?.("signup")}
             >
               {h.joinNow}
@@ -64,7 +64,7 @@ export function HeroSection({ onNavigate }: HeroSectionProps) {
           ) : null}
           <Button 
             size="lg" 
-            className="rounded-full border-2 border-primary/80 bg-card px-8 py-6 text-primary hover:bg-accent"
+            className="tp-hero-secondary rounded-full border-2 px-8 py-6"
             onClick={() => onNavigate?.("how-it-works")}
           >
             {h.howItWorks}

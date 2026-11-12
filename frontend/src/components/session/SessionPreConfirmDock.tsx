@@ -338,6 +338,20 @@ export function SessionPreConfirmDock() {
     Boolean(isAuthenticated && user) && (hasRealRows || hasFeedback || hasCancelSurvey);
   const itemCount = visibleRows.length + pendingFeedback.length + pendingCancelSurveys.length;
 
+  // Dar ekranda yalnızca acil olmayan kartlar (değerlendirme / iptal anketi) varsa dock küçük sekme
+  // olarak başlar; önceden mobilde paket kartını ve "Rezervasyon" butonunu kapatıyordu.
+  // Zaman kritik seans onay kartı geldiğinde dock yeniden açılır.
+  const onlyNonUrgent = !hasRealRows && (hasFeedback || hasCancelSurvey);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const narrow = window.matchMedia?.("(max-width: 640px)").matches ?? false;
+    if (hasRealRows) {
+      setMinimized(false);
+    } else if (onlyNonUrgent && narrow) {
+      setMinimized(true);
+    }
+  }, [hasRealRows, onlyNonUrgent]);
+
   const onSubmitFeedback = async (item: PendingReviewDockDto) => {
     if (!token) return;
     const rating = feedbackRating[item.exchangeRequestId] ?? 0;

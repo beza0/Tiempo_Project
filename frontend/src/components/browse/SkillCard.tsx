@@ -133,7 +133,7 @@ export function SkillCard({
             </Badge>
           ) : null}
           {availability ? (
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="tp-chip-wrap text-xs">
               {availability}
             </Badge>
           ) : null}

@@ -34,8 +34,15 @@ function formatNavbarCreditHours(
   locale: string,
 ): string {
   if (minutes == null) return "—";
+  // Dakikalar da gösterilir: önceden 30 dk bakiye "0h" görünüyordu.
   const h = Math.floor(minutes / 60);
-  return locale === "tr" ? `${h} sa` : `${h}h`;
+  const m = minutes % 60;
+  if (locale === "tr") {
+    if (h === 0) return `${m} dk`;
+    return m === 0 ? `${h} sa` : `${h} sa ${m} dk`;
+  }
+  if (h === 0) return `${m}m`;
+  return m === 0 ? `${h}h` : `${h}h ${m}m`;
 }
 
 /** İlk + soyad baş harfi; tek kelimede ilk iki harf. */

@@ -73,7 +73,7 @@ export function CategoriesSection() {
             return (
               <Card
                 key={category.slug}
-                className={`group cursor-pointer rounded-2xl border border-slate-200/90 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:ring-1 dark:ring-white/5 ${bgColors[index]}`}
+                className={`tp-category-card group rounded-2xl border p-6 shadow-sm ${bgColors[index]}`}
               >
                 <div
                   className={`mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br ${colors[index]} shadow-md transition-transform duration-300 group-hover:scale-110`}
@@ -81,11 +81,11 @@ export function CategoriesSection() {
                   <Icon className="h-7 w-7 text-white" />
                 </div>
 
-                <h3 className="mb-1 text-lg font-medium text-slate-900">
+                <h3 className="tp-category-card__title mb-1 text-lg font-medium">
                   {category.name}
                 </h3>
 
-                <p className="text-sm text-slate-600">{countLabel}</p>
+                <p className="tp-category-card__count text-sm">{countLabel}</p>
               </Card>
             );
           })}

@@ -29,34 +29,9 @@ export function TestimonialsSection() {
             </p>
           </div>
 
-          <p className="mb-10 text-center text-muted-foreground">{tm.empty}</p>
+          {/* Boş durum: önceden 5 yıldızlı sahte iskelet kartlar gösteriliyordu (gerçek yorum izlenimi). */}
+          <p className="text-center text-muted-foreground">{tm.empty}</p>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {[0, 1, 2].map((index) => (
-              <Card
-                key={index}
-                className="flex min-h-[220px] flex-col justify-center rounded-3xl border-2 border-dashed border-border/80 bg-card/50 p-8"
-              >
-                <div className="mb-4 flex justify-center gap-1 opacity-30">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="h-5 w-5 fill-yellow-400 text-yellow-400"
-                    />
-                  ))}
-                </div>
-                <div className="mx-auto mb-4 h-3 w-3/4 max-w-[220px] rounded-full bg-muted" />
-                <div className="mx-auto mb-6 h-3 w-1/2 max-w-[160px] rounded-full bg-muted" />
-                <div className="flex items-center justify-center gap-4">
-                  <div className="h-14 w-14 shrink-0 rounded-full bg-muted" />
-                  <div className="space-y-2 text-left">
-                    <div className="h-3 w-24 rounded bg-muted" />
-                    <div className="h-3 w-32 rounded bg-muted" />
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
         </div>
       </section>
     );
