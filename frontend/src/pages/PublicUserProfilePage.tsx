@@ -257,7 +257,7 @@ export function PublicUserProfilePage({ onNavigate }: Props) {
               <Button
                 size="sm"
                 type="button"
-                className="bg-card text-primary hover:bg-accent"
+                className="tp-btn-on-accent !py-1.5"
                 onClick={() => openMessagesToUser()}
               >
                 <MessageCircle className="mr-2 h-4 w-4" />

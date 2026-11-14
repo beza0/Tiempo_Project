@@ -27,7 +27,7 @@ export function HowItWorksPage({ onNavigate }: HowItWorksPageProps) {
   return (
     <PageLayout onNavigate={onNavigate}>
       
-      <div className="bg-gradient-to-r from-blue-500 to-blue-700 pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="tp-page-hero">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl sm:text-5xl md:text-6xl text-white mb-6">
             {h.heroTitle}
@@ -38,7 +38,7 @@ export function HowItWorksPage({ onNavigate }: HowItWorksPageProps) {
           {!isAuthenticated ? (
             <Button
               size="lg"
-              className="rounded-full bg-card px-8 py-6 text-primary shadow-xl hover:bg-accent"
+              className="tp-hero-primary rounded-full px-8 py-6 shadow-xl"
               onClick={() => onNavigate?.("signup")}
             >
               {h.getStartedFree}
@@ -57,7 +57,7 @@ export function HowItWorksPage({ onNavigate }: HowItWorksPageProps) {
           </p>
         </div>
         
-        <div className="space-y-12">
+        <div className="grid gap-6 md:grid-cols-2">
           {h.steps.map((step, index) => {
             const Icon = stepIcons[index];
             const gradients = [
@@ -68,21 +68,22 @@ export function HowItWorksPage({ onNavigate }: HowItWorksPageProps) {
             ] as const;
 
             return (
-              <div key={index} className="w-full">
-                <Card className="rounded-3xl border-0 p-8 shadow-xl transition-shadow hover:shadow-2xl">
-                  <div
-                    className={`mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${gradients[index]} shadow-lg`}
-                  >
-                    <Icon className="h-8 w-8 text-white" />
+              <div key={index} className="h-full">
+                <Card className="h-full rounded-2xl border border-border p-7 shadow-sm">
+                  <div className="mb-5 flex items-center gap-4">
+                    <div
+                      className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${gradients[index]} shadow-md`}
+                    >
+                      <Icon className="h-6 w-6 text-white" />
+                    </div>
+                    <span className="text-3xl font-semibold tabular-nums text-muted-foreground/50">
+                      {step.number}
+                    </span>
                   </div>
 
-                  <div className="mb-4 text-left text-6xl font-semibold tabular-nums text-muted-foreground/35">
-                    {step.number}
-                  </div>
+                  <h3 className="mb-2 text-xl font-semibold text-foreground">{step.title}</h3>
 
-                  <h3 className="mb-3 text-2xl text-foreground">{step.title}</h3>
-
-                  <p className="text-lg text-muted-foreground">{step.description}</p>
+                  <p className="text-muted-foreground">{step.description}</p>
                 </Card>
               </div>
             );
@@ -137,7 +138,7 @@ export function HowItWorksPage({ onNavigate }: HowItWorksPageProps) {
               </p>
               {!isAuthenticated ? (
                 <Button
-                  className="w-full bg-card text-primary hover:bg-accent"
+                  className="tp-btn-on-accent w-full"
                   onClick={() => onNavigate?.("signup")}
                 >
                   {h.claimBonus}
@@ -201,7 +202,7 @@ export function HowItWorksPage({ onNavigate }: HowItWorksPageProps) {
           {!isAuthenticated ? (
             <Button
               size="lg"
-              className="rounded-full bg-card px-8 py-6 text-primary shadow-xl hover:bg-accent"
+              className="tp-hero-primary rounded-full px-8 py-6 shadow-xl"
               onClick={() => onNavigate?.("signup")}
             >
               {h.ctaButton}

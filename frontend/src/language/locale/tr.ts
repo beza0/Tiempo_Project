@@ -1,3 +1,4 @@
+import { infoPagesTr } from "./info-pages-tr";
 /** Turkish UI strings — keys must match `en.ts`. */
 import type { Translation } from "./en";
 import { faqPageTr } from "./faq-page-tr";
@@ -87,6 +88,11 @@ export const tr: Translation = {
     tagline:
       "Herkesin öğrenebildiği ve öğretebildiği zaman temelli beceri takas platformu. Topluluğumuza katılın ve bugün beceri takasına başlayın.",
     quickLinks: "Hızlı bağlantılar",
+    platform: "Platform",
+    helpTitle: "Yardım",
+    browseSkills: "Becerilere göz at",
+    instructorGuide: "Eğitmen rehberi",
+    company: "Şirket",
     aboutUs: "Hakkımızda",
     contactUs: "İletişim",
     faq: "SSS",
@@ -103,6 +109,18 @@ export const tr: Translation = {
       "Tiempos. Tüm hakları saklıdır. Öğrenmeye tutkuyla.",
   },
   landing: {
+    featured: {
+      title: "Öne çıkan beceriler",
+      subtitle: "Topluluğun şu an paylaştığı becerilerden bazıları",
+      seeAll: "Tüm becerileri gör",
+      empty: "Henüz yayınlanmış beceri yok. İlk beceriyi siz paylaşın!",
+    },
+    finalCta: {
+      title: "Bildiğiniz bir şeyi öğretin, merak ettiğinizi öğrenin",
+      text: "Ücretsiz hesap açın; yeni üyeler 1 saat hediyeyle başlar.",
+      primary: "Ücretsiz başla",
+      secondary: "Becerilere göz at",
+    },
     hero: {
       badge: "Zaman temelli beceri takas platformu",
       line1: "Beceri takası yapın.",
@@ -165,6 +183,10 @@ export const tr: Translation = {
     },
   },
   browse: {
+    dayShort: ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"],
+    everyDay: "Her gün",
+    weekdays: "Hafta içi",
+    weekend: "Hafta sonu",
     title: "Becerileri keşfet",
     subtitle: "Uzman topluluğumuzdan öğrenmek için doğru beceriyi bulun",
     searchPlaceholder: "Beceri, eğitmen veya kategori ara…",
@@ -575,9 +597,9 @@ export const tr: Translation = {
     completedBadge: "Tamamlandı",
     rejectedHint: "Bu rezervasyon isteği reddedildi.",
     acceptedSessionHint:
-      "Oturum onaylandı. Planlanan başlangıç saatine kadar her iki taraf da iptal edebilir. Zaman kredisi sadece eğitmen oturumu “tamamlandı” diye işaretlediğinde alınan tarafın bakiyesinden düşer.",
+      "Oturum onaylandı ve öğrencinin saati ayrıldı. Başlangıç saatine kadar iki taraf da iptal edebilir; iptalde saat öğrenciye iade edilir. Seans tamamlanınca saat eğitmene aktarılır.",
     cancelledHint:
-      "Bu rezervasyon iptal edildi. Rezervasyonda kredi rehin alınmaz; tamamlandı denince düşer — bu yüzden bakiyeniz değişmedi.",
+      "Bu rezervasyon iptal edildi. Ayrılmış saat varsa öğrencinin bakiyesine iade edildi.",
     cancelSession: "Oturumu iptal et",
     cancelPending: "Talebi geri çek",
     cancelConfirmTitle: "Bu rezervasyon iptal edilsin mi?",
@@ -585,7 +607,7 @@ export const tr: Translation = {
       "Geri alınamaz. Bekleyen/onaylı rezervasyon iptal edilirse askıdaki kredi öğrenciye iade edilir. Karşı taraf bilgilendirilir.",
     markSessionComplete: "Oturumu tamamlandı işaretle",
     instructorMarkCompleteHint:
-      "Eğitmen olarak oturum bittiğinde tamamlandı diye işaretleyin. Öğrenci sizi puanlayabilir ve zaman kredileri aktarılır.",
+      "Seans bittikten sonra yapıldığını onaylayın; iki taraf onaylayınca saat bakiyenize aktarılır.",
     sessionCompletedHint:
       "Bu oturum tamamlandı. Mesaj geçmişini okuyabilirsiniz.",
     createBooking: "Yeni rezervasyon oluştur",
@@ -606,7 +628,7 @@ export const tr: Translation = {
     sessionLinkPlaceholder: "https://...",
     saveSessionLink: "Linki kaydet",
     requesterMarkAttendance: "Oturuma katıldım (isteğe bağlı)",
-    requesterMarkedAttendance: "Katılım onaylandı. Kredi aktarımı yine eğitmenin tamamlandı adımıyla olur.",
+    requesterMarkedAttendance: "Onayınız alındı. Karşı taraf da onaylayınca saat aktarılır.",
     requesterConfirmStarted: "Seansın yapıldığını onayla",
     ownerConfirmStarted: "Seansın yapıldığını onayla",
     nextStepLearnerBefore:
@@ -681,7 +703,7 @@ export const tr: Translation = {
         number: "02",
         title: "Göz at ve bağlan",
         description:
-          "Topluluğumuzun sunduğu yüzlerce beceriyi keşfet. İlgi alanlarına ve takvimine göre eşleş.",
+          "Topluluğun paylaştığı becerileri keşfet. İlgi alanlarına ve takvimine göre eşleş.",
       },
       {
         number: "03",
@@ -745,7 +767,7 @@ export const tr: Translation = {
     linkInstructor: "Eğitmen rehberi",
     linkBrowse: "Becerilere göz at",
     ctaTitle: "Öğrenmeye hazır mısın?",
-    ctaSubtitle: "Topluluğumuzdaki binlerce öğrenci ve öğretmene katıl",
+    ctaSubtitle: "Ücretsiz hesap aç; ilk saatin bizden",
     ctaButton: "Ücretsiz hesap oluştur",
   },
   contactPage: {
@@ -758,7 +780,7 @@ export const tr: Translation = {
     emailAddress: "tiempos.site@gmail.com",
     responseTitle: "Yanıt süresi",
     responseText:
-      "İş günlerinde genelde 24 saat içinde e-posta ile döneriz.",
+      "Genellikle birkaç iş günü içinde e-posta ile dönüş yapıyoruz.",
     formTitle: "Bize yazın",
     labelName: "Ad Soyad",
     labelEmail: "E-posta",
@@ -796,6 +818,7 @@ export const tr: Translation = {
     faqButton: "SSS’ye git",
   },
   faqPage: faqPageTr,
+  infoPages: infoPagesTr,
   addSkill: {
     title: "Yeni beceri ekle",
     editTitle: "Beceriyi düzenle",
@@ -909,7 +932,7 @@ export const tr: Translation = {
     detailOnline: "Çevrim içi oturumlar",
     detailSchedule: "Esnek program",
     detailCert: "Tamamlayınca sertifika",
-    bookSession: "Oturum ayırt",
+    bookSession: "Rezervasyon yap",
     messageInstructor: "Eğitmene mesaj",
     categoryProgramming: "Beceri",
     courseTitle: "Beceri",
@@ -1031,7 +1054,7 @@ export const tr: Translation = {
         "Tiempos, 2024’te eğitimciler ve geliştiricilerin ortak bir vizyonla bir araya gelmesiyle başladı: öğrenmenin maddi durumdan bağımsız olarak herkese erişilebilir olduğu bir dünya.",
         "Geleneksel eğitim platformlarının, öğrenmek isteyen ama ücreti karşılayamayan insanları dışarıda bıraktığını gördük. Öte yandan birçok yetenekli insan bilgisini paylaşmak istiyor ama nereden başlayacağını bilmiyor.",
         "Zamanı para birimi olarak kullanarak gerçekten eşitlikçi bir platform oluşturduk. İster ileri düzey programlama ister başlangıç seviyesi yemek pişirme öğretin—saatiniz aynı değerde. Bu ilke, hayatın her alanından öğrenci ve eğitmenlerden oluşan çeşitli ve aktif bir topluluk kurmamıza yardımcı oldu.",
-        "Bugün Tiempos büyümeye devam ediyor; dünya çapında binlerce insanı bir araya getiriyor, anlamlı bağlar kuruyor ve bilgi ile topluluk gibi hayattaki en iyi şeylerin etiket gerektirmediğini gösteriyor.",
+        "Bugün Tiempos büyümeye devam ediyor; insanları bir araya getiriyor, anlamlı bağlar kuruyor ve bilgi ile topluluk gibi hayattaki en iyi şeylerin etiket gerektirmediğini gösteriyor.",
       ],
       ctaTitle: "Topluluğumuza katılmaya hazır mısınız?",
       ctaSubtitle:
@@ -1044,17 +1067,17 @@ export const tr: Translation = {
     },
     contact: {
       title: "İletişim",
-      body: "Tüm mesajları okuyoruz. İş birliği, basın veya hesap desteği için Destek sayfasındaki e-posta adresini kullanın. Ortalama dönüş: birkaç iş günü.\n\nE-posta: support@tiempos.local (canlıya alırken güncelleyin).",
+      body: "Tüm mesajları okuyoruz. İş birliği, basın veya hesap desteği için bu sayfadaki formu kullanın. Ortalama dönüş süresi birkaç iş günüdür.",
     },
     support: {
       title: "Destek ve yardım",
-      body: "Yardıma mı ihtiyacınız var? Önce Nasıl çalışır, İptal ve no-show politikası ve Eğitmen rehberi sayfalarına bakın. Takıldıysanız support@tiempos.local adresine hesap e-postanızı ve kısa açıklamayı yazın.\n\nHer anlaşmazlığa arabuluculuk yapamayız; ancak kötüye kullanım ve tekrarlayan no-show modellerini ciddiye alır, topluluğu korumak için hesap kısıtlayabiliriz.",
+      body: "Yardıma mı ihtiyacınız var? Önce Nasıl çalışır, İptal ve no-show politikası ve Eğitmen rehberi sayfalarına bakın. Yanıtı bulamazsanız iletişim formundan yazın.",
     },
     terms: {
       title: "Kullanım şartları",
       heroSubtitle:
         "Tiempos'u adil ve güvenli kullanma kuralları: profil, davranış ve zaman kredileri.",
-      body: "Tiempos'ta hesap oluşturup hizmeti kullanarak, platformu iyi niyetle kullanmayı kabul edersiniz. Profil bilgilerinizi doğru tutar, diğer üyelere saygılı davranır ve yürürlükteki yasalara uyarsınız.\n\nZaman kredileri yasal para değildir, nakde çevrilemez ve nakit değeri yoktur; yalnızca uygulama içinde beceri takası ve oturum akışını düzenlemek içindir.\n\nÖzellikleri değiştirebilir, kötüye kullanım, taciz veya tekrarlayan ihlallerde hesapları askıya alabilir veya kısıtlayabilir, gerekli durumlarda uygulama içi bildirimlerle haber verebiliriz.\n\nŞartları güncellersek makul ölçüde bildirim yapılır; güncellemeden sonra kullanımı sürdürmek güncel şartları kabul sayılır.\n\nBu metin geliştirme amaçlı sade bir özettir. Canlıya çıkmadan önce tam hukuki metin uzman avukatla hazırlanmalıdır.",
+      body: "Tiempos'ta hesap oluşturup hizmeti kullanarak, platformu iyi niyetle kullanmayı kabul edersiniz. Profil bilgilerinizi doğru tutar, diğer üyelere saygılı davranır ve yürürlükteki yasalara uyarsınız.\n\nZaman kredileri yasal para değildir, nakde çevrilemez ve nakit değeri yoktur; yalnızca uygulama içinde beceri takası ve oturum akışını düzenlemek içindir.\n\nÖzellikleri değiştirebilir, kötüye kullanım, taciz veya tekrarlayan ihlallerde hesapları askıya alabilir veya kısıtlayabilir, gerekli durumlarda uygulama içi bildirimlerle haber verebiliriz.\n\nŞartları güncellersek makul ölçüde bildirim yapılır; güncellemeden sonra kullanımı sürdürmek güncel şartları kabul sayılır.",
     },
     privacy: {
       title: "Gizlilik politikası",
@@ -1066,11 +1089,11 @@ export const tr: Translation = {
       title: "İptal, geç iptal ve no-show",
       heroSubtitle:
         "Oturumu ne zaman iptal edebileceğiniz, geç iptal ve gelmeme durumunda beklentiler ve kredi mantığı.",
-      body: "Zaman kredileri genelde eğitmen oturumu ürün içinde “tamamlandı” olarak işaretlendiğinde kesinleşir. Yalnızca rezervasyon veya bekleme durumunda bakiyenizin nasıl etkilendiğini uygulama içi yardımdan doğrulayın.\n\nÜyeler arasında ortak beklenti olarak şunları kullanabilirsiniz:\n\n— Planlanan başlangıçtan 2 saatten fazla önce: iptal tipik olarak kredi hareketi olmadan yapılabilir (çoğu senaryoda kesin borç henüz oluşmamıştır; uygulamayı kontrol edin).\n\n— Başlangıçtan 1–2 saat önce: geç iptal sayılır; karşı tarafı derhal bilgilendirin. Tekrarlayan örüntüler güven ve topluluk güvenilirliğini etkileyebilir.\n\n— 1 saatten az kala veya hiç gelinmemesi (no-show): oturum düşebilir; eğitmen durumu Destek üzerinden kayda geçirebilir. Tekrarlayan no-show hesap incelemesine yol açabilir.\n\nİş parçacığındaki isteğe bağlı “katılım” bilgisi iki tarafa yardımcı olur; kredi aktarımını belirleyen adım yine eğitmenin tamamlama işlemidir.\n\nBu metin topluluk yönergesidir, hukuki danışmanlık yerine geçmez. Eşik sürelerini kurulumunuza göre güncelleyebilirsiniz.",
+      body: "Tiempos'ta saatler rezervasyonun her adımında sistem tarafından otomatik yönetilir. Kurallar herkes için aynıdır:\n\n— Talep gönderildiğinde: Bakiyenizden saat düşmez. Bekleyen talebinizi istediğiniz zaman geri çekebilirsiniz.\n\n— Eğitmen kabul ettiğinde: Rezervasyon süresi kadar saat bakiyenizden ayrılır (askıya alınır).\n\n— Seans başlamadan iptal: Öğrenci de eğitmen de onaylı seansı başlangıç saatine kadar iptal edebilir. Ayrılan saat öğrenciye tam olarak iade edilir.\n\n— Seans öncesi onay: Başlangıçtan 10 dakika önce iki taraftan katılım onayı istenir. İki taraf da katılmayacağını bildirirse ya da yanıtlar çelişirse rezervasyon iptal edilir ve saat iade edilir.\n\n— Seans sırasında sorun: Bağlantı kopması ya da karşı tarafın gelmemesi gibi durumlarda oturum kartından sorun bildirin. Başlangıçtan o ana kadar geçen süre eğitmene aktarılır, kalan süre iade edilir.\n\n— Seans tamamlandığında: İki taraf da seans öncesi onay verdiyse süre bitiminde saat otomatik olarak eğitmene aktarılır. Seanstan sonra iki taraf da “Seansın yapıldığını onayla” ile aktarımı tamamlayabilir.\n\n— Hiç onay yoksa (no-show): Seans bitiminden sonraki 24 saat içinde iki taraf da onay vermezse saat otomatik olarak öğrenciye iade edilir.\n\nTekrarlayan no-show ve kötüye kullanım durumlarında topluluğu korumak için hesaplar kısıtlanabilir.",
     },
     instructorGuide: {
       title: "Eğitmen: onay ve oturum akışı",
-      body: "1) Öğrenci talep + zaman önerir. Siz kabul, red veya red + yeni zaman teklif edebilirsiniz (red sonrası).\n\n2) Kabulden sonra sohbet tam açılır. Takvimde çakışan onaylı oturum engellenir. Zoom/Meet veya sınıf linkini oturum kartında paylaşın.\n\n3) Gerçek ders bittiğinde “Oturumu tamamlandı işaretle” ile kredi aktarılır. Sorun varsa, başlangıçtan önce iptal (yukarıdaki politika).\n\n4) İsteğe bağlı: öğrenci “katıldım” onayı verebilir; güvence amaçlı—tamamlandı adımının yerine geçmez.",
+      body: "Talepleri kabul edin ya da reddedin; kabul ettiğinizde öğrencinin saati ayrılır ve seans bitiminde bakiyenize aktarılır. Ayrıntılar için Eğitmen rehberine bakın.",
     },
   },
   notificationsPage: {

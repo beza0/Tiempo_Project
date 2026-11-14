@@ -58,13 +58,13 @@ export const faqPageEn = {
       id: 7,
       category: "sessions",
       q: "How do sessions work?",
-      a: "Once you book a session, you'll receive the teacher's contact information. You can meet online (via video call) or in-person if both parties agree. After the session, both users confirm completion and leave ratings.",
+      a: "Pick an available day and time on the skill's page and send a request. When the instructor accepts, your hours are held and in-app messaging opens; the instructor shares the meeting link. Both sides confirm attendance 10 minutes before the start, the hours move to the instructor when the session ends, and you review each other.",
     },
     {
       id: 8,
       category: "sessions",
       q: "What happens if I can't attend a scheduled session?",
-      a: "You can cancel up to 24 hours before the session without penalty. Your time credits will be refunded. Late cancellations may result in credit deduction.",
+      a: "You can cancel a confirmed session until its start time; the held hours are fully refunded to the learner. If a session ends without either side confirming it, the hours are refunded automatically after 24 hours.",
     },
     {
       id: 9,
@@ -94,13 +94,13 @@ export const faqPageEn = {
       id: 13,
       category: "safety",
       q: "Is Tiempos safe?",
-      a: "Yes! We verify all users, maintain a rating system, and have community guidelines. We recommend meeting online for your first few sessions and always meeting in public places for in-person sessions.",
+      a: "Every account is opened with email verification, and reviews and community guidelines keep things trustworthy. You can block a member from messages. We recommend meeting online for first sessions and in busy public places for in-person ones.",
     },
     {
       id: 14,
       category: "safety",
       q: "What if I have a problem with another user?",
-      a: "You can report any issues through our support system. We take all reports seriously and will investigate accordingly. Serious violations may result in account suspension.",
+      a: "Block the member from the messages screen and tell us through the contact form. We review every report; serious violations can lead to account restrictions.",
     },
     {
       id: 15,
@@ -112,7 +112,7 @@ export const faqPageEn = {
       id: 16,
       category: "technical",
       q: "I forgot my password. What should I do?",
-      a: "Click “Forgot Password” on the login page. We'll send you a reset link to your email address. Make sure to check your spam folder if you don't see it.",
+      a: "Click “Forgot password” on the sign-in page. We'll email you a 6-digit code valid for 1 hour. If you don't see it, check your spam folder.",
     },
   ],
 };

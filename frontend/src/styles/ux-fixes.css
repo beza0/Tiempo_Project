@@ -159,3 +159,123 @@
   outline: 3px solid #fde68a;
   outline-offset: 2px;
 }
+
+/* ------------------------------------------------------------------------- */
+/* Ortak marka yüzeyi: iç sayfa başlıkları (önceden her sayfada farklı, düz mavi
+   ya da mor gradyan ve çok yüksek bantlar vardı)                              */
+/* ------------------------------------------------------------------------- */
+:root {
+  --tp-hero-surface:
+    radial-gradient(900px 320px at 50% -20%, rgba(147, 197, 253, 0.35), transparent 70%),
+    linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%);
+}
+
+.about-hero,
+.contact-hero,
+.faq-hero,
+.legal-hero,
+.buy-credits-hero,
+.tp-page-hero {
+  background: var(--tp-hero-surface) !important;
+  color: #fff;
+}
+
+.about-hero,
+.contact-hero,
+.faq-hero,
+.legal-hero {
+  padding: 56px 16px 52px !important;
+}
+
+.buy-credits-hero {
+  padding-top: 5.5rem !important;
+  padding-bottom: 3rem !important;
+}
+
+.tp-page-hero {
+  padding: 6rem 1rem 2.75rem;
+}
+
+@media (min-width: 640px) {
+  .tp-page-hero {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+.about-hero-subtitle,
+.contact-hero-subtitle,
+.faq-hero-subtitle,
+.legal-hero-subtitle,
+.buy-credits-hero__subtitle {
+  color: rgba(255, 255, 255, 0.86) !important;
+}
+
+.tp-cta-panel {
+  background: var(--tp-hero-surface);
+  color: #fff;
+}
+
+.tp-btn-secondary--on-accent {
+  border-color: rgba(255, 255, 255, 0.75);
+  color: #fff;
+}
+
+.tp-btn-secondary--on-accent:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* <details> özet işaretçisini gizle (Safari dahil) */
+summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Beceri kartı kapak yer tutucusu */
+.tp-cover-placeholder {
+  background:
+    radial-gradient(240px 140px at 80% 0%, rgba(147, 197, 253, 0.45), transparent 70%),
+    linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+}
+
+/* Başlık tipografisi: temel katmanda (yardımcı sınıflar yine geçerli). Önceden font-semibold
+   tanımsız olduğu için başlıklar ince görünüyordu. */
+@layer base {
+  h1,
+  h2 {
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  h3,
+  h4 {
+    font-weight: 600;
+  }
+}
+
+/* Sayfa sonu çağrı bölümleri ve butonları: ortak yüzey, beyaz buton (önceden mavi üstüne koyu buton) */
+.about-cta,
+.faq-contact {
+  background: var(--tp-hero-surface) !important;
+}
+
+.about-cta-button,
+.faq-contact-button {
+  background: #fff !important;
+  color: #1d4ed8 !important;
+  font-weight: 600;
+}
+
+.about-cta-button:hover,
+.faq-contact-button:hover {
+  background: #eff6ff !important;
+  color: #1e40af !important;
+}
+
+.contact-faq-button {
+  font-weight: 600;
+}
+
+.dark .contact-faq-button {
+  color: #93c5fd !important;
+  border-color: #60a5fa !important;
+}

@@ -58,13 +58,13 @@ export const faqPageTr = {
       id: 7,
       category: "sessions",
       q: "Oturumlar nasıl işler?",
-      a: "Bir oturum ayırdığınızda eğitmenin iletişim bilgilerini alırsınız. İki taraf da kabul ederse çevrim içi (görüntülü görüşme) veya yüz yüze buluşabilirsiniz. Oturumdan sonra her iki taraf tamamlamayı onaylar ve değerlendirme bırakır.",
+      a: "Becerinin sayfasından uygun bir gün ve saat seçerek talep gönderirsiniz. Eğitmen kabul edince saatiniz ayrılır ve uygulama içi mesajlaşma açılır; eğitmen toplantı linkini paylaşır. Seanstan 10 dakika önce iki taraftan katılım onayı istenir, seans bitince saat eğitmene aktarılır ve karşılıklı değerlendirme bırakırsınız.",
     },
     {
       id: 8,
       category: "sessions",
       q: "Planlanmış bir oturuma katılamazsam ne olur?",
-      a: "Oturumdan en az 24 saat önce cezasız iptal edebilirsiniz; zaman kredileriniz iade edilir. Geç iptallerde kredi kesintisi olabilir.",
+      a: "Onaylı bir seansı başlangıç saatine kadar iptal edebilirsiniz; ayrılan saat öğrenciye tam olarak iade edilir. Seans hiçbir taraf onaylamadan biterse saat 24 saat sonra otomatik olarak iade edilir.",
     },
     {
       id: 9,
@@ -94,13 +94,13 @@ export const faqPageTr = {
       id: 13,
       category: "safety",
       q: "Tiempos güvenli mi?",
-      a: "Evet! Kullanıcıları doğrular, değerlendirme sistemi ve topluluk kurallarımız vardır. İlk oturumlar için çevrim içi buluşmayı; yüz yüze için ise kalabalık yerleri öneririz.",
+      a: "Her hesap e-posta doğrulamasıyla açılır; değerlendirmeler ve topluluk kurallarıyla güveni koruruz. Rahatsız eden bir kullanıcıyı mesajlardan engelleyebilirsiniz. İlk seanslar için çevrim içi buluşmayı, yüz yüze için kalabalık yerleri öneririz.",
     },
     {
       id: 14,
       category: "safety",
       q: "Başka bir kullanıcıyla sorun yaşarsam ne yapmalıyım?",
-      a: "Sorunları destek sistemimiz üzerinden bildirebilirsiniz. Tüm bildirimleri ciddiye alır ve inceleriz. Ağır ihlaller hesap askıya alınmasına yol açabilir.",
+      a: "Kullanıcıyı mesajlar ekranından engelleyebilir, durumu iletişim formundan bize bildirebilirsiniz. Tüm bildirimleri inceleriz; ağır ihlaller hesabın kısıtlanmasına yol açabilir.",
     },
     {
       id: 15,
@@ -112,7 +112,7 @@ export const faqPageTr = {
       id: 16,
       category: "technical",
       q: "Şifremi unuttum, ne yapmalıyım?",
-      a: "Giriş sayfasında “Şifremi unuttum”a tıklayın. E-posta adresinize sıfırlama bağlantısı göndeririz. Görünmezse spam klasörünü kontrol edin.",
+      a: "Giriş sayfasında “Şifremi unuttum”a tıklayın. E-posta adresinize 1 saat geçerli 6 haneli bir kod göndeririz. Görünmezse spam klasörünü kontrol edin.",
     },
   ],
 };

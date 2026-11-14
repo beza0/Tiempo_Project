@@ -470,12 +470,13 @@ export function ProfilePage({
                 className="bg-white/10 border-white/30 text-white hover:bg-white/20"
                 onClick={() => void handleShareProfile()}
                 title={p.shareProfile}
+                aria-label={p.shareProfile}
               >
                 <Share2 className="w-4 h-4" />
               </Button>
               <Button
                 size="sm"
-                className="bg-card text-primary hover:bg-accent"
+                className="tp-btn-on-accent !py-1.5"
                 onClick={() => onNavigate?.("edit-profile")}
               >
                 <Edit className="w-4 h-4 mr-2" />

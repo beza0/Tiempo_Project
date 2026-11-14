@@ -25,14 +25,15 @@ export function PageLayout({
         /* hideFooter: tam yükseklik sütunu; taşma yok — çocuklar flex + min-h-0 ile kalan yüksekliği alır */
         hideFooter
           ? "page-layout min-h-0 flex-1 overflow-hidden overscroll-none"
-          : "min-h-dvh",
+          : "min-h-dvh shrink-0",
         className,
       )}
     >
       <Navbar onNavigate={onNavigate} />
       <main
         className={cn(
-          "flex w-full max-w-full min-h-0 flex-1 flex-col",
+          /* Footer'lı sayfalarda main içeriğe göre büyür (min-h-0 içeriği sıkıştırıp footer'ı üstüne bindiriyordu) */
+          "flex w-full max-w-full flex-1 flex-col",
           /* pt-16: fixed navbar (h-16) — yükseklik düşümü yalnızca layout’ta; Messages içinde tekrarlanmaz */
           hideFooter &&
             "page-layout-main flex min-h-0 flex-1 flex-col overflow-hidden overscroll-none pt-16",

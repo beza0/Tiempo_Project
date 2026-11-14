@@ -1,3 +1,4 @@
+import { infoPagesEn } from "./info-pages-en";
 /** English UI strings — keep keys in sync with `tr.ts`. */
 import { faqPageEn } from "./faq-page-en";
 
@@ -86,6 +87,11 @@ export const en = {
     tagline:
       "The time-based skill exchange platform where everyone can learn and teach. Join our community and start trading skills today.",
     quickLinks: "Quick Links",
+    platform: "Platform",
+    helpTitle: "Help",
+    browseSkills: "Browse skills",
+    instructorGuide: "Instructor guide",
+    company: "Company",
     aboutUs: "About Us",
     contactUs: "Contact Us",
     faq: "FAQ",
@@ -102,6 +108,18 @@ export const en = {
       "Tiempos. All rights reserved. Made with passion for learning.",
   },
   landing: {
+    featured: {
+      title: "Featured skills",
+      subtitle: "A few of the skills the community is sharing right now",
+      seeAll: "See all skills",
+      empty: "No skills published yet. Be the first to share one!",
+    },
+    finalCta: {
+      title: "Teach what you know, learn what you're curious about",
+      text: "Create a free account; new members start with 1 free hour.",
+      primary: "Get started free",
+      secondary: "Browse skills",
+    },
     hero: {
       badge: "Time-Based Skill Exchange Platform",
       line1: "Trade Skills.",
@@ -164,6 +182,10 @@ export const en = {
     },
   },
   browse: {
+    dayShort: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    everyDay: "Every day",
+    weekdays: "Weekdays",
+    weekend: "Weekends",
     title: "Explore Skills",
     subtitle: "Find the perfect skill to learn from our community of experts",
     searchPlaceholder: "Search for skills, instructors, or categories...",
@@ -573,9 +595,9 @@ export const en = {
     completedBadge: "Completed",
     rejectedHint: "This booking request was declined.",
     acceptedSessionHint:
-      "Session is confirmed. Either side can cancel before the scheduled start. Time credits are only debited when the host marks the session complete.",
+      "The session is confirmed and the learner's hours are held. Either side can cancel until the start time; cancelling refunds the learner. When the session is completed, the hours move to the instructor.",
     cancelledHint:
-      "This booking was cancelled. Time credits are not held when a session is only reserved — nothing is refunded, but you were not charged yet.",
+      "This booking was cancelled. Any held hours were refunded to the learner's balance.",
     cancelSession: "Cancel session",
     cancelPending: "Withdraw request",
     cancelConfirmTitle: "Cancel this booking?",
@@ -583,7 +605,7 @@ export const en = {
       "This cannot be undone. Held credits are returned to the learner if a pending/accepted booking is cancelled. The other person will be notified.",
     markSessionComplete: "Mark session complete",
     instructorMarkCompleteHint:
-      "As the instructor, mark the session when it’s done. The learner can then rate you, and time credits are transferred.",
+      "After the session ends, confirm it took place; once both sides confirm, the hours move to your balance.",
     sessionCompletedHint:
       "This session is completed. You can still read the message history.",
     createBooking: "Create booking",
@@ -604,7 +626,7 @@ export const en = {
     sessionLinkPlaceholder: "https://...",
     saveSessionLink: "Save link",
     requesterMarkAttendance: "I attended the session (optional)",
-    requesterMarkedAttendance: "You confirmed attendance. The host still marks complete to transfer credits.",
+    requesterMarkedAttendance: "Your confirmation is saved. The hours transfer once the other side confirms too.",
     requesterConfirmStarted: "Confirm the session took place",
     ownerConfirmStarted: "Confirm the session took place",
     nextStepLearnerBefore:
@@ -679,7 +701,7 @@ export const en = {
         number: "02",
         title: "Browse & Connect",
         description:
-          "Explore hundreds of skills offered by our community. Find the perfect match based on your interests and schedule.",
+          "Explore the skills our community shares. Find the perfect match based on your interests and schedule.",
       },
       {
         number: "03",
@@ -744,7 +766,7 @@ export const en = {
     linkBrowse: "Browse skills",
     ctaTitle: "Ready to Start Learning?",
     ctaSubtitle:
-      "Join thousands of learners and teachers in our community",
+      "Create a free account; your first hour is on us",
     ctaButton: "Create Free Account",
   },
   contactPage: {
@@ -757,7 +779,7 @@ export const en = {
     emailAddress: "tiempos.site@gmail.com",
     responseTitle: "Response Time",
     responseText:
-      "We typically respond within 24 hours on business days.",
+      "We usually reply by email within a few business days.",
     formTitle: "Send us a Message",
     labelName: "Full Name",
     labelEmail: "Email Address",
@@ -795,6 +817,7 @@ export const en = {
     faqButton: "Visit FAQ",
   },
   faqPage: faqPageEn,
+  infoPages: infoPagesEn,
   addSkill: {
     title: "Add New Skill",
     editTitle: "Edit Skill",
@@ -1026,7 +1049,7 @@ export const en = {
         "Tiempos started in 2024 when a group of educators and developers came together with a shared vision: to create a world where learning is accessible to everyone, regardless of their financial situation.",
         "We noticed that traditional educational platforms often exclude talented individuals who want to learn but can't afford the fees. Meanwhile, many skilled people want to share their knowledge but don't know where to start.",
         "By using time as currency, we've created a truly equitable platform. Whether you're teaching advanced programming or beginner cooking, your hour is worth the same. This fundamental principle has helped us build a diverse, engaged community of learners and teachers from all walks of life.",
-        "Today, Tiempos continues to grow, connecting thousands of people around the world, fostering meaningful connections, and proving that the best things in life – like knowledge and community – don't need a price tag.",
+        "Today, Tiempos keeps growing, bringing people together, fostering meaningful connections, and proving that the best things in life – like knowledge and community – don't need a price tag.",
       ],
       ctaTitle: "Ready to Join Our Community?",
       ctaSubtitle:
@@ -1039,17 +1062,17 @@ export const en = {
     },
     contact: {
       title: "Contact us",
-      body: "We read every message. For partnerships, press, or account help, use the support email on the Support page. Average response: a few business days.\n\nEmail: support@tiempos.local (update this in your deployment).",
+      body: "We read every message. For partnerships, press or account help, use the form on this page. We usually reply within a few business days.",
     },
     support: {
       title: "Support & help",
-      body: "Need help? Check How it works, Cancellation & no-show policy, and the Instructor guide first. If you are stuck, email support@tiempos.local with your account email and a short description.\n\nWe cannot mediate every dispute, but we take abuse and no-show patterns seriously and may restrict accounts to protect the community.",
+      body: "Need help? Check How it works, the Cancellations & no-show policy and the Instructor guide first. If you can't find the answer, write to us through the contact form.",
     },
     terms: {
       title: "Terms of Service",
       heroSubtitle:
         "The rules for using Tiempos fairly and safely—profiles, behavior, and time credits.",
-      body: "By creating an account and using Tiempos, you agree to use the service in good faith. You will provide accurate profile information, treat other members with respect, and follow applicable laws.\n\nTime credits are not legal tender, have no cash value, and cannot be redeemed for cash. They exist only to schedule and record skill exchanges inside the platform.\n\nWe may change or discontinue features, send notices in the app, and suspend or restrict accounts that abuse the platform, harass others, or repeatedly break these expectations.\n\nIf we update these terms, we will give reasonable notice where practical. Continued use after changes means you accept the updated terms.\n\nThis page is a plain-language summary for the project. Before a public launch, a complete Terms of Service should be drafted and reviewed with qualified legal counsel.",
+      body: "By creating an account and using Tiempos, you agree to use the service in good faith. You will provide accurate profile information, treat other members with respect, and follow applicable laws.\n\nTime credits are not legal tender, have no cash value, and cannot be redeemed for cash. They exist only to schedule and record skill exchanges inside the platform.\n\nWe may change or discontinue features, send notices in the app, and suspend or restrict accounts that abuse the platform, harass others, or repeatedly break these expectations.\n\nIf we update these terms, we will give reasonable notice where practical. Continued use after changes means you accept the updated terms.",
     },
     privacy: {
       title: "Privacy Policy",
@@ -1061,11 +1084,11 @@ export const en = {
       title: "Cancellations & no-show",
       heroSubtitle:
         "When you can cancel a session, what “late cancel” and no-show mean, and how time credits move.",
-      body: "Time credits on Tiempos are settled when the instructor marks a session as completed in the product flow. Until then, making or holding a booking does not permanently debit your balance in the same way as a final charge—see in-app help for the exact behavior in your build.\n\nUse this policy as a shared expectation between members:\n\n— More than 2 hours before the scheduled start: cancellation is typically free of credit movement (in most cases nothing has been finally debited yet; confirm in the app).\n\n— Between 1 and 2 hours before the start: treat this as a late cancellation. Tell the other person as soon as possible. Repeated patterns can affect trust signals and community standing.\n\n— Less than 1 hour before the start, or if someone does not show up (no-show): the session may be forfeited; the host may document the situation through Support. Repeated no-shows may lead to account review.\n\nOptional attendance acknowledgment in a thread can help both sides, but it does not replace the instructor’s “complete session” step for moving credits.\n\nThis is a community guideline, not a substitute for legal advice. Adjust time windows in your deployment if needed.",
+      body: "On Tiempos, hours are managed automatically at every step of a booking. The rules are the same for everyone:\n\n— When you send a request: No hours are taken from your balance. You can withdraw a pending request at any time.\n\n— When the instructor accepts: Hours equal to the booking length are held from your balance.\n\n— Cancelling before the start: Both the learner and the instructor can cancel a confirmed session until its start time. The held hours are fully refunded to the learner.\n\n— Pre-session confirmation: 10 minutes before the start, both sides are asked to confirm attendance. If both decline, or the answers conflict, the booking is cancelled and the hours are refunded.\n\n— A problem during the session: If the connection drops or the other person doesn't show up, report a problem from the session card. The time elapsed since the start goes to the instructor and the rest is refunded.\n\n— When the session is completed: If both sides confirmed beforehand, the hours move to the instructor automatically when the session ends. After the session, both sides can also complete the transfer with “Confirm the session took place”.\n\n— No confirmation at all (no-show): If neither side confirms within 24 hours of the end, the hours are refunded to the learner automatically.\n\nTo protect the community, accounts with repeated no-shows or abuse may be restricted.",
     },
     instructorGuide: {
       title: "Instructor: approval & session flow",
-      body: "1) A learner sends a request with a proposed time. You can Accept, Decline, or Decline and propose a new time (after a decline).\n\n2) After you Accept, the thread opens fully. Add the meeting link (Zoom, Meet, etc.) in the session card so the learner can join. Conflicting accepted sessions are blocked to protect your calendar.\n\n3) When the real session is done, use “Mark session complete” so time credits are transferred. If something goes wrong, cancel before the scheduled start (rules above).\n\n4) Optional: the learner can mark attendance; it does not replace your completion action but helps trust.",
+      body: "Accept or decline requests; when you accept, the learner's hours are held and move to your balance when the session ends. See the Instructor guide for details.",
     },
   },
   notificationsPage: {

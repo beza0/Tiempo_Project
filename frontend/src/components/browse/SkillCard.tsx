@@ -12,6 +12,16 @@ function initials(name: string): string {
   return (p[0][0] + p[p.length - 1][0]).toUpperCase();
 }
 
+/** Kapak görseli yoksa / yüklenemezse: marka gradyanı + başlığın baş harfi (kırık resim ikonu yerine). */
+function CoverPlaceholder({ title }: { title: string }) {
+  const letter = title.trim().charAt(0).toLocaleUpperCase("tr-TR") || "T";
+  return (
+    <div className="tp-cover-placeholder flex h-full w-full items-center justify-center" aria-hidden>
+      <span className="text-5xl font-semibold text-white/90">{letter}</span>
+    </div>
+  );
+}
+
 interface SkillCardProps {
   title: string;
   instructor: {
@@ -32,6 +42,8 @@ interface SkillCardProps {
   /** Kendi ilanın; Book gösterilmez */
   showBookCta?: boolean;
   onBookNow?: () => void;
+  /** Kart başlığı / kapağı: beceri detayına git (verilmezse onBookNow kullanılır) */
+  onOpen?: () => void;
   onInstructorClick?: () => void;
 }
 
@@ -48,8 +60,10 @@ export function SkillCard({
   tags,
   showBookCta = true,
   onBookNow,
+  onOpen,
   onInstructorClick,
 }: SkillCardProps) {
+  const open = onOpen ?? onBookNow;
   const { t } = useLanguage();
   const b = t.browse;
   const sc = t.skillCard;
@@ -65,7 +79,7 @@ export function SkillCard({
   const hasCover = Boolean(image?.trim());
 
   return (
-    <Card className="group overflow-hidden rounded-2xl border border-border/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+    <Card className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/80 transition-shadow duration-300 hover:shadow-lg">
       <div className="relative h-48 overflow-hidden">
         {hasCover ? (
           <ImageWithFallback
@@ -73,25 +87,35 @@ export function SkillCard({
             alt={title}
             loading="lazy"
             fallbackSrc={coverFallbackUrl}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+            errorFallback={<CoverPlaceholder title={title} />}
+            className="h-full w-full object-cover transition-transform duration-300 motion-safe:group-hover:scale-105"
           />
         ) : (
-          <div
-            className="h-full w-full bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 opacity-90 transition-transform duration-300 motion-safe:group-hover:scale-[1.02]"
-            aria-hidden
-          />
+          <CoverPlaceholder title={title} />
         )}
         <Badge className="absolute right-3 top-3 border-0 bg-background/95 text-foreground shadow-sm backdrop-blur-sm hover:bg-accent">
           {categoryLabel}
         </Badge>
       </div>
 
-      <div className="p-5">
-        <h3 className="mb-3 text-xl text-foreground">{title}</h3>
+      <div className="flex flex-1 flex-col p-5">
+        <h3 className="mb-3 text-lg font-semibold leading-snug text-foreground">
+          {open ? (
+            <button
+              type="button"
+              onClick={open}
+              className="text-left after:absolute after:inset-0 after:content-[''] hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:hover:text-blue-300"
+            >
+              {title}
+            </button>
+          ) : (
+            title
+          )}
+        </h3>
 
         <button
           type="button"
-          className="mb-4 flex w-full cursor-pointer items-center gap-3 rounded-lg text-left transition-colors hover:bg-muted/40"
+          className="relative z-10 mb-4 flex w-full cursor-pointer items-center gap-3 rounded-lg text-left transition-colors hover:bg-muted/40"
           onClick={onInstructorClick}
           disabled={!onInstructorClick}
           aria-label={instructor.name}
@@ -144,11 +168,11 @@ export function SkillCard({
           ))}
         </div>
 
-        <div className={`flex items-center border-t border-border pt-4 ${showBookCta ? "justify-end" : ""}`}>
+        <div className={`mt-auto flex items-center border-t border-border pt-4 ${showBookCta ? "justify-end" : ""}`}>
           {showBookCta ? (
             <Button
               type="button"
-              className="bg-gradient-to-r from-blue-500 to-blue-700 text-white"
+              className="relative z-10"
               onClick={onBookNow}
             >
               {sc.bookNow}

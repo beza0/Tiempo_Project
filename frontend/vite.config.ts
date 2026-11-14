@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 
 const projectRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -112,6 +113,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       coopUnsafeNoneDevPlugin(),
       react(),
+      tailwindcss(),
       googleAnalyticsHtmlPlugin(gaId),
       apiProxySanityCheckPlugin(devApiProxy),
     ],

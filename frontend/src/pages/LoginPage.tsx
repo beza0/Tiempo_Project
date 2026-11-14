@@ -94,7 +94,7 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="john@example.com"
+                placeholder={t.contactPage.placeholderEmail}
                 className="mt-2"
                 required
                 autoComplete="email"

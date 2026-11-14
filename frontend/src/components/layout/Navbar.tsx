@@ -317,7 +317,8 @@ export function Navbar({ onNavigate }: NavbarProps) {
               <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white">
                 <BrandLogo className="h-8 w-8 object-contain" />
               </div>
-              <span className="text-xl whitespace-nowrap text-gray-900 dark:text-zinc-50">
+              {/* Dar ekranda yalnızca logo: sağdaki butonlar ve menü sığsın */}
+              <span className="hidden whitespace-nowrap text-xl font-semibold tracking-tight text-gray-900 sm:inline dark:text-zinc-50">
                 Tiempos
               </span>
             </button>
@@ -592,7 +593,7 @@ export function Navbar({ onNavigate }: NavbarProps) {
                   </PopoverContent>
                 </Popover>
 
-                <div className="relative z-30 flex min-w-0 max-w-full items-center gap-3 sm:gap-2 md:gap-3">
+                <div className="relative z-30 flex min-w-0 max-w-full items-center gap-2 md:gap-3">
                   <button
                     type="button"
                     onClick={() => handleNavigate("messages")}
@@ -611,7 +612,8 @@ export function Navbar({ onNavigate }: NavbarProps) {
                     </span>
                   </button>
 
-                  <div className="flex h-9 shrink-0 items-center gap-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 px-3 py-1.5 text-white">
+                  {/* Bakiye rozeti dar ekranda gizli (panelde ve menüde görünür) */}
+                  <div className="hidden h-9 shrink-0 items-center gap-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 px-3 py-1.5 text-white sm:flex">
                     <Clock className="h-4 w-4 shrink-0" />
                     <span className="text-sm font-medium tabular-nums">
                       {formatNavbarCreditHours(creditMinutes, locale)}
@@ -726,7 +728,7 @@ export function Navbar({ onNavigate }: NavbarProps) {
                 type="button"
                 className="nav-xl-menu-btn shrink-0 rounded-lg p-2 text-gray-700 hover:bg-gray-100 dark:text-zinc-200 dark:hover:bg-zinc-900"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                aria-label="Toggle menu"
+                aria-label={locale === "tr" ? "Menüyü aç/kapat" : "Toggle menu"}
                 aria-expanded={isMenuOpen}
               >
                 <Menu className="h-6 w-6" />

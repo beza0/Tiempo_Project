@@ -289,7 +289,7 @@ export function SignUpPage({ onNavigate }: SignUpPageProps) {
               <Input
                 id="name"
                 name="name"
-                placeholder="John Doe"
+                placeholder={t.contactPage.placeholderName}
                 className="mt-2"
                 required
                 autoComplete="name"
@@ -302,7 +302,7 @@ export function SignUpPage({ onNavigate }: SignUpPageProps) {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="john@example.com"
+                placeholder={t.contactPage.placeholderEmail}
                 className="mt-2"
                 required
                 autoComplete="email"

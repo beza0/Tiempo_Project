@@ -73,7 +73,7 @@ export function ForgotPasswordPage({ onNavigate }: ForgotPasswordPageProps) {
                   <Input 
                     id="email"
                     type="email"
-                    placeholder="john@example.com"
+                    placeholder={t.contactPage.placeholderEmail}
                     className="mt-2"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}

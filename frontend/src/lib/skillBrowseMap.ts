@@ -1,3 +1,4 @@
+import { compactDays, compactTimeRange } from "./availabilityLabel";
 import type { SkillDto } from "../api/skills";
 import type { Messages } from "../language";
 import {
@@ -42,32 +43,25 @@ export function mapSkillDtoToBrowseCard(
   messages: Messages,
 ): BrowseSkillCardModel {
   const b = messages.browse;
-  const dayLabels = messages.addSkill.days;
   const rawCat = skill.category?.trim();
   const categoryValue = rawCat || "Programming";
   const categoryLabel =
     b.categoryLabels[categoryValue as keyof typeof b.categoryLabels] ??
     categoryValue;
-  const dayIndex: Record<string, number> = {
-    MONDAY: 0,
-    TUESDAY: 1,
-    WEDNESDAY: 2,
-    THURSDAY: 3,
-    FRIDAY: 4,
-    SATURDAY: 5,
-    SUNDAY: 6,
-  };
-  const localizedDays = (skill.availableDays ?? [])
-    .map((d) => dayLabels[dayIndex[d]] ?? d)
-    .join(", ");
   const meta = skill.description ?? "";
   const fallbackDays = parseMetaField(meta, ["Available Days *", "Müsait günler *"]);
   const fallbackTime = parseMetaField(
     meta,
     ["Available From *– Available Until *", "Başlangıç *–Bitiş *"],
   );
-  const availability = localizedDays && skill.availableFrom && skill.availableUntil
-    ? `${localizedDays} · ${skill.availableFrom} - ${skill.availableUntil}`
+  const compact = compactDays(skill.availableDays, {
+    short: b.dayShort,
+    everyDay: b.everyDay,
+    weekdays: b.weekdays,
+    weekend: b.weekend,
+  });
+  const availability = compact && skill.availableFrom && skill.availableUntil
+    ? `${compact} · ${compactTimeRange(skill.availableFrom, skill.availableUntil)}`
     : fallbackDays && fallbackTime
       ? `${fallbackDays} · ${fallbackTime}`
       : "";
@@ -80,7 +74,8 @@ export function mapSkillDtoToBrowseCard(
   const location = (isInPerson || inPersonByFallback)
     ? (skill.inPersonLocation ?? parseMetaField(meta, ["Location", "Konum"]))
     : null;
-  const tags = rawCat ? [categoryLabel] : [];
+  // Kategori kapak görselinin üstünde zaten gösteriliyor; alt etiket tekrarıydı.
+  const tags: string[] = [];
   const searchBlob = [
     skill.title,
     skill.ownerName,

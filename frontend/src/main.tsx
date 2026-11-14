@@ -5,6 +5,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
 import "./index.css";
+import "./styles/tailwind.css";
 import "./styles/ux-fixes.css";
 import { initAnalytics } from "./lib/analytics";
 

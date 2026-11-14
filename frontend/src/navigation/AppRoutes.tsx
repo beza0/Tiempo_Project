@@ -26,16 +26,14 @@ import { BuyCreditsPage } from "../pages/BuyCreditsPage";
 import { PaymentPage } from "../pages/PaymentPage";
 import { PaymentReturnPage } from "../pages/PaymentReturnPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
+import { CommunityPage, InstructorGuidePage, SupportPage } from "../pages/InfoPages";
 import { AboutPage } from "../pages/AboutPage";
 import { ContactPage } from "../pages/ContactPage";
 import { FAQPage } from "../pages/FAQPage";
 import {
-  CommunityPage,
-  SupportPage,
   TermsPage,
   PrivacyPage,
   CancellationPolicyPage,
-  InstructorGuidePage,
 } from "../pages/StaticContentPages";
 import { PUBLIC_PROFILE_USER_ID_KEY } from "../api/user";
 import type { PageType } from "../App";

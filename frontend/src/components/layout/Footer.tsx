@@ -1,140 +1,83 @@
-import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { PATHS } from "../../navigation/paths";
 import { BrandLogo } from "../common/BrandLogo";
 
+type FooterLink = { to: string; label: string };
+
+/**
+ * Sade, nötr footer: sayfa zeminiyle uyumlu, dört sütun. Sosyal medya ikonları kaldırıldı
+ * (gerçek hesaba değil, facebook.com gibi genel adreslere gidiyordu). Topluluk, destek ve
+ * eğitmen rehberi sayfaları ilk kez buradan erişilebilir.
+ */
 export function Footer() {
   const { t } = useLanguage();
   const f = t.footer;
 
+  const columns: { title: string; links: FooterLink[] }[] = [
+    {
+      title: f.platform,
+      links: [
+        { to: PATHS.browse, label: f.browseSkills },
+        { to: PATHS.howItWorks, label: f.howItWorks },
+        { to: PATHS.instructorGuide, label: f.instructorGuide },
+        { to: PATHS.community, label: f.community },
+      ],
+    },
+    {
+      title: f.helpTitle,
+      links: [
+        { to: PATHS.faq, label: f.faq },
+        { to: PATHS.support, label: f.support },
+        { to: PATHS.contact, label: f.contactUs },
+        { to: PATHS.policyCancellation, label: f.cancellationPolicy },
+      ],
+    },
+    {
+      title: f.company,
+      links: [
+        { to: PATHS.about, label: f.aboutUs },
+        { to: PATHS.privacy, label: f.privacy },
+        { to: PATHS.terms, label: f.terms },
+      ],
+    },
+  ];
+
   return (
-    <footer className="border-t border-white/15 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 px-4 py-12 text-white sm:px-6 lg:px-8">
+    <footer className="border-t border-border bg-card/40 px-4 py-12 text-foreground sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-4">
-          <div className="col-span-1 md:col-span-2">
-            <div className="mb-4 flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm">
-                <BrandLogo className="h-8 w-8 object-contain" />
-              </div>
-              <span className="text-2xl font-semibold">Tiempos</span>
-            </div>
-            <p className="mb-4 max-w-md text-indigo-100/90">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
+          <div className="col-span-2">
+            <Link to={PATHS.home} className="inline-flex items-center gap-2" aria-label="Tiempos">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white shadow-sm">
+                <BrandLogo className="h-7 w-7 object-contain" />
+              </span>
+              <span className="text-xl font-semibold tracking-tight">Tiempos</span>
+            </Link>
+            <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
               {f.tagline}
             </p>
-            <div className="flex gap-4">
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 transition-colors duration-200 hover:bg-blue-500"
-                aria-label="Facebook"
-              >
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 transition-colors duration-200 hover:bg-sky-400"
-                aria-label="Twitter / X"
-              >
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 transition-colors duration-200 hover:bg-pink-500"
-                aria-label="Instagram"
-              >
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 transition-colors duration-200 hover:bg-indigo-600"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="h-5 w-5" />
-              </a>
-            </div>
           </div>
-
-          <div>
-            <h3 className="mb-4 text-lg font-medium text-white">{f.quickLinks}</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  to={PATHS.about}
-                  className="text-indigo-100/90 transition-colors duration-200 hover:text-white"
-                >
-                  {f.aboutUs}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={PATHS.contact}
-                  className="text-indigo-100/90 transition-colors duration-200 hover:text-white"
-                >
-                  {f.contactUs}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={PATHS.faq}
-                  className="text-indigo-100/90 transition-colors duration-200 hover:text-white"
-                >
-                  {f.faq}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={PATHS.howItWorks}
-                  className="text-indigo-100/90 transition-colors duration-200 hover:text-white"
-                >
-                  {f.howItWorks}
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="mb-4 text-lg font-medium text-white">{f.legal}</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  to={PATHS.privacy}
-                  className="text-indigo-100/90 transition-colors duration-200 hover:text-white"
-                >
-                  {f.privacy}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={PATHS.terms}
-                  className="text-indigo-100/90 transition-colors duration-200 hover:text-white"
-                >
-                  {f.terms}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={PATHS.policyCancellation}
-                  className="text-indigo-100/90 transition-colors duration-200 hover:text-white"
-                >
-                  {f.cancellationPolicy}
-                </Link>
-              </li>
-            </ul>
-          </div>
+          {columns.map((col) => (
+            <nav key={col.title} aria-label={col.title}>
+              <h3 className="text-sm font-semibold text-foreground">{col.title}</h3>
+              <ul className="mt-3 space-y-2">
+                {col.links.map((l) => (
+                  <li key={l.to}>
+                    <Link
+                      to={l.to}
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground"
+                    >
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
         </div>
-
-        <div className="border-t border-white/20 pt-8 text-center text-indigo-200/80">
-          <p>
-            &copy; {new Date().getFullYear()} {f.copyright}
-          </p>
+        <div className="mt-10 border-t border-border pt-6 text-sm text-muted-foreground">
+          &copy; {new Date().getFullYear()} {f.copyright}
         </div>
       </div>
     </footer>

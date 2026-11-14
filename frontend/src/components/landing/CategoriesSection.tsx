@@ -1,4 +1,5 @@
-import { Card } from "../ui/card";
+import { Link } from "react-router-dom";
+import { PATHS } from "../../navigation/paths";
 import { Dumbbell, Palette, Languages, Code, Music } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLanguage } from "../../contexts/LanguageContext";
@@ -55,7 +56,7 @@ export function CategoriesSection() {
     >
       <div className="mx-auto max-w-7xl">
         <div className="mb-16 text-center">
-          <h2 className="mb-4 text-3xl text-foreground sm:text-4xl md:text-5xl">
+          <h2 className="mb-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
             {c.title}
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
@@ -71,9 +72,10 @@ export function CategoriesSection() {
               n: String(n),
             });
             return (
-              <Card
+              <Link
                 key={category.slug}
-                className={`tp-category-card group rounded-2xl border p-6 shadow-sm ${bgColors[index]}`}
+                to={`${PATHS.browse}?category=${encodeURIComponent(category.slug)}`}
+                className={`tp-category-card group block rounded-2xl border p-6 shadow-sm transition-colors hover:border-primary/60 ${bgColors[index]}`}
               >
                 <div
                   className={`mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br ${colors[index]} shadow-md transition-transform duration-300 group-hover:scale-110`}
@@ -81,12 +83,12 @@ export function CategoriesSection() {
                   <Icon className="h-7 w-7 text-white" />
                 </div>
 
-                <h3 className="tp-category-card__title mb-1 text-lg font-medium">
+                <h3 className="tp-category-card__title mb-1 text-lg font-semibold">
                   {category.name}
                 </h3>
 
                 <p className="tp-category-card__count text-sm">{countLabel}</p>
-              </Card>
+              </Link>
             );
           })}
         </div>

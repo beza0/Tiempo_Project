@@ -2,10 +2,10 @@
 
 .buy-credits-page {
   background-color: var(--bc-page-bg);
-  --bc-primary: #4f46e5;
-  --bc-primary-light: #6366f1;
-  --bc-primary-soft: #eef2ff;
-  --bc-primary-border: #818cf8;
+  --bc-primary: #1d4ed8;
+  --bc-primary-light: #3b82f6;
+  --bc-primary-soft: #eff6ff;
+  --bc-primary-border: #60a5fa;
   --bc-text: #0f172a;
   --bc-muted: #64748b;
   --bc-divider: #e2e8f0;
@@ -29,7 +29,7 @@
 .buy-credits-hero {
   padding-top: 6rem;
   padding-bottom: 4.5rem;
-  background: linear-gradient(90deg, #2563eb 0%, #4f46e5 50%, #4338ca 100%);
+  background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 50%, #1e3a8a 100%);
 }
 
 @media (min-width: 640px) {
@@ -93,7 +93,7 @@
   margin-bottom: 2.75rem;
   padding: 1.125rem 1.25rem;
   border-radius: 1rem;
-  background: linear-gradient(90deg, #3b82f6 0%, #4f46e5 100%);
+  background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%);
   color: #fff;
   box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
 }
@@ -171,7 +171,7 @@
 }
 
 .buy-credits-card:hover:not(.buy-credits-card--selected) {
-  border-color: #c7d2fe;
+  border-color: #bfdbfe;
   box-shadow: var(--bc-shadow-hover);
   transform: translateY(-2px);
 }
@@ -202,7 +202,7 @@
   font-weight: 600;
   letter-spacing: 0.02em;
   color: #fff;
-  background: linear-gradient(90deg, #7c3aed 0%, #4f46e5 100%);
+  background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
   box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
   white-space: nowrap;
 }
@@ -236,11 +236,11 @@
   font-size: 1.75rem;
   font-weight: 700;
   line-height: 1.1;
-  color: #5b21b6;
+  color: #1e40af;
 }
 
 .dark .buy-credits-card__price {
-  color: #a78bfa;
+  color: #60a5fa;
 }
 
 .buy-credits-card__price-currency {
@@ -329,7 +329,7 @@
 }
 
 .dark .buy-credits-card__select-label--on {
-  color: #a5b4fc;
+  color: #93c5fd;
 }
 
 /* Ödeme butonu alanı */
@@ -357,7 +357,7 @@
   font-size: 0.9375rem;
   font-weight: 600;
   color: #fff;
-  background: linear-gradient(90deg, #2563eb 0%, #4f46e5 100%);
+  background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
   box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
   cursor: pointer;
   display: inline-flex;

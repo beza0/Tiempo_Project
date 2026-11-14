@@ -2,8 +2,8 @@
 
 .payment-page {
   background-color: var(--pay-bg);
-  --pay-primary: #5b21b6;
-  --pay-primary-mid: #6366f1;
+  --pay-primary: #1e40af;
+  --pay-primary-mid: #3b82f6;
   --pay-success: #16a34a;
   --pay-danger: #dc2626;
   --pay-text: #0f172a;
@@ -57,7 +57,7 @@
 }
 
 .payment-page__back:hover {
-  border-color: #c7d2fe;
+  border-color: #bfdbfe;
   color: var(--pay-text);
 }
 
@@ -188,7 +188,7 @@
   font-size: 1rem;
   font-weight: 600;
   color: #fff;
-  background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+  background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%);
   box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
   cursor: pointer;
   display: inline-flex;
@@ -271,7 +271,7 @@
 }
 
 .dark .payment-summary__total-price {
-  color: #a78bfa;
+  color: #60a5fa;
 }
 
 .payment-summary__features-title {
@@ -365,7 +365,7 @@
   height: 100%;
   width: 45%;
   border-radius: 9999px;
-  background: linear-gradient(90deg, #4f46e5, #7c3aed);
+  background: linear-gradient(90deg, #1d4ed8, #2563eb);
   animation: payment-bar 1.2s ease-in-out infinite;
 }
 
@@ -426,7 +426,7 @@
 
 .payment-status__btn--primary {
   color: #fff;
-  background: linear-gradient(90deg, #4f46e5, #7c3aed);
+  background: linear-gradient(90deg, #1d4ed8, #2563eb);
 }
 
 .payment-status__btn--outline {

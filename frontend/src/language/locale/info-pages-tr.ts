@@ -1,0 +1,71 @@
+/** Topluluk, Destek ve Eğitmen rehberi sayfaları — Türkçe (tr.ts içine aktarılır). */
+export const infoPagesTr = {
+  community: {
+    heroTitle: "Topluluk",
+    heroSubtitle: "Tiempos'u değerli kılan, birbirine zaman ayıran insanlar.",
+    sectionTitle: "Topluluk ilkeleri",
+    sectionLead:
+      "Takasın adil ve keyifli kalması için herkesten beklediğimiz birkaç basit kural.",
+    items: [
+      { icon: "users", title: "Saygı", text: "Farklı seviyelere ve geçmişlere açık olun. Taciz, ayrımcılık ve istenmeyen mesajlar hesabın kısıtlanmasına yol açar." },
+      { icon: "clock", title: "Dakiklik", text: "Onayladığınız saatte hazır olun. Gelemeyecekseniz seans başlamadan iptal edin; ayrılan saat öğrenciye anında iade edilir." },
+      { icon: "message", title: "Açık iletişim", text: "Beklentinizi, seviyenizi ve toplantı linkini mesajlarda net biçimde paylaşın." },
+      { icon: "star", title: "Dürüst değerlendirme", text: "Seanstan sonra adil ve yapıcı bir yorum bırakın; değerlendirmeler profillerde görünür." },
+      { icon: "shield", title: "Güvenlik", text: "Kişisel ve finansal bilgilerinizi paylaşmayın. Rahatsız eden bir üyeyi mesajlar ekranından engelleyin." },
+      { icon: "scale", title: "Adil takas", text: "Bir saat öğretmek bir saat kazandırır. Herkesin zamanı eşit değerdedir." },
+    ],
+    ctaTitle: "Topluluğa katkıda bulunun",
+    ctaText: "Bildiğiniz bir şeyi paylaşın; ilk dersinizle saat kazanmaya başlayın.",
+    ctaPrimary: "Beceri paylaş",
+    ctaSecondary: "Becerilere göz at",
+  },
+  support: {
+    heroTitle: "Destek ve yardım",
+    heroSubtitle: "Sorunuzun yanıtı büyük olasılıkla aşağıda.",
+    quickTitle: "Hızlı bağlantılar",
+    quickLinks: [
+      { icon: "help", title: "Sıkça sorulan sorular", text: "Hesap, saat kredisi ve oturumlarla ilgili en sık sorular.", page: "faq" },
+      { icon: "book", title: "Nasıl çalışır", text: "Beceri paylaşmaktan ilk seansa kadar adım adım.", page: "how-it-works" },
+      { icon: "calendar", title: "İptal ve no-show", text: "İptal, iade ve seans onayı kuralları.", page: "policy-cancellation" },
+      { icon: "graduation", title: "Eğitmen rehberi", text: "Talepleri yanıtlamak ve seans yönetmek.", page: "instructor-guide" },
+    ],
+    topicsTitle: "Sık karşılaşılan durumlar",
+    topics: [
+      { q: "Doğrulama kodu gelmedi", a: "Spam klasörünü kontrol edin, ardından kayıt ekranındaki “Tekrar gönder” ile yeni kod isteyin. 5 hatalı denemeden sonra kod geçersiz olur; yeni kod isteyebilirsiniz." },
+      { q: "Şifremi unuttum", a: "Giriş ekranında “Şifremi unuttum”u seçin. E-postanıza 1 saat geçerli 6 haneli bir kod gönderilir." },
+      { q: "Saatim düştü ama seans yapılmadı", a: "Seans başlamadan iptal edilen rezervasyonlarda saat anında iade edilir. Seans hiçbir taraf onaylamadan biterse, bitişten 24 saat sonra otomatik olarak iade edilir." },
+      { q: "Karşı taraf seansa gelmedi", a: "Seans sırasında oturum kartındaki “Sorun bildir” ile durumu yazın. Geçen süre aktarılır, kalan süre bakiyenize iade edilir." },
+      { q: "Rahatsız edici mesaj aldım", a: "Mesajlar ekranında kullanıcıyı engelleyin ve iletişim formundan bize bildirin." },
+    ],
+    contactTitle: "Yanıtı bulamadınız mı?",
+    contactText: "İletişim formundan yazın; genellikle birkaç iş günü içinde dönüş yapıyoruz.",
+    contactButton: "İletişim formu",
+  },
+  instructorGuide: {
+    heroTitle: "Eğitmen rehberi",
+    heroSubtitle: "Becerinizi paylaşın; öğrettiğiniz her saat bakiyenize eklensin.",
+    stepsTitle: "Bir seans nasıl ilerler?",
+    steps: [
+      { title: "Becerinizi ekleyin", text: "Başlık, açıklama, seviye ve uygun gün/saatlerinizi girin. Öğrenciler yalnızca bu aralıklarda rezervasyon isteyebilir." },
+      { title: "Talepleri yanıtlayın", text: "Gelen talebi kabul edin ya da reddedin. Reddettikten sonra öğrenciye yeni bir zaman önerebilirsiniz." },
+      { title: "Kabul ettiğinizde", text: "Öğrencinin saati bakiyesinden ayrılır. Toplantı linkini (Zoom, Meet…) oturum kartına ekleyin. Takviminizle çakışan ikinci bir onay engellenir." },
+      { title: "Seanstan 10 dakika önce", text: "İki taraftan da katılım onayı istenir. İkiniz de onaylarsanız seans bitiminde saat otomatik olarak bakiyenize aktarılır." },
+      { title: "Seanstan sonra", text: "Gerekirse “Seansın yapıldığını onayla” ile aktarımı tamamlayın ve karşılıklı değerlendirme bırakın." },
+    ],
+    rulesTitle: "Bilmeniz gerekenler",
+    rules: [
+      { icon: "calendar", title: "İptal", text: "Seans başlamadan iki taraf da iptal edebilir; ayrılan saat öğrenciye tam iade edilir." },
+      { icon: "alert", title: "Sorun bildirimi", text: "Seans sırasında bildirilen sorunlarda geçen süre size aktarılır, kalan süre öğrenciye iade edilir." },
+      { icon: "clock", title: "Onaysız seans", text: "Hiçbir taraf onay vermezse, bitişten 24 saat sonra saat öğrenciye iade edilir." },
+    ],
+    ctaTitle: "İlk becerinizi ekleyin",
+    ctaText: "Birkaç dakikada profilinize ekleyin; öğrenciler size talep göndermeye başlasın.",
+    ctaPrimary: "Beceri paylaş",
+  },
+  notFound: {
+    title: "Sayfa bulunamadı",
+    text: "Aradığınız sayfa taşınmış ya da hiç var olmamış olabilir.",
+    home: "Ana sayfa",
+    browse: "Becerilere göz at",
+  },
+};

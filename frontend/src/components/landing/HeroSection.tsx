@@ -39,7 +39,7 @@ export function HeroSection({ onNavigate }: HeroSectionProps) {
           </span>
         </div>
         
-        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white mb-6 tracking-tight">
+        <h1 className="mb-6 text-4xl font-semibold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
           {h.line1} <br />
           <span className="bg-gradient-to-r from-yellow-300 to-pink-300 bg-clip-text text-transparent">
             {h.line2Earn}

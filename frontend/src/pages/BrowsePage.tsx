@@ -20,6 +20,7 @@ import {
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useState, useMemo, useEffect, useLayoutEffect, useRef } from "react";
 import type { PageType } from "../App";
+import { useSearchParams } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useAuth } from "../contexts/AuthContext";
 import { formatTemplate } from "../language";
@@ -51,7 +52,11 @@ export function BrowsePage({
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState<SortOption>("relevant");
-  const [filters, setFilters] = useState<Filters>(emptyFilters);
+  const [searchParams] = useSearchParams();
+  const [filters, setFilters] = useState<Filters>(() => {
+    const cat = searchParams.get("category");
+    return cat ? { ...emptyFilters, categories: [cat] } : emptyFilters;
+  });
   const [mobileDraftFilters, setMobileDraftFilters] = useState<Filters>(filters);
   const [catalog, setCatalog] = useState<BrowseSkillCardModel[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
@@ -186,7 +191,7 @@ export function BrowsePage({
     <PageLayout onNavigate={onNavigate}>
       
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-500 to-blue-700 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+      <div className="tp-page-hero">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl sm:text-4xl md:text-5xl text-white mb-4">
             {b.title}
@@ -276,7 +281,7 @@ export function BrowsePage({
             </div>
             
             {catalogLoading ? (
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {Array.from({ length: PAGE_SIZE }).map((_, i) => (
                   <Card key={i} className="rounded-2xl border border-border/70 p-4 shadow-sm">
                     <div className="h-44 w-full animate-pulse rounded-xl bg-muted" />
@@ -289,7 +294,7 @@ export function BrowsePage({
                 ))}
               </div>
             ) : sortedSkills.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {paginatedSkills.map((skill) => {
                   const isOwnListing =
                     Boolean(user?.id) && skill.ownerId === user?.id;

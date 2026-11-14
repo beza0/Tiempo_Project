@@ -13,8 +13,8 @@
   padding-bottom: 2.75rem;
   padding-left: max(24px, env(safe-area-inset-left, 0px));
   padding-right: max(24px, env(safe-area-inset-right, 0px));
-  /* Footer ile aynı paletten tek düz ton (linear-gradient yok) — Tailwind blue-500 */
-  background: #3b82f6;
+  /* Ortak marka yüzeyi (diğer sayfa başlıklarıyla aynı) */
+  background: var(--tp-hero-surface);
 }
 
 @media (min-width: 640px) {
@@ -30,12 +30,12 @@
 }
 
 .dark .sd-hero-wrap {
-  /* Koyu arayüzde aynı aileden bir ton daha koyu mavi */
-  background: #2563eb;
+  background: var(--tp-hero-surface);
 }
 
 .sd-hero-inner-max {
   width: 100%;
+  max-width: 80rem;
   margin-left: auto;
   margin-right: auto;
 }
@@ -397,7 +397,7 @@
   font-weight: 600 !important;
   border: none !important;
   background: #fff !important;
-  color: #3730a3 !important;
+  color: #1e40af !important;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
   white-space: normal !important;
   text-align: center;
@@ -408,7 +408,7 @@
 
 .sd-book-button:hover {
   background: #f4f4f5 !important;
-  color: #312e81 !important;
+  color: #1e3a8a !important;
 }
 
 .sd-message-button {

@@ -17,7 +17,7 @@ export function FeaturesSection() {
     <section id="features" className="bg-muted/40 px-4 py-20 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="mb-16 text-center">
-          <h2 className="mb-4 text-3xl text-foreground sm:text-4xl md:text-5xl">
+          <h2 className="mb-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
             {f.title}
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
@@ -38,7 +38,7 @@ export function FeaturesSection() {
                   <Icon className="h-8 w-8 text-white" />
                 </div>
                 
-                <h3 className="mb-3 text-xl text-foreground sm:text-2xl">
+                <h3 className="mb-3 text-xl font-semibold text-foreground">
                   {feature.title}
                 </h3>
                 

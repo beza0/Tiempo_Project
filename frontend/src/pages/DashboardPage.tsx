@@ -148,7 +148,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
 
   return (
     <PageLayout onNavigate={onNavigate}>
-      <div className="bg-gradient-to-r from-blue-500 to-blue-700 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+      <div className="tp-page-hero">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl sm:text-4xl text-white mb-2">
             {formatTemplate(d.welcome, { name: displayName })}

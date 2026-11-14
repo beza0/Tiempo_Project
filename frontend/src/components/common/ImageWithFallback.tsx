@@ -6,6 +6,8 @@ const ERROR_IMG_SRC =
 type Props = React.ImgHTMLAttributes<HTMLImageElement> & {
   /** Birincil URL başarısız olursa (429, uzun prompt vb.) tek seferlik alternatif src */
   fallbackSrc?: string | null;
+  /** Tüm kaynaklar başarısız olunca gösterilecek öğe (varsayılan: genel görsel ikonu) */
+  errorFallback?: React.ReactNode;
 };
 
 export function ImageWithFallback(props: Props) {
@@ -22,7 +24,12 @@ export function ImageWithFallback(props: Props) {
     setErroredSourceKey(sourceKey);
   };
 
-  const { src, alt, style, className, ...rest } = props;
+  const { src, alt, style, className, errorFallback, fallbackSrc: _fallbackSrc, ...rest } = props;
+  void _fallbackSrc;
+
+  if (didError && errorFallback) {
+    return <>{errorFallback}</>;
+  }
 
   return didError ? (
     <div

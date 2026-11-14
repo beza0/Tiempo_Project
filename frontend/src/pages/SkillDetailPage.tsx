@@ -1,3 +1,4 @@
+import { compactDays, compactTimeRange } from "../lib/availabilityLabel";
 import { PageLayout } from "../components/layout/PageLayout";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -588,16 +589,6 @@ export function SkillDetailPage({
   const coverImageSrc = resolveSkillCoverImageUrl(skill);
   const mainDesc = descriptionMain(skill.description);
   const metaBlock = descriptionMeta(skill.description);
-  const dayLabels = t.addSkill.days;
-  const dayIndex: Record<string, number> = {
-    MONDAY: 0,
-    TUESDAY: 1,
-    WEDNESDAY: 2,
-    THURSDAY: 3,
-    FRIDAY: 4,
-    SATURDAY: 5,
-    SUNDAY: 6,
-  };
   const metaSessionType =
     (skill.sessionTypes?.length
       ? skill.sessionTypes
@@ -610,20 +601,31 @@ export function SkillDetailPage({
     parseMetaField(metaBlock, ["Location", "Konum"]);
   const metaDays =
     (skill.availableDays?.length
-      ? skill.availableDays
-          .map((d) => dayLabels[dayIndex[d]] ?? d)
-          .join(", ")
+      ? compactDays(skill.availableDays, {
+          short: b.dayShort,
+          everyDay: b.everyDay,
+          weekdays: b.weekdays,
+          weekend: b.weekend,
+        })
       : null) ??
     parseMetaField(metaBlock, ["Available Days *", "Müsait günler *"]);
   const metaTime =
     skill.availableFrom && skill.availableUntil
-      ? `${skill.availableFrom} - ${skill.availableUntil}`
+      ? compactTimeRange(skill.availableFrom, skill.availableUntil)
       : parseMetaField(
           metaBlock,
           ["Available From *– Available Until *", "Başlangıç *–Bitiş *"],
         );
-  const levelLabel = skill.level
-    ? skill.level.charAt(0).toUpperCase() + skill.level.slice(1).toLowerCase()
+  const levelKey = (skill.level ?? "").trim().toLowerCase();
+  const levelMap: Record<string, string> = {
+    beginner: t.addSkill.levelBeginner,
+    intermediate: t.addSkill.levelIntermediate,
+    advanced: t.addSkill.levelAdvanced,
+    expert: t.addSkill.levelExpert,
+  };
+  // Seviye, arayüz diline çevrilir (önceden TR arayüzde "Intermediate" görünüyordu).
+  const levelLabel = levelKey
+    ? levelMap[levelKey] ?? levelKey.charAt(0).toUpperCase() + levelKey.slice(1)
     : "";
 
   const isOwnListing =
@@ -632,10 +634,9 @@ export function SkillDetailPage({
   const perSessionLabel = formatTemplate(s.perSession, {
     n: String(skill.durationMinutes > 0 ? skill.durationMinutes : 60),
   });
+  // Gün ve saat birlikte: "Her gün · 09:00–21:00" (önceden yalnızca biri gösteriliyordu).
   const scheduleSummary =
-    metaDays?.trim() ||
-    metaTime?.trim() ||
-    "—";
+    [metaDays?.trim(), metaTime?.trim()].filter(Boolean).join(" · ") || "—";
 
   const metaVenueLine =
     [metaSessionType?.trim(), metaLocation?.trim()].filter(Boolean).join(" · ") ||
@@ -643,12 +644,14 @@ export function SkillDetailPage({
   const VenueIcon = metaLocation?.trim() ? MapPin : Video;
 
   const dm = skill.durationMinutes > 0 ? skill.durationMinutes : 60;
+  const hourUnit = locale === "tr" ? "sa" : "h";
+  const minUnit = locale === "tr" ? "dk" : "min";
   const sessionHoursDisplay =
     dm >= 60 && dm % 60 === 0
-      ? `${dm / 60}h`
+      ? `${dm / 60} ${hourUnit}`
       : dm >= 60
-        ? `${(dm / 60).toFixed(1)}h`
-        : `${dm} min`;
+        ? `${Math.floor(dm / 60)} ${hourUnit} ${dm % 60} ${minUnit}`
+        : `${dm} ${minUnit}`;
 
   const heroTagBadges = [
     levelLabel,
@@ -678,6 +681,13 @@ export function SkillDetailPage({
                   alt={skill.title}
                   loading="eager"
                   fallbackSrc={skillCoverImageFallbackUrl(skill)}
+                  errorFallback={
+                    <div className="tp-cover-placeholder flex h-full w-full items-center justify-center" aria-hidden>
+                      <span className="text-7xl font-semibold text-white/90">
+                        {skill.title.trim().charAt(0).toLocaleUpperCase("tr-TR")}
+                      </span>
+                    </div>
+                  }
                   className="sd-hero-image"
                 />
               </div>
@@ -695,11 +705,14 @@ export function SkillDetailPage({
                     <div className="sd-instructor-text">
                       <p className="sd-instructor-label">{s.instructor}</p>
                       <p className="sd-instructor-name">{skill.ownerName}</p>
-                      <p className="sd-students-line">
-                        {formatTemplate(s.studentsCount, {
-                          n: isOwnListing ? String(learnersCountForOwner) : "0",
-                        })}
-                      </p>
+                      {/* Öğrenci sayısı yalnızca ilan sahibine bilinir; başkalarına her zaman "0" gösteriliyordu */}
+                      {isOwnListing ? (
+                        <p className="sd-students-line">
+                          {formatTemplate(s.studentsCount, {
+                            n: String(learnersCountForOwner),
+                          })}
+                        </p>
+                      ) : null}
                     </div>
                   </div>
                 </div>
