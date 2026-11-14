@@ -422,21 +422,22 @@ export function ProfilePage({
           <ImageWithFallback
             src={avatarSrc}
             alt=""
-            className="w-32 h-32 rounded-2xl border-4 border-white object-cover shadow-2xl shrink-0"
+            className="h-20 w-20 shrink-0 rounded-2xl border-4 border-white object-cover shadow-2xl sm:h-32 sm:w-32"
           />
         ) : (
           <div
-            className="w-32 h-32 rounded-2xl shadow-2xl border-4 border-white flex items-center justify-center text-3xl font-semibold text-white bg-white/20 shrink-0"
+            className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border-4 border-white bg-white/20 text-2xl font-semibold text-white shadow-2xl sm:h-32 sm:w-32 sm:text-3xl"
             aria-hidden
           >
             {initialsFromFullName(displayName)}
           </div>
         )}
 
-        <div className="flex-1 text-white">
-          <div className="flex items-start justify-between mb-3">
-            <div>
-              <h1 className="text-3xl mb-2">{displayName || "—"}</h1>
+        <div className="min-w-0 flex-1 text-white">
+          {/* Mobilde butonlar ismin altına iner (önceden isim ve butonlar tek satırda sıkışıyordu) */}
+          <div className="mb-3 flex flex-col-reverse gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <h1 className="mb-2 text-2xl sm:text-3xl">{displayName || "—"}</h1>
               {displayEmail ? (
                 <div className="mb-3 flex items-center gap-2 text-white/90">
                   <Mail className="h-4 w-4 shrink-0" aria-hidden />
@@ -457,7 +458,7 @@ export function ProfilePage({
                     </span>
                   </>
                 ) : (
-                  <span className="text-lg text-white/80">
+                  <span className="text-base text-white/80 sm:text-lg">
                     {p.noRatingsYet}
                   </span>
                 )}

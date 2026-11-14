@@ -4146,6 +4146,20 @@ html.dark body {
   flex-direction: column;
 }
 
+/* Mobil: tek panel. Bu kural katmansız olduğu için Tailwind'in "hidden" sınıfını eziyordu;
+   gelen kutusu ve sohbet 390px'e yan yana sıkışıyordu. */
+.chat-pane.hidden,
+.inbox-pane.hidden {
+  display: none;
+}
+
+@media (min-width: 40rem) {
+  .chat-pane.sm\:flex,
+  .inbox-pane.sm\:flex {
+    display: flex;
+  }
+}
+
 .chat-header {
   flex-shrink: 0;
 }
